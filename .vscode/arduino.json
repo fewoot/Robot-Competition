@@ -1,3 +1,5 @@
 {
-    "board": "arduino:avr:uno"
+    "board": "arduino:avr:uno",
+    "sketch": "Motor Test\\motor_test.ino",
+    "port": "COM6"
 }
