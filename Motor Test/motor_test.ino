@@ -3,7 +3,7 @@
 #define value 200
 
 void setup(){
-
+    pinMode();
 }
 
 void loop(){
