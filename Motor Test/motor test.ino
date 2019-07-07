@@ -7,5 +7,6 @@ void setup(){
 }
 
 void loop(){
-    
+    analogWrite(6,value);
+    analogWrite(5,vlaue);
 }
