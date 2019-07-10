@@ -1,5 +1,5 @@
 {
     "board": "arduino:avr:uno",
-    "sketch": "Motor Test2\\motor_test2.ino",
+    "sketch": "Baseline.ino",
     "port": "COM6"
 }
