@@ -33,11 +33,11 @@
  }    
 
  void loop()  {   
-    // myservo1.writeMicroseconds(STOP);  //Stop   
-    // myservo2.writeMicroseconds(STOP);  //Stop   
+      // myservo1.writeMicroseconds(STOP);  //Stop   
+      // myservo2.writeMicroseconds(STOP);  //Stop   
     // delay(2000); 
 
-    // myservo1.writeMicroseconds(MIN);  //full forward   
+      myservo1.writeMicroseconds(MIN);  //full forward   
     // delay(1000); 
 
     // myservo1.writeMicroseconds(STOP);  //stop   

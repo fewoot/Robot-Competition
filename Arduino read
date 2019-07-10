@@ -1,0 +1,58 @@
+
+
+void setup(){
+    
+}
+
+void loop(){
+    
+}
+
+pinMode(PIN,MODE)//设置输出PIN是引脚号,MODE是模式，INPUT/OUTPUT
+digitalWrite(PIN,MODE)//设置电压/通断电
+digitalRead(PIN);//读取引脚状态
+analogRead(PIN);//读取模拟电压值 0-1023
+analogWrite(PIN,VALUE);//输出模拟电压值,VALUE介于0-255,但pin5、6的值会更高，应该可以是两倍
+delay(TIME)//暂停，单位毫秒
+delayMicroseconds(TIME);//暂停，单位微秒
+Serial.begin(9600);//初始化串口，9600常见
+Serial.print(DATA);//串口发送数据
+Serial.println(DATA);//串口发送数据，自动换行
+Serial.available();//返回串口缓冲区中当前剩余的字符个数，当它>0时，可以读取
+Serial.read();//指从串口的缓冲区取出并读取一个Byte的数据，注意是取出，缓冲区数据会减少
+map(NUMBER,FROM_LOW,FROM_HIGH,TO_LOW,TO_HIGH);//将NUMBER的区间从之前的均匀的转换到新的，值也等比改变
+random(min, max);//给随机数[min,max)之间，min可不填，返回long类型的值
+
+{
+对于电位器有：
+                ---------------   5V
+                
+操纵杆垂直屏幕向外---------------   输出
+                
+                ---------------   GND
+}
+
+{
+对于按钮：
+    1           2
+    ----////----
+        ····
+    ----////----
+    3           4
+1、2相连，3、4相连，按下后全相连，按钮内部
+}
+
+{
+对于RGB三色灯：
+    ///////--------蓝
+    ///////----------绿
+    ///////------------公用
+    ///////----------红
+}
+
+{
+对于LED灯：
+    /////---------负极
+  ///////
+    /////-----------正极
+}
