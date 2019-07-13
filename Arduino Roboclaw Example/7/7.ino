@@ -31,10 +31,11 @@ void displayspeed(void)
   uint8_t status1,status2,status3,status4;
   bool valid1,valid2,valid3,valid4;
   
-  int32_t enc1= roboclaw.ReadEncM1(address, &status1, &valid1);
+  int32_t enc1 = roboclaw.ReadEncM1(address, &status1, &valid1);
   int32_t enc2 = roboclaw.ReadEncM2(address, &status2, &valid2);
   int32_t speed1 = roboclaw.ReadSpeedM1(address, &status3, &valid3);
   int32_t speed2 = roboclaw.ReadSpeedM2(address, &status4, &valid4);
+
   Serial.print("Encoder1:");
   if(valid1){
     Serial.print(enc1,DEC);
@@ -76,27 +77,35 @@ void displayspeed(void)
 
 void loop() {
   uint8_t depth1,depth2;
-
-  roboclaw.SpeedAccelDistanceM1(address,12000,12000,42000,1);
-  roboclaw.SpeedAccelDistanceM2(address,12000,-12000,42000,1);
-  roboclaw.SpeedAccelDistanceM1(address,12000,0,0);  //distance traveled is v*v/2a = 12000*12000/2*12000 = 6000
-  roboclaw.SpeedAccelDistanceM2(address,12000,0,0);  //that makes the total move in ondirection 48000
+  
+  roboclaw.SpeedDistanceM1(address,12000,48000,1);
+  roboclaw.SpeedDistanceM2(address,-12000,48000,1);
   do{
     displayspeed();
     roboclaw.ReadBuffers(address,depth1,depth2);
-  }while(depth1!=0x80 && depth2!=0x80);	//loop until distance command completes
-
-  delay(1000);
+  }while(depth1!=0x80 && depth2!=0x80);	//Loop until distance command has completed
   
-  roboclaw.SpeedAccelDistanceM1(address,12000,-12000,42000,1);
-  roboclaw.SpeedAccelDistanceM2(address,12000,12000,42000,1);
-  roboclaw.SpeedAccelDistanceM1(address,12000,0,0);
-  roboclaw.SpeedAccelDistanceM2(address,12000,0,0);
+  delay(1000);
+
+  roboclaw.SpeedDistanceM1(address,-12000,48000,1);
+  roboclaw.SpeedDistanceM2(address,12000,48000,1);
   do{
     displayspeed();
     roboclaw.ReadBuffers(address,depth1,depth2);
-  }while(depth1!=0x80 && depth2!=0x80);	//loop until distance command completes
-
-  delay(1000);
+  }while(depth1!=0x80 && depth2!=0x80);	//Loop until distance command has completed
   
+  delay(1000);  //When no second command is given the motors will automatically slow down to 0 which takes 1 second
+
+  roboclaw.SpeedDistanceM1(address,12000,48000,1);
+  roboclaw.SpeedDistanceM2(address,-12000,48000,1);
+  roboclaw.SpeedDistanceM1(address,-12000,48000,0);
+  roboclaw.SpeedDistanceM2(address,12000,48000,0);
+  roboclaw.SpeedDistanceM1(address,0,48000,0);
+  roboclaw.SpeedDistanceM2(address,0,48000,0);
+  do{
+    displayspeed();
+    roboclaw.ReadBuffers(address,depth1,depth2);
+  }while(depth1!=0x80 && depth2!=0x80);	//Loop until distance command has completed
+  
+  delay(1000);
 }

@@ -22,8 +22,8 @@ void setup() {
   roboclaw.begin(38400);
   
   //Set PID Coefficients
-  roboclaw.SetM1VelocityPID(address,Kd,Kp,Ki,qpps);
-  roboclaw.SetM2VelocityPID(address,Kd,Kp,Ki,qpps);  
+  //roboclaw.SetM1VelocityPID(address,Kd,Kp,Ki,qpps);
+  //roboclaw.SetM2VelocityPID(address,Kd,Kp,Ki,qpps);  
 }
 
 void displayspeed(void)

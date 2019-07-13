@@ -75,15 +75,15 @@ void displayspeed(void)
 }
 
 void loop() {
-  roboclaw.SpeedAccelM1(address,12000,12000);
-  roboclaw.SpeedAccelM2(address,12000,-12000);
+  //roboclaw.SpeedAccelM1(address,0,1200);
+  //roboclaw.SpeedAccelM2(address,0,-1200);
   for(uint8_t i = 0;i<100;i++){
     displayspeed();
     delay(10);
   }
 
-  roboclaw.SpeedAccelM1(address,12000,-12000);
-  roboclaw.SpeedAccelM2(address,12000,12000);
+  // roboclaw.SpeedAccelM1(address,0,-1200);
+  // roboclaw.SpeedAccelM2(address,0,1200);
   for(uint8_t i = 0;i<100;i++){
     displayspeed();
     delay(10);

@@ -75,13 +75,13 @@ void displayspeed(void)
 }
 
 void loop() {
-  roboclaw.SpeedM1(address,12000);
+  //roboclaw.SpeedM1(address,120);
   for(uint8_t i = 0;i<100;i++){
     displayspeed();
     delay(10);
   }
 
-  roboclaw.SpeedM1(address,-12000);
+  //roboclaw.SpeedM1(address,-120);
   for(uint8_t i = 0;i<100;i++){
     displayspeed();
     delay(10);

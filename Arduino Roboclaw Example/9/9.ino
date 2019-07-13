@@ -13,13 +13,13 @@ RoboClaw roboclaw(&serial,10000);
 void setup() {
   //Open Serial and roboclaw serial ports
   Serial.begin(57600);
-  rc.begin(38400);
+  roboclaw.begin(38400);
 }
 
 void loop() {
   char version[32];
 
-  if(rc.ReadVersion(address,version)){
+  if(roboclaw.ReadVersion(address,version)){
     Serial.println(version);  
   }
 
