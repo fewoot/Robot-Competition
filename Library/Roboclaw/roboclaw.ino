@@ -1,6 +1,26 @@
+/**
+ * 对于加速和减速的理解：
+ * 1.加速减速是有默认值的，为655360
+ * 2.原值、百分比、时间值之间有比例关系
+ * 3. 百分比 = ( 原值 / 32768 ) x 100
+ * 4. 原值 = ( 百分比 / 100 ) x 32768
+ * 5. 时间 = ( 原值 / 32768 ) x 1
+ * 6. 原值 = 32768 / 时间
+ * 7.时间单位是s
+ */
+
 //所需要的库
 #include <SoftwareSerial.h>
 #include <RoboClaw.h>
+
+//地址
+#define address 0x80
+#define accel 655360
+#define deccel 655360
+#define accel1 655360
+#define accel2 655360
+#define deccel1 655360
+#define deccel2 655360
 
 //新建一个模拟串口
 SoftwareSerial serial = SoftwareSerial(10,11);
@@ -15,44 +35,94 @@ RoboClaw roboclaw = RoboClaw(&serial,timeout);
 roboclaw.begin(38400);
 
 
-//控制电机移动，address是指令存储的地址，speed值在0-127中
-ForwardM1(address, speed);
-BackwardM1(address,speed);
-ForwardM2(address, speed);
-BackwardM2(address,speed);
-ForwardBackwardM1(address,speed);
-ForwardBackwardM2(address,speed);
+//控制电机移动，address是指令存储的地址，speed值不是0-127，而是根据你的电机而定，目前市8500封顶
+roboclaw.ForwardM1(address, speed);
+roboclaw.BackwardM1(address,speed);
+roboclaw.ForwardM2(address, speed);
+roboclaw.BackwardM2(address,speed);
+roboclaw.ForwardBackwardM1(address,speed);
+roboclaw.ForwardBackwardM2(address,speed);
 
 //混合模式下设置电机转动，其中只有这里speed会从中间划分一道分水岭，即向前还是向后
-ForwardMixed(address,speed);
-BackwardMixed(address,speed);
-TurnRightMixed(address,speed);
-TurnLeftMixed(address,speed);
-ForwardBackwardMixed(address,speed);
-LeftRightMixed(address,speed);
+roboclaw.ForwardMixed(address,speed);
+roboclaw.BackwardMixed(address,speed);
+roboclaw.TurnRightMixed(address,speed);
+roboclaw.TurnLeftMixed(address,speed);
+roboclaw.ForwardBackwardMixed(address,speed);
+roboclaw.LeftRightMixed(address,speed);
 
 //读取编码器的值，返回一个32-bit的值，最好用long存储
-ReadEncM1(address);
-ReadEncM2(address);
-ReadSpeedM1(address);
-ReadSpeedM2(address);
-ResetEncoders(address);
+roboclaw.ReadEncM1(address);
+roboclaw.ReadEncM2(address);
+roboclaw.ReadSpeedM1(address);
+roboclaw.ReadSpeedM2(address);
+roboclaw.ResetEncoders(address);
 
 //这两个是设定编码器的值，val是一个32-bit的参数
-SetEncM1(address,val);
-SetEncM2(address,val);
+roboclaw.SetEncM1(address,val);
+roboclaw.SetEncM2(address,val);
 
 //使电机旋转固定的距离（角度），flag值为0/1，0表示暂存命令，1表示立即执行
-SpeedDistanceM1(address, speed, distance, flag);
-SpeedDistanceM2(address, speed, distance, flag);
-SpeedDistanceM1M2(address, speed1, distance1, speed2, distance2, flag);
-//accel是加速度
-SpeedAccelDistanceM1(address, accel, speed, distance, flag);
-SpeedAccelDistanceM2(address, accel, speed, distance, flag);
-SpeedAccelDistanceM1M2(address, accel, speed1, distance1, speed2, distance2, flag);
+roboclaw.SpeedDistanceM1(address, speed, distance, flag);
+roboclaw.SpeedDistanceM2(address, speed, distance, flag);
+roboclaw.SpeedDistanceM1M2(address, speed1, distance1, speed2, distance2, flag);
+roboclaw.//accel是加速度
+roboclaw.SpeedAccelDistanceM1(address, accel, speed, distance, flag);
+roboclaw.SpeedAccelDistanceM2(address, accel, speed, distance, flag);
+roboclaw.SpeedAccelDistanceM1M2(address, accel, speed1, distance1, speed2, distance2, flag);
 
 //使电机旋转到特定位置，accel是加速度，deccel是减速度，position是位置，是在编码器计数中的位置，
 //flag为0暂存命令，1立即执行
-SpeedAccelDeccelPositionM1(address, accel, speed, deccel, position, flag);
-peedAccelDeccelPositionM2(address, accel, speed, deccel, position, flag);
-SpeedAccelDeccelPositionM1M2(address, accel1, speed1, deccel1, position1, accel2, speed2, deccel2, position2, flag);
+roboclaw.SpeedAccelDeccelPositionM1(address, accel, speed, deccel, position, flag);
+roboclaw.peedAccelDeccelPositionM2(address, accel, speed, deccel, position, flag);
+roboclaw.SpeedAccelDeccelPositionM1M2(address, accel1, speed1, deccel1, position1, accel2, speed2, deccel2, position2, flag);
+
+/**
+ * 这个函数可以读取两个电机的位置信息和速度信息
+ */
+void displayspeed(void){
+    uint8_t status1,status2,status3,status4;
+    bool valid1,valid2,valid3,valid4;
+    
+    int32_t enc1= roboclaw.ReadEncM1(address, &status1, &valid1);
+    int32_t enc2 = roboclaw.ReadEncM2(address, &status2, &valid2);
+    int32_t speed1 = roboclaw.ReadSpeedM1(address, &status3, &valid3);
+    int32_t speed2 = roboclaw.ReadSpeedM2(address, &status4, &valid4);
+    Serial.print("Encoder1:");
+    if(valid1){
+        Serial.print(enc1,HEX);
+        Serial.print(" ");
+        Serial.print(status1,HEX);
+        Serial.print(" ");
+    }else{
+        Serial.print("invalid ");
+    }
+
+    Serial.print("Encoder2:");
+    if(valid2){
+        Serial.print(enc2,HEX);
+        Serial.print(" ");
+        Serial.print(status2,HEX);
+        Serial.print(" ");
+    }else{
+        Serial.print("invalid ");
+    }
+
+    Serial.print("Speed1:");
+    if(valid3){
+        Serial.print(speed1,HEX);
+        Serial.print(" ");
+    }else{
+        Serial.print("invalid ");
+    }
+
+    Serial.print("Speed2:");
+    if(valid4){
+        Serial.print(speed2,HEX);
+        Serial.print(" ");
+    }else{
+        Serial.print("invalid ");
+    }
+
+    Serial.println();
+}
