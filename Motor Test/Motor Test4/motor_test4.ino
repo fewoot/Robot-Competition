@@ -38,8 +38,13 @@
 //第一个地址，每个地址可以存储0-255字节的值
 int addr = 0;
 //float f;
-char c[5]= {'h','e','l','l','o'};
-String s;
+//char c[5]= {'h','e','l','l','o'};
+//String s;
+
+struct MyObject {
+    long time_record;
+    int status;
+};
 
 void Edelete(){
     for(int i=0;i<=1024;++i){
@@ -47,7 +52,58 @@ void Edelete(){
     }
 }
 
+void record(int choice){
+    MyObject jilu;
+    jilu.time_record = millis();
+    jilu.status = choice;
+    EEPROM.put(addr,jilu);
+    addr += sizeof(MyObject);
+}
+
+void re_record(){
+    MyObject luru;
+    Serial.begin(9600);
+    addr = 0;
+    for(;;){
+        EEPROM.get(addr,luru);
+        Serial.print(luru.time_record);
+        Serial.print(" : ");
+        Serial.println(luru.status);
+        addr += sizeof(MyObject);
+    }
+        
+    
+        
+    
+    
+
+}
+
+
 void setup(){
+    //Edelete();
+    //re_record();
+    //Serial.begin(9600);
+    // record(3);
+    // delay(1000);
+    // record(12);
+    // delay(1000);
+    // record(1);
+
+    // long temp,temp1;
+    // Serial.begin(9600);
+    // delay(1000);
+    // Serial.println(millis());
+    // EEPROM.put(addr,millis());
+    // EEPROM.get(addr,temp);
+    // delay(2000);
+    // addr += 4;
+    // EEPROM.put(addr,millis());
+    // EEPROM.get(addr,temp1);
+
+    // delay(1000);
+    // Serial.println(temp);
+    // Serial.println(temp1);
     // Serial.begin(9600);
     // EEPROM.put(addr,c);
     // Serial.println(EEPROM.get(addr,s));
