@@ -35,7 +35,7 @@ RoboClaw roboclaw = RoboClaw(&serial,timeout);
 roboclaw.begin(38400);
 
 
-//控制电机移动，address是指令存储的地址，speed值不是0-127，而是根据你的电机而定，目前市8500封顶
+//控制电机移动，address是指令存储的地址，speed值是0-127
 roboclaw.ForwardM1(address, speed);
 roboclaw.BackwardM1(address,speed);
 roboclaw.ForwardM2(address, speed);
@@ -66,15 +66,16 @@ roboclaw.SetEncM2(address,val);
 roboclaw.SpeedDistanceM1(address, speed, distance, flag);
 roboclaw.SpeedDistanceM2(address, speed, distance, flag);
 roboclaw.SpeedDistanceM1M2(address, speed1, distance1, speed2, distance2, flag);
-roboclaw.//accel是加速度
+//accel是加速度
 roboclaw.SpeedAccelDistanceM1(address, accel, speed, distance, flag);
 roboclaw.SpeedAccelDistanceM2(address, accel, speed, distance, flag);
 roboclaw.SpeedAccelDistanceM1M2(address, accel, speed1, distance1, speed2, distance2, flag);
 
 //使电机旋转到特定位置，accel是加速度，deccel是减速度，position是位置，是在编码器计数中的位置，
+//在这个给、函数中，speed是编码器函数，0-8000，不同于上面的
 //flag为0暂存命令，1立即执行
 roboclaw.SpeedAccelDeccelPositionM1(address, accel, speed, deccel, position, flag);
-roboclaw.peedAccelDeccelPositionM2(address, accel, speed, deccel, position, flag);
+roboclaw.SpeedAccelDeccelPositionM2(address, accel, speed, deccel, position, flag);
 roboclaw.SpeedAccelDeccelPositionM1M2(address, accel1, speed1, deccel1, position1, accel2, speed2, deccel2, position2, flag);
 
 /**
