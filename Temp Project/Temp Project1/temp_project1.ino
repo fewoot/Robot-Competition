@@ -1,6 +1,6 @@
 
 /**
- * 目前目标：实现两轮车
+ * 目前目标：实现两轮车(完成)
  * 目标功能：能检测物体并转向它
  * 目标要求：快、稳、准
  * 
@@ -78,6 +78,8 @@ RoboClaw roboclaw = RoboClaw(&serial,timeout);
 //定义日志地址
 int addr = 0;
 
+int last_move_status = 0;
+
 //定义日志格式
 struct MyObject {
     long time_record;
@@ -134,6 +136,33 @@ void goright(int level){
     roboclaw.ForwardM2(address, speed-level);
 }
 
+void gonothing(){
+    // static int temp = 0;
+    // if(temp==0){
+    //     long time_now = millis();
+    //     temp = 1;
+    // }
+    long time_now = millis();
+    for(;;){
+        if(millis()-time_now>400){
+            //turnLeft();
+            if(last_move_status==onright || last_move_status==onrightfront){
+                turnRight();
+            }else{
+                turnLeft();
+            }
+            //roboclaw.ReadSpeedM1(address);
+            //roboclaw.ReadSpeedM2(address);
+            
+
+        }
+        if(detect()==onnothing){
+
+        }else{
+            return;
+        }
+    }
+}
 
 void move(int status){
     switch (status){
@@ -179,7 +208,8 @@ void move(int status){
         //如果没有检测到，可能是真的没有检测到，也有可能是在转弯过程中刚刚好转到了一个中间的位置-
         //所以不作为
         //turnLeft();
-        stop();
+        //stop();
+        gonothing();
         break;
     default:
         //状态7
@@ -331,30 +361,35 @@ void move_set(){
         //状态1
         //record(1);
         //在正左方
+        last_move_status = onleft;
         move(onleft);
         break;
     case onleftfront:
         //状态2
         //record(2);
         //在左前方
+        last_move_status = onleftfront;
         move(onleftfront);
         break;
     case onfront:
         //状态3
         //record(3);
         //在前方
+        last_move_status = onfront;
         move(onfront);
         break;
     case onrightfront:
         //状态4
         //record(4);
         //在右前方
+        last_move_status = onrightfront;
         move(onrightfront);
         break;
     case onright:
         //状态5
         //record(5);
         //在正右方
+        last_move_status = onright;
         move(onright);
         break;
     case onnothing:
@@ -367,7 +402,7 @@ void move_set(){
         break;
     default:
         //状态7
-        record(7);
+        //record(7);
         //其他情况
         break;
     }
