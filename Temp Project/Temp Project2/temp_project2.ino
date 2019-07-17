@@ -16,7 +16,7 @@
  * 设定一些和传输命令有关的参数
  */
 #define address 0x80
-//新建一个模拟串口
+//新建一个模拟串口,S1=P11,S2=P10
 SoftwareSerial serial = SoftwareSerial(10,11);
 //设置超时值
 #define timeout 10000
@@ -29,6 +29,9 @@ RoboClaw roboclaw = RoboClaw(&serial,timeout);
 #define onrightfront 4
 #define onright 5
 #define onnothing 6
+
+#define goSpeedFast 25
+#define goSpeedSlow 10
 
 /**
  * 定义传感器
@@ -192,25 +195,25 @@ void right(){
  * 传感器检测函数
  */
 int detect(){
-    if(digitalRead(detector5)==LOW){
-        //infrared[5] = {no,no,yes,no,no};
-        return onright;
-    }else if(digitalRead(detector1)==LOW){
-        //infrared[5] = {no,yes,no,no,no};
-        return onleft;
-    }else if(digitalRead(detector4)==LOW){
-        //infrared[5] = {no,no,no,yes,no};
-        return onrightfront;
-    }else if(digitalRead(detector2)==LOW){
-        //infrared[5] = {yes,no,no,no,no};
-        return onleftfront;
-    }else if(digitalRead(detector3)==LOW){
-        //infrared[5] = {no,no,no,no,yes};
-        return onfront;
-    }else{
-        //infrared[5] = {no,no,no,no,no};
-        return onnothing;
-    }
+    // if(digitalRead(detector5)==LOW){
+    //     //infrared[5] = {no,no,yes,no,no};
+    //     return onright;
+    // }else if(digitalRead(detector1)==LOW){
+    //     //infrared[5] = {no,yes,no,no,no};
+    //     return onleft;
+    // }else if(digitalRead(detector4)==LOW){
+    //     //infrared[5] = {no,no,no,yes,no};
+    //     return onrightfront;
+    // }else if(digitalRead(detector2)==LOW){
+    //     //infrared[5] = {yes,no,no,no,no};
+    //     return onleftfront;
+    // }else if(digitalRead(detector3)==LOW){
+    //     //infrared[5] = {no,no,no,no,yes};
+    //     return onfront;
+    // }else{
+    //     //infrared[5] = {no,no,no,no,no};
+    //     return onnothing;
+    // }
 }
 //探测器以上---------------------------------------------------------------------------------------------------
 
@@ -256,14 +259,14 @@ void move(int status){
         //record(1);
         //在正左方
         //left();
-        goleft(25);
+        goleft(goSpeedFast);
         break;
     case onleftfront:
         //状态2
         //record(2);
         //在左前方
         //left_front();
-        goleft(10);
+        goleft(goSpeedSlow);
         break;
     case onfront:
         //状态3
@@ -277,14 +280,14 @@ void move(int status){
         //record(4);
         //在右前方
         //right_front();
-        goright(10);
+        goright(goSpeedSlow);
         break;
     case onright:
         //状态5
         //record(5);
         //在正右方
         //right();
-        goright(25);
+        goright(goSpeedFast);
         break;
     case onnothing:
         //状态6
@@ -456,7 +459,7 @@ void loop(){
      * 通过检测传感器的数据来决定位置
      */
     //detect();
-    //status_set();
+    status_set();
     //gofront();
     //move();
     //move_set();
