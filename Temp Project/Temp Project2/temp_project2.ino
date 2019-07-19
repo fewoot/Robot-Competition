@@ -2,7 +2,12 @@
  * 最后的车转向
  * 利用之前写好的函数进行转向
  * 要求：在最多0.4s内转向前方任意角度
- * 2019.7.18小结：电机设置完成，但程序测试未完成，还要覆写传感器程序
+ * 2019.7.18小结：电机设置完成，程序测试完成，还要覆写传感器程序,同时有新的问题，若用位置停止-
+ * 则车身会产生摆动
+ */
+
+/**
+ * 30速度，5s，3.75圈，30*5：3.75 = 40：1
  */
 
 /**
@@ -23,6 +28,16 @@ SoftwareSerial serial = SoftwareSerial(10,11);
 #define timeout 10000
 //利用刚才新建的串口和通信超时值来新建一个对象
 RoboClaw roboclaw = RoboClaw(&serial,timeout);
+//加速度设置，默认
+#define accel 655360
+#define deccel 655360
+#define accel1 655360
+#define accel2 655360
+#define deccel1 655360
+#define deccel2 655360
+
+//经测试，900左右END值是一圈
+#define oneround 900
 
 #define onleft 1
 #define onleftfront 2
@@ -52,7 +67,7 @@ RoboClaw roboclaw = RoboClaw(&serial,timeout);
 /**
  * 定义默认速度
  */
-#define speed 30
+#define speed 40
 
 
 //用于储存探测器收集到的数据
@@ -97,36 +112,43 @@ struct MyObject {
 //停止
 void stop(){
     roboclaw.ForwardM1(address, 0);
-    //roboclaw.BackwardM1(address,speed);
+    //roboclaw.ForwardM1(address,speed);
     roboclaw.ForwardM2(address, 0);
 }
+void stop_stuck(){
+    roboclaw.ResetEncoders(address);
+    //stop();
+    roboclaw.SpeedAccelDeccelPositionM1M2(address, accel1, 8000, deccel1, 0, accel2, 8000, deccel2, 0, 1);
+}
+
+
 //原地左转，直到车头正对，在这之中可以被打断
 void turnLeft(){
     //roboclaw.ForwardM1(address, speed);
-    roboclaw.BackwardM1(address,speed);
+    roboclaw.ForwardM1(address,speed);
     roboclaw.ForwardM2(address, speed);
     //roboclaw.BackwardM2(address,speed);
 }
 //原地右转，直到车头正对，在这之中可以被打断
 void turnRight(){
-    roboclaw.ForwardM1(address, speed);
-    //roboclaw.BackwardM1(address,speed);
+    roboclaw.BackwardM1(address, speed);
+    //roboclaw.ForwardM1(address,speed);
     //roboclaw.ForwardM2(address, speed);
     roboclaw.BackwardM2(address,speed);
 }
 //直行
 void gofront(){
-    roboclaw.ForwardM1(address, speed);
+    roboclaw.BackwardM1(address, speed);
     roboclaw.ForwardM2(address, speed);
 }
 //向左转
 void goleft(int level){
-    roboclaw.ForwardM1(address, speed-level);
+    roboclaw.BackwardM1(address, speed-level);
     roboclaw.ForwardM2(address, speed+level);
 }
 //向右转
 void goright(int level){
-    roboclaw.ForwardM1(address, speed+level);
+    roboclaw.BackwardM1(address, speed+level);
     roboclaw.ForwardM2(address, speed-level);
 }
 /**
@@ -437,6 +459,16 @@ void Println(){
     Serial.println(digitalRead(detector5));
 }
 
+
+void test_temp(){
+    delay(3000);
+    turnLeft();
+    delay(1000);
+    //stop();
+    stop_stuck();
+    for(;;){}
+}
+
 //原始函数：
 void setup(){
     //定义模拟串口
@@ -450,6 +482,7 @@ void setup(){
     pinMode(detector5,INPUT);
     //roboclaw.SetEncM1(address,0);
     //turn_round(900);
+    //test_temp();
 }
 
 void loop(){
@@ -462,6 +495,16 @@ void loop(){
     //detect();
     //status_set();
     //gofront();
+    //goleft(goSpeedSlow);
+    //goright(goSpeedSlow);
     //move();
     //move_set();
+    //stop();
+    //turnLeft();
+    //turnRight();
+    test_temp();
+    //roboclaw.ResetEncoders(address);
+    //stop();
+    //stop_stuck();
+    //roboclaw.SpeedAccelDeccelPositionM1(address, 50, 5, 50, 0, 1);
 }
