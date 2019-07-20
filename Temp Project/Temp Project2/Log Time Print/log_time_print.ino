@@ -1,6 +1,18 @@
 #include <SoftwareSerial.h>
 #include <RoboClaw.h>
 #include <EEPROM.h>
+
+void baseline(){
+    pinMode(13,OUTPUT);
+    digitalWrite(13,HIGH);
+    delay(1000);
+    digitalWrite(13,LOW);
+    delay(100);
+    digitalWrite(13,HIGH);
+    delay(100);
+    digitalWrite(13,LOW);
+    delay(100);
+}
 //定义日志格式
 struct MyObject {
     //执行次数
@@ -31,31 +43,31 @@ void loop(){
     EEPROM.get(addr,mylog);
     switch (mylog.statue){
     case 1:
-        Serial.print("次数：");
+        Serial.print("Times:");
         Serial.print(mylog.times);
-        Serial.print("， 方向：左， 时间：");
-        Serial.print(mylog.time);
+        Serial.print(", Direction:left, Time:");
+        Serial.println(mylog.time);
         //左    
         break;
     case 2:
-        Serial.print("次数：");
+        Serial.print("Times:");
         Serial.print(mylog.times);
-        Serial.print("， 方向：左前， 时间：");
-        Serial.print(mylog.time);
+        Serial.print(", Direction:leftfront, Time:");
+        Serial.println(mylog.time);
         //左前   
         break;
     case 4:
-        Serial.print("次数：");
+        Serial.print("Times:");
         Serial.print(mylog.times);
-        Serial.print("， 方向：右前， 时间：");
-        Serial.print(mylog.time);
+        Serial.print(", Direction:rightfront, Time:");
+        Serial.println(mylog.time);
         //右前    
         break;
     case 5:
-        Serial.print("次数：");
+        Serial.print("Times:");
         Serial.print(mylog.times);
-        Serial.print("， 方向：右， 时间：");
-        Serial.print(mylog.time);
+        Serial.print(", Direction:right, Time:");
+        Serial.println(mylog.time);
         //右    
         break;
     default:
@@ -63,6 +75,8 @@ void loop(){
     }
     addr += sizeof(MyObject);
     if(addr>1024){
-        for(;;){}
+        for(;;){
+            baseline();
+        }
     }
 }

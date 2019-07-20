@@ -1,8 +1,5 @@
-void setup(){
+void baseline(){
     pinMode(13,OUTPUT);
-}
-
-void loop(){
     digitalWrite(13,HIGH);
     delay(1000);
     digitalWrite(13,LOW);
@@ -11,6 +8,14 @@ void loop(){
     delay(100);
     digitalWrite(13,LOW);
     delay(100);
+}
+
+void setup(){
+    //pinMode(13,OUTPUT);
+}
+
+void loop(){
+    baseline();
 }
 /*
 Ô­Ê¼³ÌÐò

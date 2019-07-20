@@ -1,13 +1,13 @@
 /**
  * 最后的车转向
  * 利用之前写好的函数进行转向
- * 要求：在最多0.4s内转向前方任意角度
+ * 要求：在最多0.4s内转向前方任意角度即400ms
  * 2019.7.18小结：电机设置完成，程序测试完成，还要覆写传感器程序,同时有新的问题，若用位置停止-
  * 则车身会产生摆动
  */
 
 /**
- * 30速度，5s，3.75圈，30*5：3.75 = 40：1
+ * 30速度，5s，3.75圈，30*5：3.75=40：1圈，0.25圈=10
  */
 
 /**
@@ -17,17 +17,22 @@
 #include <RoboClaw.h>
 #include <EEPROM.h>
 
+//定义是否已经开始
+#define timeyes 1
+#define timeno 0
+
+//定义电机驱动模块引脚
+#define driver_S1 11
+#define driver_S2 10
 
 /**
  * 设定一些和传输命令有关的参数
  */
 #define address 0x80
-//新建一个模拟串口,S1=P11,S2=P10
-SoftwareSerial serial = SoftwareSerial(10,11);
+
 //设置超时值
 #define timeout 10000
-//利用刚才新建的串口和通信超时值来新建一个对象
-RoboClaw roboclaw = RoboClaw(&serial,timeout);
+
 //加速度设置，默认
 #define accel 655360
 #define deccel 655360
@@ -44,6 +49,8 @@ RoboClaw roboclaw = RoboClaw(&serial,timeout);
 #define onfront 3
 #define onrightfront 4
 #define onright 5
+#define onleftfrontmore 7
+#define onrightfrontmore 8
 #define onnothing 6
 
 #define goSpeedFast 25
@@ -91,9 +98,11 @@ int time_temp = 0;
 //定义日志状态
 int time_status = 0;
 
-//定义是否已经开始
-#define timeyes 1
-#define timeno 0
+//新建一个模拟串口,S1=P11,S2=P10
+SoftwareSerial serial = SoftwareSerial(driver_S2,driver_S1);
+
+//利用刚才新建的串口和通信超时值来新建一个对象
+RoboClaw roboclaw = RoboClaw(&serial,timeout);
 
 //定义日志格式
 struct MyObject {
@@ -105,7 +114,7 @@ struct MyObject {
      */
     int statue;
     //记录时间，应该是一次完整转向所用的时间
-    int time;
+    long time;
 };
 
 //动作组以下-----------------------------------------------------------------------------------------------
@@ -115,13 +124,19 @@ void stop(){
     //roboclaw.ForwardM1(address,speed);
     roboclaw.ForwardM2(address, 0);
 }
+//停止后保持不动
 void stop_stuck(){
     roboclaw.ResetEncoders(address);
     //stop();
-    roboclaw.SpeedAccelDeccelPositionM1M2(address, accel1, 8000, deccel1, 0, accel2, 8000, deccel2, 0, 1);
+    roboclaw.SpeedAccelDeccelPositionM1M2(address, accel1, 1000, deccel1, 0, accel2, 1000, deccel2, 0, 1);
 }
-
-
+//停止后保持不动——修改后
+void stop_stuck_fixed(){
+    for(int i=0;i<1500;++i){
+        stop_stuck();
+        delay(1);
+    }
+}
 //原地左转，直到车头正对，在这之中可以被打断
 void turnLeft(){
     //roboclaw.ForwardM1(address, speed);
@@ -214,6 +229,34 @@ void right(){
 //状态组以上---------------------------------------------------------------------------------------------------
 
 //探测器以下---------------------------------------------------------------------------------------------------
+int detect_left(){
+
+}
+
+int detect_leftfront(){
+
+}
+
+int detect_leftfrontmore(){
+
+}
+
+int detect_front(){
+
+}
+
+int detect_right(){
+
+}
+
+int detect_rightfront(){
+
+}
+
+int detect_rightfrontmore(){
+
+}
+
 /**
  * 传感器检测函数
  */
@@ -237,6 +280,23 @@ int detect(){
     //     //infrared[5] = {no,no,no,no,no};
     //     return onnothing;
     // }
+    if(detect_left()==yes){
+        return onleft;
+    }else if(detect_right()==yes){
+        return onright;
+    }else if(detect_leftfront()==yes){
+        return onleftfront;
+    }else if(detect_rightfront()==yes){
+        return onrightfront;
+    }else if(detect_leftfrontmore()==yes){
+        return onleftfrontmore;
+    }else if(detect_rightfrontmore()==yes){
+        return onrightfrontmore;
+    }else if(detect_front()==yes){
+        return onfront;
+    }else{
+        return onnothing;
+    }
 }
 //探测器以上---------------------------------------------------------------------------------------------------
 
@@ -257,6 +317,7 @@ void record(){
         MyObject mylog;
         mylog.times = ++log_times;
         mylog.time = millis()-time_start;
+        //mylog.time = 12233;
         mylog.statue = time_status;
         EEPROM.put(addr,mylog);
         addr += sizeof(MyObject);
@@ -342,35 +403,51 @@ void status_set(){
         //record(1);
         //在正左方
         time_begin(onleft);
-        left();
+        turnLeft();
         break;
     case onleftfront:
         //状态2
         //record(2);
         //在左前方
         time_begin(onleftfront);
-        left_front();
+        turnLeft();
         break;
     case onfront:
         //状态3
         //record(3);
         //在前方
         record();
-        forward();
+        //forward();
+        //stop();
+        stop_stuck();
         break;
     case onrightfront:
         //状态4
         //record(4);
         //在右前方
         time_begin(onrightfront);
-        right_front();
+        //right_front();
+        turnRight();
         break;
     case onright:
         //状态5
         //record(5);
         //在正右方
         time_begin(onright);
-        right();
+        //right();
+        turnRight();
+        break;
+    case onleftfrontmore:
+        //状态7
+        //record(6);
+        //在左前方更靠近前方
+        turnLeft();
+        break;
+    case onrightfrontmore:
+        //状态8
+        //record(6);
+        //在右前方更靠近前方
+        turnRight();
         break;
     case onnothing:
         //状态6
@@ -459,13 +536,16 @@ void Println(){
     Serial.println(digitalRead(detector5));
 }
 
-
+//测试
 void test_temp(){
     delay(3000);
+    time_begin(onleft);
     turnLeft();
-    delay(1000);
+    delay(250);
     //stop();
-    stop_stuck();
+    //stop_stuck();
+    record();
+    stop_stuck_fixed();
     for(;;){}
 }
 
