@@ -17,7 +17,7 @@
 #include <RoboClaw.h>
 #include <EEPROM.h>
 
-//定义是否已经开始
+//定义日志是否已经开始
 #define timeyes 1
 #define timeno 0
 

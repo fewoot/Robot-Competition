@@ -13,7 +13,11 @@
 #include <RoboClaw.h>
 #include <EEPROM.h>
 
-//定义是否已经开始
+//定义后视探测器引脚
+#define backdetector1 A0
+#define backdetector2 A1
+
+//定义日志是否已经开始
 #define timeyes 1
 #define timeno 0
 
