@@ -1,5 +1,5 @@
 {
     "board": "arduino:avr:uno",
-    "sketch": "Temp Project\\Temp Project2\\Log Time Print\\log_time_print.ino",
+    "sketch": "Temp Project\\Temp Project2\\temp_project2.ino",
     "port": "COM8"
 }
