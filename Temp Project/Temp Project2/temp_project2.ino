@@ -4,6 +4,7 @@
  * 要求：在最多0.4s内转向前方任意角度即400ms
  * 2019.7.18小结：电机设置完成，程序测试完成，还要覆写传感器程序(已完成),同时有新的问题，若用位置停止-
  * 则车身会产生摆动(已解决，用迅速刷新的新的位置坐标来减速，但还未在实车上实验)
+ * 2019.7.21，已在小车上实验，但是目前距离定义的过进，但是detector1却意外的不错，还需要进一步研究，顺便：新传感器真垃圾！！
  */
 
 /**
@@ -24,6 +25,9 @@
 //定义电机驱动模块引脚
 #define driver_S1 11
 #define driver_S2 10
+
+//定义探测距离
+#define detect_distance 200
 
 /**
  * 设定一些和传输命令有关的参数
@@ -59,13 +63,13 @@
 /**
  * 定义传感器
  */
-#define detector1 12
-#define detector2 8
+#define detector1 A0
+#define detector2 A1
 #define detector3 6
 #define detector4 7
 #define detector5 9
-#define detector6 9
-#define detector7 10
+#define detector6 A2
+#define detector7 A3
 
 /**
  * 定义检测到物体没有
@@ -232,11 +236,19 @@ void right(){
 
 //探测器以下---------------------------------------------------------------------------------------------------
 int detect_left(){
-    return no;
+    if(analogRead(detector1)<detect_distance+50){
+        return yes;
+    }else{
+       return no; 
+    }
 }
 
 int detect_leftfront(){
-    return no;
+    if(analogRead(detector2)<detect_distance){
+        return yes;
+    }else{
+       return no; 
+    }
 }
 
 int detect_leftfrontmore(){
@@ -256,11 +268,19 @@ int detect_front(){
 }
 
 int detect_right(){
-    return no;
+    if(analogRead(detector7)<detect_distance){
+        return yes;
+    }else{
+       return no; 
+    }
 }
 
 int detect_rightfront(){
-    return no;
+    if(analogRead(detector6)<detect_distance){
+        return yes;
+    }else{
+       return no; 
+    }
 }
 
 int detect_rightfrontmore(){
@@ -416,21 +436,21 @@ void status_set(){
         //状态1
         //record(1);
         //在正左方
-        time_begin(onleft);
+        //time_begin(onleft);
         turnLeft();
         break;
     case onleftfront:
         //状态2
         //record(2);
         //在左前方
-        time_begin(onleftfront);
+        //time_begin(onleftfront);
         turnLeft();
         break;
     case onfront:
         //状态3
         //record(3);
         //在前方
-        record();
+        //record();
         //forward();
         stop();
         //stop_stuck();
@@ -440,7 +460,7 @@ void status_set(){
         //状态4
         //record(4);
         //在右前方
-        time_begin(onrightfront);
+        //time_begin(onrightfront);
         //right_front();
         turnRight();
         break;
@@ -448,7 +468,7 @@ void status_set(){
         //状态5
         //record(5);
         //在正右方
-        time_begin(onright);
+        //time_begin(onright);
         //right();
         turnRight();
         break;
@@ -540,21 +560,41 @@ void move_set(){
  * 探测器打印日志函数
  */
 void Println(){
-    Serial.print(digitalRead(detector3));
-    Serial.print(":");
-    Serial.print(digitalRead(detector4));
-    Serial.print(":");
-    Serial.println(digitalRead(detector5));
+    
+    Serial.println(detect());
+    //Serial.println(analogRead(detector7));
+    // Serial.print(digitalRead(detector3));
     // Serial.print(":");
     // Serial.print(digitalRead(detector4));
     // Serial.print(":");
     // Serial.println(digitalRead(detector5));
+    // Serial.print(":");
+    // Serial.print(digitalRead(detector4));
+    // Serial.print(":");
+    // Serial.println(digitalRead(detector5));
+    delay(400);
 }
 
 //测试
 void test_temp(){
     //Serial.begin(9600);
-    Serial.println(analogRead(A1));
+    Serial.print(analogRead(detector1));
+    Serial.print(":");
+    Serial.print(analogRead(detector2));
+    Serial.print(":");
+    Serial.print(analogRead(detector3));
+    Serial.print(":");
+    Serial.print(analogRead(detector4));
+    Serial.print(":");
+    Serial.print(analogRead(detector5));
+    Serial.print(":");
+    Serial.print(analogRead(detector6));
+    Serial.print(":");
+    Serial.print(analogRead(detector7));
+    Serial.println(":");
+    //Serial.println(analogRead(A1));
+    //Serial.
+    delay(400);
     // delay(3000);
     // time_begin(onleft);
     // turnLeft();
@@ -593,7 +633,7 @@ void loop(){
      * 通过检测传感器的数据来决定位置
      */
     //detect();
-    //status_set();
+    status_set();
     //gofront();
     //goleft(goSpeedSlow);
     //goright(goSpeedSlow);
@@ -602,7 +642,7 @@ void loop(){
     //stop();
     //turnLeft();
     //turnRight();
-    test_temp();
+    //test_temp();
     //Println();
     //roboclaw.ResetEncoders(address);
     //stop();
