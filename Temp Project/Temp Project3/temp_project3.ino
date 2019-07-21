@@ -62,9 +62,11 @@
  */
 #define detector1 12
 #define detector2 8
-#define detector3 5
-#define detector4 4
-#define detector5 3
+#define detector3 6
+#define detector4 7
+#define detector5 9
+#define detector6 9
+#define detector7 10
 
 /**
  * 定义检测到物体没有
@@ -249,11 +251,19 @@ int detect_leftfront(){
 }
 
 int detect_leftfrontmore(){
-
+    if(digitalRead(detector3)==LOW){
+        return yes;
+    }else{
+        return no;
+    }
 }
 
 int detect_front(){
-
+    if(digitalRead(detector4)==LOW){
+        return yes;
+    }else{
+        return no;
+    }
 }
 
 int detect_right(){
@@ -265,7 +275,11 @@ int detect_rightfront(){
 }
 
 int detect_rightfrontmore(){
-
+    if(digitalRead(detector5)==LOW){
+        return yes;
+    }else{
+        return no;
+    }
 }
 
 /**
@@ -537,15 +551,15 @@ void move_set(){
  * 探测器打印日志函数
  */
 void Println(){
-    Serial.print(digitalRead(detector1));
-    Serial.print(":");
-    Serial.print(digitalRead(detector2));
-    Serial.print(":");
     Serial.print(digitalRead(detector3));
     Serial.print(":");
     Serial.print(digitalRead(detector4));
     Serial.print(":");
-    Serial.println(digitalRead(detector5));
+    Serial.print(digitalRead(detector5));
+    // Serial.print(":");
+    // Serial.print(digitalRead(detector4));
+    // Serial.print(":");
+    // Serial.println(digitalRead(detector5));
 }
 
 //测试
@@ -594,7 +608,8 @@ void loop(){
     //stop();
     //turnLeft();
     //turnRight();
-    test_temp();
+    //test_temp();
+    Println();
     //roboclaw.ResetEncoders(address);
     //stop();
     //stop_stuck();

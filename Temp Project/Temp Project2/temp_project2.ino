@@ -61,9 +61,11 @@
  */
 #define detector1 12
 #define detector2 8
-#define detector3 5
-#define detector4 4
-#define detector5 3
+#define detector3 6
+#define detector4 7
+#define detector5 9
+#define detector6 9
+#define detector7 10
 
 /**
  * 定义检测到物体没有
@@ -230,31 +232,43 @@ void right(){
 
 //探测器以下---------------------------------------------------------------------------------------------------
 int detect_left(){
-
+    return no;
 }
 
 int detect_leftfront(){
-
+    return no;
 }
 
 int detect_leftfrontmore(){
-
+    if(digitalRead(detector3)==LOW){
+        return yes;
+    }else{
+        return no;
+    }
 }
 
 int detect_front(){
-
+    if(digitalRead(detector4)==LOW){
+        return yes;
+    }else{
+        return no;
+    }
 }
 
 int detect_right(){
-
+    return no;
 }
 
 int detect_rightfront(){
-
+    return no;
 }
 
 int detect_rightfrontmore(){
-
+    if(digitalRead(detector5)==LOW){
+        return yes;
+    }else{
+        return no;
+    }
 }
 
 /**
@@ -418,9 +432,9 @@ void status_set(){
         //在前方
         record();
         //forward();
-        //stop();
+        stop();
         //stop_stuck();
-        stop_stuck_fixed();
+        //stop_stuck_fixed();
         break;
     case onrightfront:
         //状态4
@@ -526,28 +540,30 @@ void move_set(){
  * 探测器打印日志函数
  */
 void Println(){
-    Serial.print(digitalRead(detector1));
-    Serial.print(":");
-    Serial.print(digitalRead(detector2));
-    Serial.print(":");
     Serial.print(digitalRead(detector3));
     Serial.print(":");
     Serial.print(digitalRead(detector4));
     Serial.print(":");
     Serial.println(digitalRead(detector5));
+    // Serial.print(":");
+    // Serial.print(digitalRead(detector4));
+    // Serial.print(":");
+    // Serial.println(digitalRead(detector5));
 }
 
 //测试
 void test_temp(){
-    delay(3000);
-    time_begin(onleft);
-    turnLeft();
-    delay(250);
-    //stop();
-    //stop_stuck();
-    record();
-    stop_stuck_fixed();
-    for(;;){}
+    //Serial.begin(9600);
+    Serial.println(analogRead(A1));
+    // delay(3000);
+    // time_begin(onleft);
+    // turnLeft();
+    // delay(250);
+    // //stop();
+    // //stop_stuck();
+    // record();
+    // stop_stuck_fixed();
+    // for(;;){}
 }
 
 //原始函数：
@@ -561,6 +577,9 @@ void setup(){
     pinMode(detector3,INPUT);
     pinMode(detector4,INPUT);
     pinMode(detector5,INPUT);
+    pinMode(detector6,INPUT);
+    pinMode(detector7,INPUT);
+    //pinMode(3,INPUT);
     //roboclaw.SetEncM1(address,0);
     //turn_round(900);
     //test_temp();
@@ -584,6 +603,7 @@ void loop(){
     //turnLeft();
     //turnRight();
     test_temp();
+    //Println();
     //roboclaw.ResetEncoders(address);
     //stop();
     //stop_stuck();
