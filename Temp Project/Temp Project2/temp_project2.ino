@@ -8,6 +8,16 @@
  */
 
 /**
+ * 记录：
+ * 1-343
+ * 2-350
+ * 3-固定65mm
+ * 4-固定90mm
+ * 5-固定65mm
+ * 6-333
+ * 7-317
+ */
+/**
  * 30速度，5s，3.75圈，30*5：3.75=40：1圈，0.25圈=10(即速度×时间/ms为10)
  */
 
@@ -27,7 +37,7 @@
 #define driver_S2 10
 
 //定义探测距离
-#define detect_distance 200
+#define detect_distance 250
 
 /**
  * 设定一些和传输命令有关的参数
@@ -80,7 +90,7 @@
 /**
  * 定义默认速度
  */
-#define speed 40
+#define speed 60
 
 
 //用于储存探测器收集到的数据
@@ -236,7 +246,7 @@ void right(){
 
 //探测器以下---------------------------------------------------------------------------------------------------
 int detect_left(){
-    if(analogRead(detector1)<detect_distance+50){
+    if(analogRead(detector1)<313){
         return yes;
     }else{
        return no; 
@@ -244,7 +254,7 @@ int detect_left(){
 }
 
 int detect_leftfront(){
-    if(analogRead(detector2)<detect_distance){
+    if(analogRead(detector2)<310){
         return yes;
     }else{
        return no; 
@@ -268,7 +278,7 @@ int detect_front(){
 }
 
 int detect_right(){
-    if(analogRead(detector7)<detect_distance){
+    if(analogRead(detector7)<317){
         return yes;
     }else{
        return no; 
@@ -276,7 +286,7 @@ int detect_right(){
 }
 
 int detect_rightfront(){
-    if(analogRead(detector6)<detect_distance){
+    if(analogRead(detector6)<333){
         return yes;
     }else{
        return no; 
@@ -484,13 +494,13 @@ void status_set(){
         //在右前方更靠近前方
         turnRight();
         break;
-    case onnothing:
-        //状态6
-        //record(6);
-        //暂时没有检测到
-        //如果没有检测到，可能是真的没有检测到，也有可能是在转弯过程中刚刚好转到了一个中间的位置-
-        //所以不作为
-        break;
+    // case onnothing:
+    //     //状态6
+    //     //record(6);
+    //     //暂时没有检测到
+    //     //如果没有检测到，可能是真的没有检测到，也有可能是在转弯过程中刚刚好转到了一个中间的位置-
+    //     //所以不作为
+    //     break;
     default:
         //状态7
         //record(7);
@@ -572,24 +582,25 @@ void Println(){
     // Serial.print(digitalRead(detector4));
     // Serial.print(":");
     // Serial.println(digitalRead(detector5));
-    delay(400);
+    //delay(400);
 }
 
 //测试
 void test_temp(){
     //Serial.begin(9600);
+    Serial.print("1:");
     Serial.print(analogRead(detector1));
-    Serial.print(":");
+    Serial.print(",2:");
     Serial.print(analogRead(detector2));
-    Serial.print(":");
-    Serial.print(analogRead(detector3));
-    Serial.print(":");
-    Serial.print(analogRead(detector4));
-    Serial.print(":");
-    Serial.print(analogRead(detector5));
-    Serial.print(":");
+    Serial.print(",3:");
+    Serial.print(digitalRead(detector3));
+    Serial.print(",4:");
+    Serial.print(digitalRead(detector4));
+    Serial.print(",5:");
+    Serial.print(digitalRead(detector5));
+    Serial.print(",6:");
     Serial.print(analogRead(detector6));
-    Serial.print(":");
+    Serial.print(",7:");
     Serial.print(analogRead(detector7));
     Serial.println(":");
     //Serial.println(analogRead(A1));
@@ -633,7 +644,7 @@ void loop(){
      * 通过检测传感器的数据来决定位置
      */
     //detect();
-    status_set();
+    //status_set();
     //gofront();
     //goleft(goSpeedSlow);
     //goright(goSpeedSlow);
@@ -644,6 +655,7 @@ void loop(){
     //turnRight();
     //test_temp();
     //Println();
+    //Serial.println(digitalRead(7));
     //roboclaw.ResetEncoders(address);
     //stop();
     //stop_stuck();
