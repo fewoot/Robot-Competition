@@ -90,7 +90,9 @@
 /**
  * 定义默认速度
  */
-#define speed 60
+#define turn_speed_fast 80
+#define turn_speed_middle 60
+#define turn_speed_slow 40
 
 
 //用于储存探测器收集到的数据
@@ -154,31 +156,31 @@ void stop_stuck_fixed(){
     //}
 }
 //原地左转，直到车头正对，在这之中可以被打断
-void turnLeft(){
+void turnLeft(int speed){
     //roboclaw.ForwardM1(address, speed);
     roboclaw.ForwardM1(address,speed);
     roboclaw.ForwardM2(address, speed);
     //roboclaw.BackwardM2(address,speed);
 }
 //原地右转，直到车头正对，在这之中可以被打断
-void turnRight(){
+void turnRight(int speed){
     roboclaw.BackwardM1(address, speed);
     //roboclaw.ForwardM1(address,speed);
     //roboclaw.ForwardM2(address, speed);
     roboclaw.BackwardM2(address,speed);
 }
 //直行
-void gofront(){
+void gofront(int speed){
     roboclaw.BackwardM1(address, speed);
     roboclaw.ForwardM2(address, speed);
 }
 //向左转
-void goleft(int level){
+void goleft(int speed,int level){
     roboclaw.BackwardM1(address, speed-level);
     roboclaw.ForwardM2(address, speed+level);
 }
 //向右转
-void goright(int level){
+void goright(int speed,int level){
     roboclaw.BackwardM1(address, speed+level);
     roboclaw.ForwardM2(address, speed-level);
 }
@@ -197,9 +199,9 @@ void gonothing(){
         if(millis()-time_now>400){
             //turnLeft();
             if(last_move_status==onright || last_move_status==onrightfront){
-                turnRight();
+                //turnRight();
             }else{
-                turnLeft();
+                //turnLeft();
             }
             //roboclaw.ReadSpeedM1(address);
             //roboclaw.ReadSpeedM2(address);
@@ -225,22 +227,22 @@ void forward(){
 
 void left_front(){
     //向左旋转
-    turnLeft();
+    //turnLeft();
 }
 
 void right_front(){
     //向右旋转
-    turnRight();
+    //turnRight();
 }
 
 void left(){
     //向左旋转
-    turnLeft();
+    //turnLeft();
 }
 
 void right(){
     //向右旋转
-    turnRight();
+    //turnRight();
 }
 //状态组以上---------------------------------------------------------------------------------------------------
 
@@ -324,7 +326,28 @@ int detect(){
     //     //infrared[5] = {no,no,no,no,no};
     //     return onnothing;
     // }
-    if(detect_left()==yes){
+
+
+    // if(detect_left()==yes){
+    //     return onleft;
+    // }else if(detect_right()==yes){
+    //     return onright;
+    // }else if(detect_leftfront()==yes){
+    //     return onleftfront;
+    // }else if(detect_rightfront()==yes){
+    //     return onrightfront;
+    // }else if(detect_leftfrontmore()==yes){
+    //     return onleftfrontmore;
+    // }else if(detect_rightfrontmore()==yes){
+    //     return onrightfrontmore;
+    // }else if(detect_front()==yes){
+    //     return onfront;
+    // }else{
+    //     return onnothing;
+    // }
+    if(detect_front()==yes){
+        return onfront;
+    }else if(detect_left()==yes){
         return onleft;
     }else if(detect_right()==yes){
         return onright;
@@ -336,8 +359,6 @@ int detect(){
         return onleftfrontmore;
     }else if(detect_rightfrontmore()==yes){
         return onrightfrontmore;
-    }else if(detect_front()==yes){
-        return onfront;
     }else{
         return onnothing;
     }
@@ -387,35 +408,35 @@ void move(int status){
         //record(1);
         //在正左方
         //left();
-        goleft(goSpeedFast);
+        //goleft(goSpeedFast);
         break;
     case onleftfront:
         //状态2
         //record(2);
         //在左前方
         //left_front();
-        goleft(goSpeedSlow);
+        //goleft(goSpeedSlow);
         break;
     case onfront:
         //状态3
         //record(3);
         //在前方
         //forward();
-        gofront();
+        //gofront();
         break;
     case onrightfront:
         //状态4
         //record(4);
         //在右前方
         //right_front();
-        goright(goSpeedSlow);
+        //goright(goSpeedSlow);
         break;
     case onright:
         //状态5
         //record(5);
         //在正右方
         //right();
-        goright(goSpeedFast);
+        //goright(goSpeedFast);
         break;
     case onnothing:
         //状态6
@@ -425,7 +446,7 @@ void move(int status){
         //所以不作为
         //turnLeft();
         //stop();
-        gonothing();
+        //gonothing();
         break;
     default:
         //状态7
@@ -447,14 +468,14 @@ void status_set(){
         //record(1);
         //在正左方
         //time_begin(onleft);
-        turnLeft();
+        turnLeft(turn_speed_fast);
         break;
     case onleftfront:
         //状态2
         //record(2);
         //在左前方
         //time_begin(onleftfront);
-        turnLeft();
+        turnLeft(turn_speed_middle);
         break;
     case onfront:
         //状态3
@@ -462,6 +483,7 @@ void status_set(){
         //在前方
         //record();
         //forward();
+        delay(14);
         stop();
         //stop_stuck();
         //stop_stuck_fixed();
@@ -472,7 +494,7 @@ void status_set(){
         //在右前方
         //time_begin(onrightfront);
         //right_front();
-        turnRight();
+        turnRight(turn_speed_middle);
         break;
     case onright:
         //状态5
@@ -480,19 +502,19 @@ void status_set(){
         //在正右方
         //time_begin(onright);
         //right();
-        turnRight();
+        turnRight(turn_speed_fast);
         break;
     case onleftfrontmore:
         //状态7
         //record(6);
         //在左前方更靠近前方
-        turnLeft();
+        turnLeft(turn_speed_slow);
         break;
     case onrightfrontmore:
         //状态8
         //record(6);
         //在右前方更靠近前方
-        turnRight();
+        turnRight(turn_speed_slow);
         break;
     // case onnothing:
     //     //状态6
@@ -630,6 +652,7 @@ void setup(){
     pinMode(detector5,INPUT);
     pinMode(detector6,INPUT);
     pinMode(detector7,INPUT);
+    delay(3000);
     //pinMode(3,INPUT);
     //roboclaw.SetEncM1(address,0);
     //turn_round(900);
@@ -644,7 +667,7 @@ void loop(){
      * 通过检测传感器的数据来决定位置
      */
     //detect();
-    //status_set();
+    status_set();
     //gofront();
     //goleft(goSpeedSlow);
     //goright(goSpeedSlow);
@@ -654,10 +677,11 @@ void loop(){
     //turnLeft();
     //turnRight();
     //test_temp();
-    //Println();
+    Println();
     //Serial.println(digitalRead(7));
     //roboclaw.ResetEncoders(address);
     //stop();
     //stop_stuck();
     //roboclaw.SpeedAccelDeccelPositionM1(address, 50, 5, 50, 0, 1);
+    //Serial.println(digitalRead(5));
 }
