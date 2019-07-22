@@ -353,19 +353,19 @@ int detect(){
     /**
      * 这个模块中，优先检测前方，在从侧边向前方递进
      */
-    if(detect_front()==DETECT_YES){
+    if(detectFront()==DETECT_YES){
         return ON_FRONT;
-    }else if(detect_left()==DETECT_YES){
+    }else if(detectLeft()==DETECT_YES){
         return ON_LEFT;
-    }else if(detect_right()==DETECT_YES){
+    }else if(detectRight()==DETECT_YES){
         return ON_RIGHT;
-    }else if(detect_leftfront()==DETECT_YES){
+    }else if(detectLeftFront()==DETECT_YES){
         return ON_LEFT_FRONT;
-    }else if(detect_rightfront()==DETECT_YES){
+    }else if(detectRightFront()==DETECT_YES){
         return ON_RIGHT_FRONT;
-    }else if(detect_leftfrontmore()==DETECT_YES){
+    }else if(detectLeftFrontMore()==DETECT_YES){
         return ON_LEFT_FRONT_MORE;
-    }else if(detect_rightfrontmore()==DETECT_YES){
+    }else if(detectRightFrontMore()==DETECT_YES){
         return ON_RIGHT_FRONT_MORE;
     }else{
         return ON_NOTHING;

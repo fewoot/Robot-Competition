@@ -593,7 +593,7 @@ void move_set(){
  */
 void Println(){
     
-    Serial.println(detect());
+    //Serial.println(detect());
     //Serial.println(analogRead(detector7));
     // Serial.print(digitalRead(detector3));
     // Serial.print(":");
@@ -605,6 +605,7 @@ void Println(){
     // Serial.print(":");
     // Serial.println(digitalRead(detector5));
     //delay(400);
+    Serial.println(analogRead(A0));
 }
 
 //测试
@@ -667,7 +668,7 @@ void loop(){
      * 通过检测传感器的数据来决定位置
      */
     //detect();
-    status_set();
+    //status_set();
     //gofront();
     //goleft(goSpeedSlow);
     //goright(goSpeedSlow);
@@ -678,6 +679,7 @@ void loop(){
     //turnRight();
     //test_temp();
     Println();
+    delay(400);
     //Serial.println(digitalRead(7));
     //roboclaw.ResetEncoders(address);
     //stop();
