@@ -54,6 +54,7 @@ roboclaw.ForwardBackwardMixed(address,speed);
 roboclaw.LeftRightMixed(address,speed);
 
 //读取编码器的值，返回一个32-bit的值，最好用long存储
+//注意：电机驱动的负值不是负值，-1 = 4294967259，依次递减
 roboclaw.ReadEncM1(address);
 roboclaw.ReadEncM2(address);
 roboclaw.ReadSpeedM1(address);
