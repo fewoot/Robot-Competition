@@ -1,5 +1,5 @@
 /**
- * 第三阶段：进行中
+ * 第三阶段：完成
  * 平齐1200左右，误差在+-10,变化最小时170
  */
 
@@ -109,19 +109,31 @@
 // #define DETECTOR6 7
 // #define DETECTOR7 A3
 
+//定义转向状态（目前未使用）
 #define READY_TO_TURN_RIGHT 1
 #define READY_TO_TURN_LEFT 0
 #define READY_TO_GO_FRONT 2
 
+//转向误差值（未使用）
 #define TURN_ERROR_VALUE 20
 
+//微小角度转向速度（未使用）
 #define TURN_SLOW_SPEED 9
 
+//微小前进速度（未使用）
 #define GO_SLOW_SPEED 8
 
+//微小角度转向位置（使用）
 #define TURN_SLOW_POSITION 25
 
+//微小前进位置（使用）
 #define GO_SLOW_POSITION 25
+
+//最小检测变化，用于两侧90°转向时判断是否有物体
+#define MIN_DETECT_CHANGE 177
+
+//对正时两个探测器数值差异范围
+#define OffSET_THRESHOLD 10
 
 /**
  * 定义检测到物体没有
@@ -129,10 +141,13 @@
 #define DETECT_YES 0
 #define DETECT_NO 1
 
+//记录无敌人时，左侧边界的距离
 int last_detect_left = 0;
 
+//记录无敌人时，右侧边界的距离
 int last_detect_right = 0;
 
+//记录两侧探测器的数值总和，没用
 int last_detect_sum = 1200;
 
 /**
@@ -184,7 +199,7 @@ RoboClaw roboclaw = RoboClaw(&serial,TIME_OUT);
 // };
 
 //动作组以下-----------------------------------------------------------------------------------------------
-//停止
+//微小转向（未使用）
 void turnSlowOrMove(int ready_to_turn){
     if(ready_to_turn==READY_TO_TURN_LEFT){
         turnLeft(TURN_SLOW_SPEED);
@@ -194,7 +209,7 @@ void turnSlowOrMove(int ready_to_turn){
         gofront(TURN_SLOW_SPEED);
     }
 }
-
+//停止
 void stop(){
     roboclaw.ForwardM1(ADDRESS, 0);
     //roboclaw.ForwardM1(address,speed);
@@ -280,7 +295,7 @@ void gonothing(){
 // void goFrontPosition(){
 
 // }
-
+//M1电机前进位置函数
 void M1PositionForward(int position){
     //static int M1PositionTemp = 0;
     //if(roboclaw.ReadEncM1(ADDRESS)==-position){
@@ -294,7 +309,7 @@ void M1PositionForward(int position){
         }
     }
 }
-
+//M1电机后退位置函数
 void M1PositionBackward(int position){
     //roboclaw.SetEncM1(ADDRESS,0);
     
@@ -308,7 +323,7 @@ void M1PositionBackward(int position){
         }
     }
 }
-
+//M2电机后退位置函数
 void M2PositionBackward(int position){
     //static int M1PositionTemp = 0;
     //if(roboclaw.ReadEncM1(ADDRESS)==-position){
@@ -322,7 +337,7 @@ void M2PositionBackward(int position){
         }
     }
 }
-
+//M2电机前进位置函数
 void M2PositionForward(int position){
     //roboclaw.SetEncM1(ADDRESS,0);
     
@@ -337,7 +352,7 @@ void M2PositionForward(int position){
     }
 }
 
-
+//向右转位置函数
 void turnRightPosition(int single){
     //M1PositionBackward(single);
     //M2PositionForward(single);
@@ -366,7 +381,7 @@ void turnRightPosition(int single){
     }
 }
 
-
+//向左转位置函数
 void turnLeftPosition(int single){
     //static int M1PositionTemp = 0;
     //if(roboclaw.ReadEncM1(ADDRESS)==-position){
@@ -396,6 +411,7 @@ void turnLeftPosition(int single){
     }
 }
 
+//微小前进位置函数
 void goFrontPosition(){
     roboclaw.ResetEncoders(ADDRESS);
     roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, GO_SLOW_POSITION, ACCEL2, 8000, DECCEL2, GO_SLOW_POSITION, 1);
@@ -516,6 +532,7 @@ void goFrontPosition(){
     
 // }
 
+//检测后侧数据，返回应该向哪走（未使用）
 int detectorBack(){
     if(analogRead(DETECTOR_BACK_A2)-analogRead(DETECTOR_BACK_A3)>TURN_ERROR_VALUE){
         return READY_TO_TURN_LEFT;
@@ -880,6 +897,19 @@ int detect(){
 //     }
 // }
 
+//初始基准线函数，13号灯双闪
+void baseline(){
+    pinMode(13,OUTPUT);
+    digitalWrite(13,HIGH);
+    delay(1000);
+    digitalWrite(13,LOW);
+    delay(100);
+    digitalWrite(13,HIGH);
+    delay(100);
+    digitalWrite(13,LOW);
+    delay(100);
+}
+
 
 /**
  * 探测器打印日志函数
@@ -958,6 +988,90 @@ void test_temp(){
     // for(;;){}
 }
 
+//测试函数
+void test(){
+    //delay(5000);
+    for(int i=0;i<10;++i){
+        Serial.print("left:");
+        Serial.print(analogRead(A2));
+        Serial.print("....right:");
+        Serial.print(analogRead(A3));
+        Serial.print("....A2-A3:");
+        Serial.println(analogRead(A2)-analogRead(A3));
+        delay(1000);
+    }
+    turnLeftPosition(TURN_SLOW_POSITION);
+    for(;;){
+        Serial.print("left:");
+        Serial.print(analogRead(A2));
+        Serial.print("....right:");
+        Serial.print(analogRead(A3));
+        Serial.print("....A2-A3:");
+        Serial.println(analogRead(A2)-analogRead(A3));
+        delay(1000);
+    }
+    
+}
+
+
+//搜索敌人总函数
+void searchForEnemy(){
+    detectEnemy();//down
+    alignment();//down
+    //uploadDetect();
+    //goFrontPosition();//down
+}
+
+
+/**
+ * 判断侧边是否能检测到敌人
+ * 会先判断侧边距离数据是否发生大的变化，若发生，则向那个方向转向
+ * 之后会更新两侧的距离常数（不是一直的常数）
+ */
+void detectEnemy(){
+    //if()
+    //last_detect_sum = analogRead(DETECTOR_LEFT_A0)+analogRead(DETECTOR_RIGHT_A1);
+    // Serial.print("A0 cha:");
+    // Serial.print(last_detect_left-analogRead(DETECTOR_LEFT_A0));
+    // Serial.print(".....A1 cha:");
+    // Serial.println(last_detect_right-analogRead(DETECTOR_RIGHT_A1));
+    if(last_detect_left-analogRead(DETECTOR_LEFT_A0)>=MIN_DETECT_CHANGE){
+        turnLeftPosition(TURNLEFT90);
+        uploadDetect();
+    }else if(last_detect_right-analogRead(DETECTOR_RIGHT_A1)>=MIN_DETECT_CHANGE){
+        turnRightPosition(TURNRIGHT90);
+        uploadDetect();
+    }
+    
+}
+
+/**
+ * 对正函数
+ * 会根据后面的两个传感器进行和边界对齐
+ * 如果对齐（有一定的误差忽视），则会更新两侧的距离常数，同时前进一点
+ */
+void alignment(){
+    if(analogRead(DETECTOR_BACK_A2)-analogRead(DETECTOR_BACK_A3)>OffSET_THRESHOLD){
+        turnLeftPosition(TURN_SLOW_POSITION);
+    }else if(analogRead(DETECTOR_BACK_A3)-analogRead(DETECTOR_BACK_A2)>OffSET_THRESHOLD){
+        turnRightPosition(TURN_SLOW_POSITION);
+    }else{
+        //baseline();
+        //last_detect_left = 
+        uploadDetect();
+        goFrontPosition();
+    }
+}
+
+//距离更新函数
+void uploadDetect(){
+    delay(200);
+    last_detect_left = analogRead(DETECTOR_LEFT_A0);
+    last_detect_right = analogRead(DETECTOR_RIGHT_A1);
+}
+
+
+
 
 //原始函数：
 void setup(){
@@ -988,6 +1102,8 @@ void setup(){
     //test_temp();
     //stop();
     delay(1000);
+    //首先更新一下场上的距离常数，在行动
+    uploadDetect();
 }
 
 void loop(){
@@ -1134,41 +1250,17 @@ void loop(){
     // delay(5000);
     // turnLeftPosition(TURNLEFT90+130);
     // delay(5000);
-    detectEnemy();
-    delay(1000);
-    if(millis()>20000){
-        for(;;){}
-    }
-}
-
-
-void searchForEnemy(){
-    detectEnemy();
-    alignment();
-    uploadDetect();
-    goFrontPosition();
-}
-
-void detectEnemy(){
-    //if()
-    //last_detect_sum = analogRead(DETECTOR_LEFT_A0)+analogRead(DETECTOR_RIGHT_A1);
-    // Serial.print("A0 cha:");
-    // Serial.print(last_detect_left-analogRead(DETECTOR_LEFT_A0));
-    // Serial.print(".....A1 cha:");
-    // Serial.println(last_detect_right-analogRead(DETECTOR_RIGHT_A1));
-    if(last_detect_left-analogRead(DETECTOR_LEFT_A0)>=177){
-        turnLeftPosition(TURNLEFT90);
-    }else if(last_detect_right-analogRead(DETECTOR_RIGHT_A1)>=177){
-        turnRightPosition(TURNRIGHT90);
-    }
+    // detectEnemy();
+    // //delay(1000);
+    // uploadDetect();
     
-}
-
-void alignment(){
-
-}
-
-void uploadDetect(){
-    last_detect_left = analogRead(DETECTOR_LEFT_A0);
-    last_detect_right = analogRead(DETECTOR_RIGHT_A1);
+    // if(millis()>20000){
+    //     for(;;){}
+    // }
+    //test();
+    //alignment();
+    //delay(1000);
+    searchForEnemy();
+    // turnLeftPosition(TURNLEFT90);
+    // delay(1000);
 }
