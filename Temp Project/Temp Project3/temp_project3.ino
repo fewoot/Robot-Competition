@@ -81,35 +81,6 @@
 #define DECCEL2 655360
 
 
-//定义上一次检测到物体的方向
-#define DETECT_LAST_LEFT 1
-#define DETECT_LAST_RIGHT 2
-#define DETECT_LAST_FRONT 3
-
-//定义左前转向位置
-#define TURN_LEFT_SIDE 215
-//定义右前转向位置
-#define TURN_RIGHT_SIDE 230
-
-//定义左前补角转向位置
-#define TURN_LEFT_SIDE_COMPLEMENTARY 280
-//定义右前补角转向位置
-#define TURN_RIGHT_SIDE_COMPLEMENTARY 275
-
-//定义计时是否已经开始
-#define COMPLEMENTARY_TIME_YES 1
-#define COMPLEMENTARY_TIME_NO 0
-//定义计时多久后判定丢失目标
-#define COMPLEMENTARY_TIME_DELAY 200
-
-//定义上一次物体位置变量
-int last_detect_side = 0;
-//定义是否已经开始计时变量
-int complementary_time_judge = COMPLEMENTARY_TIME_NO;
-//定义计时变量
-long complementary_time = 0;
-
-
 // //定义对方位置
 // #define ON_LEFT 1
 // #define ON_LEFT_FRONT 2
@@ -131,9 +102,7 @@ long complementary_time = 0;
 #define DETECTOR_BACK_A3 A3
 #define DETECTOR_LEFT_A0 A0
 #define DETECTOR_RIGHT_A1 A1
-#define DETECTOR_LEFT_FRONT 7
-#define DETECTOR_FRONT 6
-#define DETECTOR_RIGHT_FRONT 5
+
 // #define DETECTOR1 5
 // #define DETECTOR2 A3
 // #define DETECTOR3 6
@@ -985,62 +954,14 @@ void Println(){
     delay(1000);
 }
 
-/**
- * 侧前方检测敌方函数
- * 会向那个方向进行转向
- * 刷新上一次物体方向
- * 进入前方探测器警戒模式
- */
-void detectEnemySide(){
-    if(digitalRead(DETECTOR_LEFT_FRONT)==DETECT_YES){
-        turnLeftPosition(TURN_LEFT_SIDE);
-        last_detect_side = DETECT_LAST_LEFT;
-        detectEnemyFrontAlert();
-    }else if(digitalRead(DETECTOR_RIGHT_FRONT)==DETECT_YES){
-        turnRightPosition(TURN_RIGHT_SIDE);
-        last_detect_side = DETECT_LAST_RIGHT;
-        detectEnemyFrontAlert();
-    }
-}
-
-//平常前探测器探测函数
-void detectEnemyFront(){
-    if(digitalRead(DETECTOR_FRONT)==DETECT_YES){
-        stop();
-    }
-}
-
-/**
- * 前探测器警戒函数，一旦丢失目标，先开始计时，如果超过一定值就判定丢失目标
- */
-void detectEnemyFrontAlert(){
-    if(digitalRead(DETECTOR_FRONT)==DETECT_YES){
-        stop();
-    }else{
-        if(complementary_time_judge==COMPLEMENTARY_TIME_NO){
-            complementary_time = millis();
-        }
-        if(millis()-complementary_time>COMPLEMENTARY_TIME_DELAY){
-            complementary();
-        }
-    }
-}
-
-/**
- * 转角补偿函数
- */
-void complementary(){
-    if(last_detect_side==DETECT_LAST_LEFT){
-        turnLeftPosition(TURN_LEFT_SIDE_COMPLEMENTARY);
-    }else if(last_detect_side==DETECT_LAST_RIGHT){
-        turnRightPosition(TURN_RIGHT_SIDE_COMPLEMENTARY);
-    }
-}
+//void detectEnemySideOrFront(){
+    //detectEnemySide();
+    //detectEnemyFront();
+//}
 
 //搜索敌人总函数
 void searchForEnemy(){
-    detectEnemySide();
-    detectEnemyFront();
+    //detectEnemySide();
     //detectEnemyFront();
     detectEnemy();//down
     alignment();//down
@@ -1359,51 +1280,6 @@ void loop(){
     //test();
     //alignment();
     //delay(1000);
-    searchForEnemy();
-    // turnLeftPosition(TURN_LEFT_SIDE);
-    // // turnRightPosition(TURN_RIGHT_SIDE+30);
-    // delay(3000);
-    // turnLeftPosition(TURN_LEFT_SIDE_COMPLEMENTARY+30);
-    // delay(6000);
-    // turnLeftPosition(TURN_LEFT_SIDE);
-    // // turnRightPosition(TURN_RIGHT_SIDE+30);
-    // delay(3000);
-    // turnLeftPosition(TURN_LEFT_SIDE_COMPLEMENTARY+40);
-    // delay(6000);
-    // turnLeftPosition(TURN_LEFT_SIDE);
-    // // turnRightPosition(TURN_RIGHT_SIDE+30);
-    // delay(3000);
-    // turnLeftPosition(TURN_LEFT_SIDE_COMPLEMENTARY+50);
-    // delay(6000);
-    // turnLeftPosition(TURN_LEFT_SIDE);
-    // // // turnRightPosition(TURN_RIGHT_SIDE+30);
-    // // delay(3000);
-    // // turnLeftPosition(TURN_LEFT_SIDE_COMPLEMENTARY+60);
-    // // delay(6000);
-    // turnRightPosition(TURN_RIGHT_SIDE);
-    // //turnLeftPosition(TURN_LEFT_SIDE+40);
-    // delay(3000);
-    // turnRightPosition(TURN_RIGHT_SIDE_COMPLEMENTARY-20);
-    // delay(6000);
-    // turnRightPosition(TURN_RIGHT_SIDE);
-    // //turnLeftPosition(TURN_LEFT_SIDE+40);
-    // delay(3000);
-    // turnRightPosition(TURN_RIGHT_SIDE_COMPLEMENTARY-10);
-    // delay(6000);
-    // turnRightPosition(TURN_RIGHT_SIDE);
-    // //turnLeftPosition(TURN_LEFT_SIDE+40);
-    // delay(3000);
-    // turnRightPosition(TURN_RIGHT_SIDE_COMPLEMENTARY);
-    // delay(6000);
-    // turnRightPosition(TURN_RIGHT_SIDE);
-    // //turnLeftPosition(TURN_LEFT_SIDE+40);
-    // delay(3000);
-    // turnRightPosition(TURN_RIGHT_SIDE_COMPLEMENTARY+10);
-    // delay(6000);
-    // // turnRightPosition(TURN_RIGHT_SIDE+50);
-    // // //turnLeftPosition(TURN_LEFT_SIDE+50);
-    // delay(3000);
-    // turnRightPosition(TURN_RIGHT_SIDE+60);
-    // //turnLeftPosition(TURN_LEFT_SIDE+60);
-    // delay(3000);
+    //searchForEnemy();
+    detectEnemyFront();
 }

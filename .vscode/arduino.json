@@ -1,5 +1,5 @@
 {
     "board": "arduino:avr:uno",
-    "sketch": "Temp Project\\Temp Project3\\temp_project3.ino",
+    "sketch": "Temp Project\\Temp Project5\\temp_project5.ino",
     "port": "COM8"
 }
