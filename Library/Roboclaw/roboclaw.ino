@@ -80,6 +80,9 @@ roboclaw.SpeedAccelDistanceM1M2(address, accel, speed1, distance1, speed2, dista
 roboclaw.SpeedAccelDeccelPositionM1(address, accel, speed, deccel, position, flag);
 roboclaw.SpeedAccelDeccelPositionM2(address, accel, speed, deccel, position, flag);
 roboclaw.SpeedAccelDeccelPositionM1M2(address, accel1, speed1, deccel1, position1, accel2, speed2, deccel2, position2, flag);
+roboclaw.ReadPWMs( address, &pwm1, &pwm2)
+
+
 
 /**
  * 这个函数可以读取两个电机的位置信息和速度信息

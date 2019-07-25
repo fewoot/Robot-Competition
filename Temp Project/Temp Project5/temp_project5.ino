@@ -128,6 +128,8 @@
 //微小前进速度（未使用）
 #define GO_SLOW_SPEED 8
 
+#define GO_SPEED_ATTACK 15
+
 //微小角度转向位置（使用）
 #define TURN_SLOW_POSITION 25
 
@@ -298,7 +300,7 @@ void turnRight(int speed){
 //直行,0-127
 void gofront(int speed){
     roboclaw.ForwardM1(ADDRESS, speed);
-    roboclaw.ForwardM2(ADDRESS, speed);
+    roboclaw.ForwardM2(ADDRESS, speed-1);
 }
 //向左转,0-127
 void goleft(int speed,int level){
@@ -1174,12 +1176,37 @@ void setup(){
     uploadDetect();
     // last_detect_left = 400;
     // last_detect_right = 400;
+    
+}
+
+void PrepareforAttack(){
+    int16_t pwm1;
+    int16_t pwm2;
+    stop_stuck();
+    roboclaw.ReadPWMs(ADDRESS,pwm1,pwm2);
+    if(pwm1>1000 && pwm2>1000){
+        do{
+          attack();  
+        }while(1);
+        
+    }
+}
+
+void attack(){
+    gofront(GO_SPEED_ATTACK);
 
 }
 
+//两者平时大概在-500到+500左右，受到推力后大概在2000+
+
 void loop(){
     //test();
-    stop_stuck();
+    PrepareforAttack();
+    // Serial.print("pwm1:");
+    // Serial.print(pwm1);
+    // Serial.print("    pwm2:");
+    // Serial.println(pwm2);
+    // delay(1000);
     // //     //time_begin(onleft);
     // //     //turn
     //test();
