@@ -142,6 +142,9 @@
 //对正时两个探测器数值差异范围
 #define OffSET_THRESHOLD 10
 
+
+#define GRAYSCALE_SENSOR_PIN 9
+
 /**
  * 定义检测到物体没有
  */
@@ -178,12 +181,18 @@
 
 #define MINI_CHANG 150
 
+#define ENABLE_TO_TIMING 1
+#define NOT_ENABLE_TO_TIMING 0
+int timing = NOT_ENABLE_TO_TIMING;
+
 //定义上一次物体位置变量
 int last_detect_side = DETECT_LAST_FRONT;
 //定义是否已经开始计时变量
 int complementary_time_judge = COMPLEMENTARY_TIME_NO;
 //定义计时变量
 long complementary_time = 0;
+
+int times_of_turns = 0;
 
 
 //记录无敌人时，左侧边界的距离
@@ -1130,7 +1139,7 @@ void alignmentOnlyOnce(){
 void alignmentMoreStringent(){
     if(analogRead(DETECTOR_BACK_A2)-analogRead(DETECTOR_BACK_A3)>OffSET_THRESHOLD){
         turnLeftPosition(TURN_SLOW_POSITION);
-    }else if(analogRead(DETECTOR_BACK_A3)-analogRead(DETECTOR_BACK_A2)>OffSET_THRESHOLD){
+    }else if(analogRead(DETECTOR_BACK_A3)-analogRead(DETECTOR_BACK_A2)-5>OffSET_THRESHOLD){
         turnRightPosition(TURN_SLOW_POSITION);
     }else{
         //baseline();
@@ -1185,9 +1194,11 @@ void PrepareforAttack(){
     stop_stuck();
     roboclaw.ReadPWMs(ADDRESS,pwm1,pwm2);
     if(pwm1>1000 && pwm2>1000){
-        do{
-          attack();  
-        }while(1);
+        //do{
+        attack();  
+        delay(4000);
+        stop();
+        //}while(1);
         
     }
 }
@@ -1199,9 +1210,12 @@ void attack(){
 
 //两者平时大概在-500到+500左右，受到推力后大概在2000+
 
+
 void loop(){
     //test();
-    PrepareforAttack();
+    //PrepareforAttack();
+    // Serial.println(digitalRead(GRAYSCALE_SENSOR_PIN));
+    // delay(1000);
     // Serial.print("pwm1:");
     // Serial.print(pwm1);
     // Serial.print("    pwm2:");
@@ -1212,7 +1226,7 @@ void loop(){
     //test();
     //alignment();
     //delay(1000);
-    //searchForEnemy();
+    searchForEnemy();
     //test();
     // turnRightPosition(TURN_RIGHT_SIDE);
     // delay(1000);
@@ -1240,6 +1254,8 @@ void detectEnemySide(){
         last_detect_side = DETECT_LAST_LEFT;
         complementary_time_judge = COMPLEMENTARY_TIME_NO;
         detect_if_detected = DETECT_IF_DETECTED_YES;
+        timing = ENABLE_TO_TIMING;
+        times_of_turns++;
         //delay(100);
         //detectEnemyFrontAlert();
     }else if(digitalRead(DETECTOR_RIGHT_FRONT)==DETECT_YES){
@@ -1247,12 +1263,51 @@ void detectEnemySide(){
         last_detect_side = DETECT_LAST_RIGHT;
         complementary_time_judge = COMPLEMENTARY_TIME_NO;
         detect_if_detected = DETECT_IF_DETECTED_YES;
+        timing = ENABLE_TO_TIMING;
+        times_of_turns++;
         //delay(100);
         //detectEnemyFrontAlert();
     }
 }
 // long detect_time = 0;
 // int detect_time_if_begun = COMPLEMENTARY_TIME_NO;
+
+
+// void detectEnemyFrontAlert(){
+//     while (digitalRead(DETECTOR_FRONT)==DETECT_YES){
+//         stop();
+//     }
+//     if(digitalRead(DETECTOR_FRONT)==DETECT_NO && timing==ENABLE_TO_TIMING){
+//         if(complementary_time_judge==COMPLEMENTARY_TIME_NO){
+//             complementary_time = millis();
+//             complementary_time_judge = COMPLEMENTARY_TIME_YES;
+//         }
+//         if(millis()-complementary_time>COMPLEMENTARY_TIME_DELAY){
+//             complementary_time_judge = COMPLEMENTARY_TIME_NO;
+//             detect_if_detected = DETECT_IF_DETECTED_NO;
+//             timing = NOT_ENABLE_TO_TIMING;
+//             //uploadDetect();
+//             //return;
+//             switch (last_detect_side){
+//             case DETECT_LAST_FRONT:
+//                 return;
+//                 break;
+//             case DETECT_LAST_LEFT:
+//                 turnLeftPosition(TURN_LEFT_SIDE_COMPLEMENTARY);
+//                 last_detect_side = DETECT_LAST_FRONT;
+//                 uploadDetect();
+//                 return;
+//                 break;
+//             case DETECT_LAST_RIGHT:
+//                 turnRightPosition(TURN_RIGHT_SIDE_COMPLEMENTARY);
+//                 last_detect_side = DETECT_LAST_FRONT;
+//                 uploadDetect();
+//                 return;
+//                 break;
+//             }
+//         }
+//     }
+// }
 
 //平常前探测器探测函数
 void detectEnemyFront(){
@@ -1263,10 +1318,10 @@ void detectEnemyFront(){
     //     //for(;;){
     // }
     while (digitalRead(DETECTOR_FRONT)==DETECT_YES){
-        stop();
+        //stop();
+        PrepareforAttack();
     }
-    
-    if(digitalRead(DETECTOR_FRONT)==DETECT_NO){
+    if(digitalRead(DETECTOR_FRONT)==DETECT_NO && timing==ENABLE_TO_TIMING){
         if(complementary_time_judge==COMPLEMENTARY_TIME_NO){
             complementary_time = millis();
             complementary_time_judge = COMPLEMENTARY_TIME_YES;
@@ -1274,24 +1329,35 @@ void detectEnemyFront(){
         if(millis()-complementary_time>COMPLEMENTARY_TIME_DELAY){
             complementary_time_judge = COMPLEMENTARY_TIME_NO;
             detect_if_detected = DETECT_IF_DETECTED_NO;
+            timing = NOT_ENABLE_TO_TIMING;
             //uploadDetect();
             //return;
-            switch (last_detect_side){
-            case DETECT_LAST_FRONT:
-                return;
-                break;
-            case DETECT_LAST_LEFT:
-                turnLeftPosition(TURN_LEFT_SIDE_COMPLEMENTARY);
+            if(times_of_turns%2==0){
                 last_detect_side = DETECT_LAST_FRONT;
                 uploadDetect();
+                times_of_turns = 0;
                 return;
-                break;
-            case DETECT_LAST_RIGHT:
-                turnRightPosition(TURN_RIGHT_SIDE_COMPLEMENTARY);
-                last_detect_side = DETECT_LAST_FRONT;
-                uploadDetect();
-                return;
-                break;
+            }else{
+                switch (last_detect_side){
+                // case DETECT_LAST_FRONT:
+                //     return;
+                //     break;
+                case DETECT_LAST_LEFT:
+                    turnLeftPosition(TURN_LEFT_SIDE_COMPLEMENTARY);
+                    last_detect_side = DETECT_LAST_FRONT;
+                    uploadDetect();
+                    times_of_turns = 0;
+                    return;
+                    //break;
+                case DETECT_LAST_RIGHT:
+                    turnRightPosition(TURN_RIGHT_SIDE_COMPLEMENTARY);
+                    last_detect_side = DETECT_LAST_FRONT;
+                    uploadDetect();
+                    times_of_turns = 0;
+                    return;
+                    //break;
+                }
+                //times_of_turns = 0;
             }
         }
     }
@@ -1299,26 +1365,26 @@ void detectEnemyFront(){
     
 }
 
-/**
- * 前探测器警戒函数，一旦丢失目标，先开始计时，如果超过一定值就判定丢失目标
- */
-void detectEnemyFrontAlert(){
-    delay(200);
-    if(digitalRead(DETECTOR_FRONT)==DETECT_YES){
-        stop();
-    }else{
-        //if(complementary_time_judge==COMPLEMENTARY_TIME_NO){
-        complementary_time = millis();
-        //}
-        for(;;){
-            if(millis()-complementary_time>COMPLEMENTARY_TIME_DELAY){
-                complementary();
-                return;
-            } 
-        }
+// /**
+//  * 前探测器警戒函数，一旦丢失目标，先开始计时，如果超过一定值就判定丢失目标
+//  */
+// void detectEnemyFrontAlert(){
+//     delay(200);
+//     if(digitalRead(DETECTOR_FRONT)==DETECT_YES){
+//         stop();
+//     }else{
+//         //if(complementary_time_judge==COMPLEMENTARY_TIME_NO){
+//         complementary_time = millis();
+//         //}
+//         for(;;){
+//             if(millis()-complementary_time>COMPLEMENTARY_TIME_DELAY){
+//                 complementary();
+//                 return;
+//             } 
+//         }
         
-    }
-}
+//     }
+// }
 
 /**
  * 转角补偿函数
