@@ -285,8 +285,6 @@ void backOnTheStage(){
     roboclaw.BackwardM2(ADDRESS,20);
 }
 
-
-
 //后退函数，后退距离为台子的垂直距离小一点
 void goBack(){
     roboclaw.ResetEncoders(ADDRESS);
@@ -388,12 +386,12 @@ void turnRightPosition(int single){
         }
     }
 }
+
 void stop(){
     roboclaw.ForwardM1(ADDRESS, 0);
     //roboclaw.ForwardM1(address,speed);
     roboclaw.ForwardM2(ADDRESS, 0);
 }
-
 
 //向左转位置函数
 void turnLeftPosition(int single){
