@@ -8,6 +8,10 @@
  * 记录：后侧两个最小是345左右，侧面也是345左右，当掉落以后，侧面最大是270-285左右，最近是198左右，后面贴墙左是189，右是179
  */
 /**
+ * 记录，将一侧的台子分为3部分，左侧数据：500-510，右侧数据：705-715。
+ */
+
+/**
  * 所需的库
  */
 #include <SoftwareSerial.h>
@@ -173,6 +177,12 @@
 //定义不能进入警戒状态
 #define NOT_ENABLE_TO_TIMING 0
 
+//定义180°旋转
+#define TURN_LEFT_180 1060
+
+//定义上台时要用的速度
+#define ON_STAGE_SPEED 15
+
 //初始化是否可以进入警戒状态
 int timing = NOT_ENABLE_TO_TIMING;
 
@@ -201,6 +211,7 @@ int alignment_only_once = 0;
 //定义前方是否检测到物体的变量
 int detect_if_detected = DETECT_IF_DETECTED_NO;
 
+//更新时的暂存变量
 int temp_analogRead_A1 = 0;
 int temp_analogRead_A0 = 0;
 
@@ -254,6 +265,28 @@ RoboClaw roboclaw = RoboClaw(&serial,TIME_OUT);
 // };
 
 
+void baseline(){
+    pinMode(13,OUTPUT);
+    digitalWrite(13,HIGH);
+    delay(1000);
+    digitalWrite(13,LOW);
+    delay(100);
+    digitalWrite(13,HIGH);
+    delay(100);
+    digitalWrite(13,LOW);
+    delay(100);
+}
+
+/**
+ * 后退函数，为了后退抵在边界墙上对齐用
+ */
+void backOnTheStage(){
+    roboclaw.BackwardM1(ADDRESS,20);
+    roboclaw.BackwardM2(ADDRESS,20);
+}
+
+
+
 //后退函数，后退距离为台子的垂直距离小一点
 void goBack(){
     roboclaw.ResetEncoders(ADDRESS);
@@ -301,7 +334,9 @@ void goBack(){
     // }
 }
 
-
+/**
+ * 对齐函数，在每一次对齐后都会判断小车位置
+ */
 void alignmentMoreStringent(){
     if(analogRead(DETECTOR_BACK_A2)+analogRead(DETECTOR_BACK_A3)>=1700){
         turnLeftPosition(2*TURN_SLOW_POSITION);
@@ -398,6 +433,7 @@ void goFrontPosition(){
     delay(200);
 }
 
+//更新函数，会忽略无信号
 void uploadDetect(){
     //delay(100); temp_analogRead_A1-last_detect_right<ABNORMAL_INCREASE && temp_analogRead_A0-last_detect_left<ABNORMAL_INCREASE
     temp_analogRead_A1 = analogRead(DETECTOR_RIGHT_A1);
@@ -414,48 +450,178 @@ void uploadDetect(){
     // last_detect_right = analogRead(DETECTOR_RIGHT_A1);
 }
 
+/**
+ * 台下动作，此时已经判断摔下台了
+ */
 void judgmentUnderTheStage(){
     //pinMode(13,OUTPUT);
     digitalWrite(13,HIGH);
-    goFrontPosition();
-    goFrontPosition();
-    goFrontPosition();
-    goFrontPosition();
-    while(analogRead(DETECTOR_BACK_A2)-analogRead(DETECTOR_BACK_A3)>40 || analogRead(DETECTOR_BACK_A2)+analogRead(DETECTOR_BACK_A3)>550){
-        turnLeftPosition(2*TURN_SLOW_POSITION);
+    // goFrontPosition();
+    // goFrontPosition();
+    // goFrontPosition();
+    // goFrontPosition();
+    while(analogRead(DETECTOR_BACK_A2)-analogRead(DETECTOR_BACK_A3)>20 || analogRead(DETECTOR_BACK_A2)+analogRead(DETECTOR_BACK_A3)>550){
+        turnLeftPosition(3*TURN_SLOW_POSITION);
+        if(analogRead(DETECTOR_LEFT_A0)<180){
+            // turnLeftPosition(4*TURN_SLOW_POSITION);
+            // goFrontPosition();
+            GoStageAssistsTheRightTurn();
+        }
     }
+    // while(analogRead(DETECTOR_BACK_A2)-analogRead(DETECTOR_BACK_A3)>2 && analogRead(DETECTOR_BACK_A2)>analogRead(DETECTOR_BACK_A3)){
+    //     turnLeftPosition(TURN_SLOW_POSITION);
+    // }
     //goBack(GO_BAKC_SPEED)
-    //backOnTheStage();
-    baseline();
-    delay(10000);
+    backOnTheStage();
+    delay(1500);
+    getReadyToGoOnStage();
+    changeThePositionOnStage();
+    //delay(1500);
+    //stop();
+    while(1){
+       baseline(); 
+    }
+    //
+    //delay(10000);
 }
 
-void baseline(){
-    pinMode(13,OUTPUT);
-    digitalWrite(13,HIGH);
-    delay(1000);
-    digitalWrite(13,LOW);
-    delay(100);
-    digitalWrite(13,HIGH);
-    delay(100);
-    digitalWrite(13,LOW);
-    delay(100);
+/**
+ * 对齐后改变上台位置
+ */
+void changeThePositionOnStage(){
+    if(analogRead(DETECTOR_LEFT_A0)<600){
+        turnRightPosition(TURNRIGHT90);
+        delay(100);
+        OnStagePositionMove(0,ON_STAGE_SPEED);
+        delay(100);
+        //delay(2000);
+        turnRightPosition(TURNRIGHT90);
+    }else{
+        turnLeftPosition(TURNLEFT90);
+        delay(100);
+        OnStagePositionMove(1,ON_STAGE_SPEED);
+        delay(100);
+        //delay(2000);
+        turnLeftPosition(TURNLEFT90);
+    }
+    
 }
 
+/**
+ * 为了改变上台位置，向前走
+ */
+void OnStagePositionMove(int which_side,int speed){
+    //int last_deistance_from_wall;
+    if(which_side==0){
+        int time_go_along_with_wall = millis();
+        do{
+        //last_deistance_from_wall = analogRead(DETECTOR_LEFT_A0);
+        
+        //delay(200);
+            if(analogRead(DETECTOR_LEFT_A0)>238){
+                roboclaw.ForwardM1(ADDRESS, speed);
+                roboclaw.ForwardM2(ADDRESS, speed+13);
+            }else if(analogRead(DETECTOR_LEFT_A0)<200){
+                roboclaw.ForwardM1(ADDRESS, speed+10);
+                roboclaw.ForwardM2(ADDRESS, speed);
+            }else{
+                roboclaw.ForwardM1(ADDRESS, speed);
+                roboclaw.ForwardM2(ADDRESS, speed);
+            }
+        //delay(200);
+        }while(millis()-time_go_along_with_wall<2800);
+    }else{
+            int time_go_along_with_wall = millis();
+        do{
+            //last_deistance_from_wall = analogRead(DETECTOR_LEFT_A0);
+            
+            //delay(200);
+            if(analogRead(DETECTOR_RIGHT_A1)>238){
+                roboclaw.ForwardM1(ADDRESS, speed+13);
+                roboclaw.ForwardM2(ADDRESS, speed);
+            }else if(analogRead(DETECTOR_RIGHT_A1)<200){
+                roboclaw.ForwardM1(ADDRESS, speed);
+                roboclaw.ForwardM2(ADDRESS, speed+13);
+            }else{
+                roboclaw.ForwardM1(ADDRESS, speed);
+                roboclaw.ForwardM2(ADDRESS, speed);
+            }
+            //delay(200);
+        }while(millis()-time_go_along_with_wall<2800);
+    }
+    
+    
+    // roboclaw.ResetEncoders(ADDRESS);
+    // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2000, DECCEL1, position, ACCEL2, 2000, DECCEL2, position, 1);
+}
+
+/**
+ * 为了上台向后退，未用
+ */
+void OnStagePositionBack(int speed){
+    //int last_deistance_from_wall;
+    int time_go_along_with_wall = millis();
+    do{
+        //last_deistance_from_wall = analogRead(DETECTOR_LEFT_A0);
+        
+        //delay(200);
+        if(analogRead(DETECTOR_LEFT_A0)>225){
+            roboclaw.BackwardM1(ADDRESS, speed);
+            roboclaw.BackwardM2(ADDRESS, speed+10);
+        }else if(analogRead(DETECTOR_LEFT_A0)<200){
+            roboclaw.BackwardM1(ADDRESS, speed+10);
+            roboclaw.BackwardM2(ADDRESS, speed);
+        }else{
+            roboclaw.BackwardM1(ADDRESS, speed);
+            roboclaw.BackwardM2(ADDRESS, speed);
+        }
+        //delay(200);
+    }while(millis()-time_go_along_with_wall<10000);
+    
+    // roboclaw.ResetEncoders(ADDRESS);
+    // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2000, DECCEL1, position, ACCEL2, 2000, DECCEL2, position, 1);
+}
+
+/**
+ * 对齐边界墙后向前走一段距离
+ */
+void getReadyToGoOnStage(){
+    // goFrontPosition();
+    // goFrontPosition();
+    // goFrontPosition();
+    roboclaw.ForwardM1(ADDRESS, 17);
+    roboclaw.ForwardM2(ADDRESS, 17);
+    delay(600);
+    stop();
+    delay(100);
+    //turnLeftPosition(TURNLEFT90);
+}
+
+/**
+ * 转向辅助函数，用于防止刀刃插到台子上
+ */
+void GoStageAssistsTheRightTurn(){
+    // roboclaw.ForwardM1(ADDRESS, 30);
+    // roboclaw.ForwardM2(ADDRESS, 10);
+    roboclaw.ResetEncoders(ADDRESS);
+    roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, 300, ACCEL2, 8000, DECCEL2, -300, 1);
+    delay(200);
+    roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2000, DECCEL1, 600, ACCEL2, 2000, DECCEL2, 200, 1);
+    delay(200);
+    //stop();
+}
+
+/**
+ * 判断在台上还是在台下
+ */
 void judgeWhetherOnStageOrUnderTheStage(){
-    if(temp_analogRead_A0+temp_analogRead_A1<580){
+    if(temp_analogRead_A0+temp_analogRead_A1<580 || analogRead(DETECTOR_BACK_A2)<300){
         judgmentUnderTheStage();
     }else{
         //pinMode(13,OUTPUT);
         digitalWrite(13,LOW);
     }
 }
-
-void backOnTheStage(){
-    roboclaw.BackwardM1(ADDRESS,10);
-    roboclaw.BackwardM2(ADDRESS,10);
-}
-
 
 
 //原始函数：
@@ -486,19 +652,32 @@ void setup(){
 
 
 void loop(){
-    //alignmentMoreStringent();
+    // turnLeftPosition(TURN_LEFT_180);
+    // // getReadyToGoOnStage();
+    // delay(10000);
+    alignmentMoreStringent();
+    // OnStagePositionMove(15);
+    // OnStagePositionBack(15);
+    // delay(10000);
+    // Serial.println(analogRead(DETECTOR_LEFT_A0));
+    // delay(1000);
+    // GoStageAssistsTheRightTurn();
+    // delay(10000);
     //uploadDetect();
     //judgeWhetherOnStageOrUnderTheStage();
     //uploadDetect();
-    Serial.print("left:");
-    Serial.print(analogRead(DETECTOR_LEFT_A0));
-    Serial.print("     right:");
-    Serial.print(analogRead(DETECTOR_RIGHT_A1));
-    Serial.print("     back_left");
-    Serial.print(analogRead(DETECTOR_BACK_A2));
-    Serial.print("     back_right:");
-    Serial.println(analogRead(DETECTOR_BACK_A3));
-    delay(1000);
+    // changeThePositionOnStage();
+    // delay(10000);
+    // Serial.print("left:");
+    // Serial.print(analogRead(DETECTOR_LEFT_A0));
+    // Serial.print("     right:");
+    // Serial.println(analogRead(DETECTOR_RIGHT_A1));
+    // delay(1000);
+    // Serial.print("     back_left");
+    // Serial.print(analogRead(DETECTOR_BACK_A2));
+    // Serial.print("     back_right:");
+    // Serial.println(analogRead(DETECTOR_BACK_A3));
+    // delay(1000);
     //test();
     //PrepareforAttack();
     // Serial.println(digitalRead(GRAYSCALE_SENSOR_PIN));
