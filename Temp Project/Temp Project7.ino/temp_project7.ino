@@ -1672,7 +1672,6 @@ void setup(){
     uploadDetect();
     // last_detect_left = 400;
     // last_detect_right = 400;
-    
 }
 
 //两者平时大概在-500到+500左右，受到推力后大概在2000+
