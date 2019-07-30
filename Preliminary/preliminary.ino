@@ -1,78 +1,78 @@
 /**
- * ��7�׶Σ�̨�Ϻ�̨����������
+ * 第7阶段：台上和台下联合起来
  */
 
 /**
- * ��¼��
+ * 记录：
  * 1-343   A
  * 2-350   A
- * 3-�̶�65mm
- * 4-�̶�90mm
- * 5-�̶�65mm
+ * 3-固定65mm
+ * 4-固定90mm
+ * 5-固定65mm
  * 6-333   A
  * 7-317   A
  */
 
 /**
- * תȦ��¼��
- * ������ʱ����
- * ��ת��127�ٶȣ�316-317ms�����90�㣬��ʱ316ms����
- * ����λ����Ϣ
+ * 转圈记录：
+ * 依靠延时运行
+ * 左转，127速度，316-317ms，大概90°，用时316ms以内
+ * 依靠位置信息
  */
 /**
- * 30�ٶȣ�5s��3.75Ȧ��30*5��3.75=40��1Ȧ��0.25Ȧ=10(���ٶȡ�ʱ��/msΪ10)
+ * 30速度，5s，3.75圈，30*5：3.75=40：1圈，0.25圈=10(即速度×时间/ms为10)
  */
 
 /**
- * ����Ŀ�
+ * 所需的库
  */
 #include <SoftwareSerial.h>
 #include <RoboClaw.h>
 #include <EEPROM.h>
 
-//��ת90��
+//左转90°
 #define TURNLEFT90 530
-//��ת������
+//左转——大
 #define TURNLEFT_BIG 160
-//��ת����С
+//左转——小
 #define TURNLEFT_SMALL 140
-//��ת��90��
+//右转—90°
 #define TURNRIGHT90 530
-//��ת������
+//右转——大
 #define TURNRIGHT_BIG 175
-//��ת����С
+//右转——小
 #define TURNRIGHT_SMALL 160
 
-//λ�����
+//位置误差
 #define ERROR_POSITION 7
 
-//�����ԣ�900����ENDֵ��һȦ
+//经测试，900左右END值是一圈
 #define ONE_ROUND 900
 
-// //������־�Ƿ��Ѿ���ʼ
+// //定义日志是否已经开始
 // #define TIME_YES 1
 // #define TIME_NO 0
 
-//����������ģ������
+//定义电机驱动模块引脚
 #define DRIVER_S1 11
 #define DRIVER_S2 10
 
-//�����쳣����ֵ
+//定义异常增长值
 #define ABNORMAL_INCREASE 300
 
-// //����̽�����
+// //定义探测距离
 // #define DETECT_DISTANCE 250
 
 /**
- * �趨һЩ�ʹ��������йصĲ���
+ * 设定一些和传输命令有关的参数
  */
 #define ADDRESS 0x80
 
 
-//���ó�ʱֵ
+//设置超时值
 #define TIME_OUT 10000
 
-//���ٶ����ã�Ĭ��
+//加速度设置，默认
 #define ACCEL 655360
 #define DECCEL 655360
 #define ACCEL1 655360
@@ -81,7 +81,7 @@
 #define DECCEL2 655360
 
 
-// //����Է�λ��
+// //定义对方位置
 // #define ON_LEFT 1
 // #define ON_LEFT_FRONT 2
 // #define ON_FRONT 3
@@ -91,12 +91,12 @@
 // #define ON_RIGHT_FRONT_MORE 8
 // #define ON_NOTHING 6
 
-//�����н��ٶ�
+//定义行进速度
 // #define GO_SPEED_FAST 25
 // #define GO_SPEED_SLOW 10
 
 /**
- * ���崫����
+ * 定义传感器
  */
 #define DETECTOR_BACK_A2 A2
 #define DETECTOR_BACK_A3 A3
@@ -115,223 +115,223 @@
 // #define DETECTOR6 7
 // #define DETECTOR7 A3
 
-//����ת��״̬��Ŀǰδʹ�ã�
+//定义转向状态（目前未使用）
 #define READY_TO_TURN_RIGHT 1
 #define READY_TO_TURN_LEFT 0
 #define READY_TO_GO_FRONT 2
 
-//ת�����ֵ��δʹ�ã�
+//转向误差值（未使用）
 #define TURN_ERROR_VALUE 20
 
-//΢С�Ƕ�ת���ٶȣ�δʹ�ã�
+//微小角度转向速度（未使用）
 #define TURN_SLOW_SPEED 9
 
-//΢Сǰ���ٶȣ�δʹ�ã�
+//微小前进速度（未使用）
 #define GO_SLOW_SPEED 8
 
 #define GO_SPEED_ATTACK 15
 
-//΢С�Ƕ�ת��λ�ã�ʹ�ã�
+//微小角度转向位置（使用）
 #define TURN_SLOW_POSITION 25
 
-//΢Сǰ��λ�ã�ʹ�ã�
+//微小前进位置（使用）
 #define GO_SLOW_POSITION 25
 
-//��С���仯����������90��ת��ʱ�ж��Ƿ�������
+//最小检测变化，用于两侧90°转向时判断是否有物体
 #define MIN_DETECT_CHANGE 177
 
-//����ʱ����̽������ֵ���췶Χ
+//对正时两个探测器数值差异范围
 #define OffSET_THRESHOLD 10
 
-//���崫��ֵno_signalֵ
+//定义传输值no_signal值
 #define NO_SIGNAL_VALUE 870
 
 /**
- * �����⵽����û��
+ * 定义检测到物体没有
  */
 #define DETECT_YES 0
 #define DETECT_NO 1
 
-//������һ�μ�⵽����ķ���
+//定义上一次检测到物体的方向
 #define DETECT_LAST_LEFT 1
 #define DETECT_LAST_RIGHT 2
 #define DETECT_LAST_FRONT 3
 
-//������ǰת��λ��
+//定义左前转向位置
 #define TURN_LEFT_SIDE 210
-//������ǰת��λ��
+//定义右前转向位置
 #define TURN_RIGHT_SIDE 200
 
-//������ǰ����ת��λ��
+//定义左前补角转向位置
 #define TURN_LEFT_SIDE_COMPLEMENTARY 210
-//������ǰ����ת��λ��
+//定义右前补角转向位置
 #define TURN_RIGHT_SIDE_COMPLEMENTARY 220
 
-//�����ʱ�Ƿ��Ѿ���ʼ
+//定义计时是否已经开始
 #define COMPLEMENTARY_TIME_YES 1
 #define COMPLEMENTARY_TIME_NO 0
-//�����ʱ��ú��ж���ʧĿ��
+//定义计时多久后判定丢失目标
 #define COMPLEMENTARY_TIME_DELAY 400
 
-//�ж�ǰ���Ƿ��Ѿ���⵽����
+//判断前方是否已经检测到物体
 #define DETECT_IF_DETECTED_YES 1
 #define DETECT_IF_DETECTED_NO 0
 
-//��������ٶ�
+//定义后退速度
 #define GO_BAKC_SPEED 50
 
-//���嵱�������ͻȻ����ʱ��ֵ
+//定义当两侧距离突然剧增时阈值
 #define MINI_CHANGE 150
 
-//������Կ�ʼ���뾯��״̬
+//定义可以开始进入警戒状态
 #define ENABLE_TO_TIMING 1
 
-//���岻�ܽ��뾯��״̬
+//定义不能进入警戒状态
 #define NOT_ENABLE_TO_TIMING 0
 
-//����180����ת
+//定义180°旋转
 #define TURN_LEFT_180 1060
 
-//������̨ʱҪ�õ��ٶ�
+//定义上台时要用的速度
 #define ON_STAGE_SPEED 15
 
-//��ʼ���Ƿ���Խ��뾯��״̬
+//初始化是否可以进入警戒状态
 int timing = NOT_ENABLE_TO_TIMING;
 
-//������һ������λ�ñ���
+//定义上一次物体位置变量
 int last_detect_side = DETECT_LAST_FRONT;
-//�����Ƿ��Ѿ���ʼ��ʱ����
+//定义是否已经开始计时变量
 int complementary_time_judge = COMPLEMENTARY_TIME_NO;
-//�����ʱ����
+//定义计时变量
 long complementary_time = 0;
 
-//������ת����
+//定义旋转次数
 int times_of_turns = 0;
 
-//��¼�޵���ʱ�����߽�ľ���
+//记录无敌人时，左侧边界的距离
 int last_detect_left = 0;
 
-//��¼�޵���ʱ���Ҳ�߽�ľ���
+//记录无敌人时，右侧边界的距离
 int last_detect_right = 0;
 
-//��¼����̽��������ֵ�ܺͣ�û��
+//记录两侧探测器的数值总和，没用
 int last_detect_sum = 1200;
 
-//����ʱ�ж��Ƿ��Ѿ������
+//对齐时判断是否已经对齐过
 int alignment_only_once = 0;
 
-//����ǰ���Ƿ��⵽����ı���
+//定义前方是否检测到物体的变量
 int detect_if_detected = DETECT_IF_DETECTED_NO;
 
-//����ʱ���ݴ����
+//更新时的暂存变量
 int temp_analogRead_A1 = 0;
 int temp_analogRead_A0 = 0;
 
 /**
- * ����ת���ٶȣ�0-127��
+ * 定义转向速度（0-127）
  */
 // #define TURN_SPEED_FAST 127
 // #define TURN_SPEED_MIDDLE 100
 // #define TURN_SPEED_SLOW 100
 
 
-//���ڴ���̽�����ռ���������
+//用于储存探测器收集到的数据
 //int infrared[5] = {no,no,no,no,no};
 
-// //������־��ַ
+// //定义日志地址
 // int addr = 0;
 
-// //������һ�ε�ת���ƶ�״̬
+// //定义上一次的转向移动状态
 // int last_move_status = 0;
 
-// //������־��¼����
+// //定义日志记录次数
 // int log_times = 0;
 
-// //����ʱ����ʼ��
+// //定义时间起始处
 // long time_start = 0;
 
-// //�����Ƿ��Ѿ���ʼ��ʱ��1Ϊ�Ѿ���ʼ��0Ϊδ��ʼ
+// //定义是否已经开始计时，1为已经开始，0为未开始
 // int time_temp = 0;
 
-// //������־״̬
+// //定义日志状态
 // int time_status = 0;
 
-//�½�һ��ģ�⴮��,S1=P11,S2=P10
+//新建一个模拟串口,S1=P11,S2=P10
 SoftwareSerial serial = SoftwareSerial(DRIVER_S2,DRIVER_S1);
 
-//���øղ��½��Ĵ��ں�ͨ�ų�ʱֵ���½�һ������
+//利用刚才新建的串口和通信超时值来新建一个对象
 RoboClaw roboclaw = RoboClaw(&serial,TIME_OUT);
 
-//������־��ʽ
+//定义日志格式
 // struct MyObject {
-//     //ִ�д���
+//     //执行次数
 //     int times;
-//     //��¼״̬
+//     //记录状态
 //     /**
-//      * ״̬�涨����-1����ǰ-2����ǰ-4����-5
+//      * 状态规定：左-1，左前-2，右前-4，右-5
 //      */
 //     int statue;
-//     //��¼ʱ�䣬Ӧ����һ������ת�����õ�ʱ��
+//     //记录时间，应该是一次完整转向所用的时间
 //     long time;
 // };
 
-//�ϳ���������---------------------------------------------------------------------------------------------
-//�ϳ���������---------------------------------------------------------------------------------------------
-//�ϳ���������---------------------------------------------------------------------------------------------
-//�ϳ���������---------------------------------------------------------------------------------------------
+//废除函数以下---------------------------------------------------------------------------------------------
+//废除函数以下---------------------------------------------------------------------------------------------
+//废除函数以下---------------------------------------------------------------------------------------------
+//废除函数以下---------------------------------------------------------------------------------------------
 
-//�н�����
+//行进程序
 // void move(int status){
 //     switch (status){
 //     case ON_LEFT:
-//         //״̬1
+//         //状态1
 //         //record(1);
-//         //������
+//         //在正左方
 //         //left();
 //         //goleft(goSpeedFast);
 //         break;
 //     case ON_LEFT_FRONT:
-//         //״̬2
+//         //状态2
 //         //record(2);
-//         //����ǰ��
+//         //在左前方
 //         //left_front();
 //         //goleft(goSpeedSlow);
 //         break;
 //     case ON_FRONT:
-//         //״̬3
+//         //状态3
 //         //record(3);
-//         //��ǰ��
+//         //在前方
 //         //forward();
 //         //gofront();
 //         break;
 //     case ON_RIGHT_FRONT:
-//         //״̬4
+//         //状态4
 //         //record(4);
-//         //����ǰ��
+//         //在右前方
 //         //right_front();
 //         //goright(goSpeedSlow);
 //         break;
 //     case ON_RIGHT:
-//         //״̬5
+//         //状态5
 //         //record(5);
-//         //�����ҷ�
+//         //在正右方
 //         //right();
 //         //goright(goSpeedFast);
 //         break;
 //     case ON_NOTHING:
-//         //״̬6
+//         //状态6
 //         //record(6);
-//         //��ʱû�м�⵽
-//         //���û�м�⵽�����������û�м�⵽��Ҳ�п�������ת������иոպ�ת����һ���м��λ��-
-//         //���Բ���Ϊ
+//         //暂时没有检测到
+//         //如果没有检测到，可能是真的没有检测到，也有可能是在转弯过程中刚刚好转到了一个中间的位置-
+//         //所以不作为
 //         //turnLeft();
 //         //stop();
 //         //gonothing();
 //         break;
 //     default:
-//         //״̬7
+//         //状态7
 //         //record(7);
-//         //�������
+//         //其他情况
 //         break;
 //     }
 //     //roboclaw.ForwardM1(address, speed);
@@ -339,7 +339,7 @@ RoboClaw roboclaw = RoboClaw(&serial,TIME_OUT);
 // }
 
 /**
- * ԭ��ת����
+ * 原地转向函数
  */
 // void faceToEnemy(){
 
@@ -362,9 +362,9 @@ RoboClaw roboclaw = RoboClaw(&serial,TIME_OUT);
 //     }
     // switch (detect()){
     // // case ON_LEFT:
-    // //     //״̬1
+    // //     //状态1
     // //     //record(1);
-    // //     //������
+    // //     //在正左方
     // //     //time_begin(onleft);
     // //     //turnLeft(TURN_SPEED_FAST);
     // //     //time_begin(ON_LEFT);
@@ -374,9 +374,9 @@ RoboClaw roboclaw = RoboClaw(&serial,TIME_OUT);
     // //     //for(;;){}
     // //     break;
     // case ON_LEFT:
-    //     //״̬2
+    //     //状态2
     //     //record(2);
-    //     //����ǰ��
+    //     //在左前方
     //     //time_begin(onleftfront);
     //     //turnLeft(TURN_SPEED_MIDDLE);
     //     turnLeftPosition(TURNLEFT90);
@@ -384,9 +384,9 @@ RoboClaw roboclaw = RoboClaw(&serial,TIME_OUT);
     //     //for(;;){}
     //     break;
     // // case ON_FRONT:
-    // //     //״̬3
+    // //     //状态3
     // //     //record(3);
-    // //     //��ǰ��
+    // //     //在前方
     // //     //record();
     // //     //forward();
     // //     //delay(14);
@@ -395,9 +395,9 @@ RoboClaw roboclaw = RoboClaw(&serial,TIME_OUT);
     // //     //stop_stuck_fixed();
     // //     break;
     // case ON_RIGHT:
-    //     //״̬4
+    //     //状态4
     //     //record(4);
-    //     //����ǰ��
+    //     //在右前方
     //     //time_begin(onrightfront);
     //     //right_front();
     //     turnRightPosition(TURNRIGHT90);
@@ -406,9 +406,9 @@ RoboClaw roboclaw = RoboClaw(&serial,TIME_OUT);
     //     //delay(2000);
     //     break;
     // // case ON_RIGHT:
-    // //     //״̬5
+    // //     //状态5
     // //     //record(5);
-    // //     //�����ҷ�
+    // //     //在正右方
     // //     //time_begin(onright);
     // //     //right();
     // //     turnRightPosition(TURNRIGHT90);
@@ -417,18 +417,18 @@ RoboClaw roboclaw = RoboClaw(&serial,TIME_OUT);
     // //     //delay(2000);
     // //     break;
     // case ON_LEFT_FRONT:
-    //     //״̬7
+    //     //状态7
     //     //record(6);
-    //     //����ǰ��������ǰ��
+    //     //在左前方更靠近前方
     //     //turnLeft(TURN_SPEED_SLOW);
     //     turnLeftPosition(TURNLEFT_SMALL);
     //     //delay(2000);
     //     //for(;;){}
     //     break;
     // case ON_RIGHT_FRONT:
-    //     //״̬8
+    //     //状态8
     //     //record(6);
-    //     //����ǰ��������ǰ��
+    //     //在右前方更靠近前方
     //     //turnRight(TURN_SPEED_SLOW);
         
     //     turnRightPosition(TURNRIGHT_SMALL);
@@ -436,23 +436,23 @@ RoboClaw roboclaw = RoboClaw(&serial,TIME_OUT);
     //     //for(;;){}
     //     break;
     // // case onnothing:
-    // //     //״̬6
+    // //     //状态6
     // //     //record(6);
-    // //     //��ʱû�м�⵽
-    // //     //���û�м�⵽�����������û�м�⵽��Ҳ�п�������ת������иոպ�ת����һ���м��λ��-
-    // //     //���Բ���Ϊ
+    // //     //暂时没有检测到
+    // //     //如果没有检测到，可能是真的没有检测到，也有可能是在转弯过程中刚刚好转到了一个中间的位置-
+    // //     //所以不作为
     // //     break;
     // default:
     //     stop();
-    //     //״̬7
+    //     //状态7
     //     //record(7);
-    //     //�������
+    //     //其他情况
     //     break;
     // }
 //}
 
 // /**
-//  * ǰ̽�������亯����һ����ʧĿ�꣬�ȿ�ʼ��ʱ���������һ��ֵ���ж���ʧĿ��
+//  * 前探测器警戒函数，一旦丢失目标，先开始计时，如果超过一定值就判定丢失目标
 //  */
 // void detectEnemyFrontAlert(){
 //     delay(200);
@@ -472,85 +472,85 @@ RoboClaw roboclaw = RoboClaw(&serial,TIME_OUT);
 //     }
 // }
 /**
- * Ŀǰ����ͨ�������г�����ֱ�����Ӷ�����ɣ�����Ҫ״̬�������ȷ���
+ * 目前可以通过在运行程序中直接添加动作完成，不需要状态函数，先放着
  */
 // void statusForward(){
-//     //ֹͣ
+//     //停止
 //     stop();
 // }
 // void statusleft_front(){
-//     //������ת
+//     //向左旋转
 //     //turnLeft();
 // }
 // void statusright_front(){
-//     //������ת
+//     //向右旋转
 //     //turnRight();
 // }
 // void statusleft(){
-//     //������ת
+//     //向左旋转
 //     //turnLeft();
 // }
 // void statusright(){
-//     //������ת
+//     //向右旋转
 //     //turnRight();
 // }
 /**
- * �н�ת����
+ * 行进转向函数
  */
 // void moveToEnemy(){
 //     switch (detect()){
 //     case ON_LEFT:
-//         //״̬1
+//         //状态1
 //         //record(1);
-//         //������
+//         //在正左方
 //         last_move_status = onleft;
 //         move(on);
 //         break;
 //     case onleftfront:
-//         //״̬2
+//         //状态2
 //         //record(2);
-//         //����ǰ��
+//         //在左前方
 //         last_move_status = onleftfront;
 //         move(onleftfront);
 //         break;
 //     case onfront:
-//         //״̬3
+//         //状态3
 //         //record(3);
-//         //��ǰ��
+//         //在前方
 //         last_move_status = onfront;
 //         move(onfront);
 //         break;
 //     case onrightfront:
-//         //״̬4
+//         //状态4
 //         //record(4);
-//         //����ǰ��
+//         //在右前方
 //         last_move_status = onrightfront;
 //         move(onrightfront);
 //         break;
 //     case onright:
-//         //״̬5
+//         //状态5
 //         //record(5);
-//         //�����ҷ�
+//         //在正右方
 //         last_move_status = onright;
 //         move(onright);
 //         break;
 //     case onnothing:
-//         //״̬6
+//         //状态6
 //         //record(6);
-//         //��ʱû�м�⵽
-//         //���û�м�⵽�����������û�м�⵽��Ҳ�п�������ת������иոպ�ת����һ���м��λ��-
-//         //���Բ���Ϊ
+//         //暂时没有检测到
+//         //如果没有检测到，可能是真的没有检测到，也有可能是在转弯过程中刚刚好转到了一个中间的位置-
+//         //所以不作为
 //         move(onnothing);
 //         break;
 //     default:
-//         //״̬7
+//         //状态7
 //         //record(7);
-//         //�������
+//         //其他情况
 //         break;
 //     }
 // }
 
-//��¼��ʼʱ��
+//记录开始时间
 // void time_begin(int status){
 //     if(time_temp==TIME_NO){
 //         time_start = millis();
@@ -560,7 +560,7 @@ RoboClaw roboclaw = RoboClaw(&serial,TIME_OUT);
 // }
 
 /**
- * ��������⺯����δʹ�ã�
+ * 传感器检测函数（未使用）
  */
 //int detect(){
     // if(digitalRead(detector5)==LOW){
@@ -584,7 +584,7 @@ RoboClaw roboclaw = RoboClaw(&serial,TIME_OUT);
     // }
 
     /**
-     * �����ģ���У��ȼ�����ߣ�������ǰ�����ǻ���һЩ���⣬����
+     * 在这个模块中，先检测最侧边，依次往前，但是会有一些问题，待用
      */
     // if(detect_left()==yes){
     //     return onleft;
@@ -605,7 +605,7 @@ RoboClaw roboclaw = RoboClaw(&serial,TIME_OUT);
     // }
 
     // /**
-    //  * ���ģ���У����ȼ��ǰ�����ڴӲ����ǰ���ݽ�
+    //  * 这个模块中，优先检测前方，在从侧边向前方递进
     //  */
     // if(detectFront()==DETECT_YES){
     //     return ON_FRONT;
@@ -682,14 +682,14 @@ RoboClaw roboclaw = RoboClaw(&serial,TIME_OUT);
 //         }
 //     }
 // }
-// //ֹͣ�󱣳ֲ��������޸ĺ�
+// //停止后保持不动——修改后
 // void stop_stuck_fixed(){
 //     //for(int i=0;i<1500;++i){
 //         stop_stuck();
 //         //delay(1);
 //     //}
 // }
-//�洢��־����
+//存储日志函数
 // void record(){
 //     if(time_temp==TIME_YES){
 //         MyObject mylog;
@@ -711,7 +711,7 @@ RoboClaw roboclaw = RoboClaw(&serial,TIME_OUT);
 //     //     addr += sizeof(MyObject);
 //     // }
 // }
-//�����ഫ����
+//检测左侧传感器
 // int detectLeft(){
 //     // if(analogRead(DETECTOR1)<313){
 //     //     return DETECT_YES;
@@ -725,7 +725,7 @@ RoboClaw roboclaw = RoboClaw(&serial,TIME_OUT);
 //         return DETECT_NO;
 //     }
 // }
-//�����ƫǰ������
+//检测左偏前传感器
 // int detectLeftFront(){
 //     // if(digitalRead(DETECTOR2)==LOW){
 //     //     return DETECT_YES;
@@ -739,7 +739,7 @@ RoboClaw roboclaw = RoboClaw(&serial,TIME_OUT);
 //        return DETECT_NO; 
 //     }
 // }
-//���ǰƫ�󴫸���
+//检测前偏左传感器
 // int detectLeftFrontMore(){
 //     if(analogRead(DETECTOR3)<310){
 //         return DETECT_YES;
@@ -747,7 +747,7 @@ RoboClaw roboclaw = RoboClaw(&serial,TIME_OUT);
 //        return DETECT_NO; 
 //     }
 // }
-//���ǰ��������
+//检测前方传感器
 // int detectFront(){
 //     if(digitalRead(DETECTOR3)==LOW){
 //         return DETECT_YES;
@@ -755,7 +755,7 @@ RoboClaw roboclaw = RoboClaw(&serial,TIME_OUT);
 //         return DETECT_NO;
 //     }
 // }
-//����ҷ�������
+//检测右方传感器
 // int detectRight(){
 //     // if(analogRead(DETECTOR7)<317){
 //     //     return DETECT_YES;
@@ -769,7 +769,7 @@ RoboClaw roboclaw = RoboClaw(&serial,TIME_OUT);
 //         return DETECT_NO;
 //     }
 // }
-//�����ƫǰ������
+//检测右偏前传感器
 // int detectRightFront(){
 //     // if(digitalRead(DETECTOR4)==LOW){
 //     //     return DETECT_YES;
@@ -783,7 +783,7 @@ RoboClaw roboclaw = RoboClaw(&serial,TIME_OUT);
 //        return DETECT_NO; 
 //     }
 // }
-//���ǰƫ�Ҵ�����
+//检测前偏右传感器
 // int detectRightFrontMore(){
 //     if(analogRead(DETECTOR5)<333){
 //         return DETECT_YES;
@@ -793,18 +793,17 @@ RoboClaw roboclaw = RoboClaw(&serial,TIME_OUT);
     
 // }
 
-//�ϳ���������---------------------------------------------------------------------------------------------
-//�ϳ���������---------------------------------------------------------------------------------------------
-//�ϳ���������---------------------------------------------------------------------------------------------
-//�ϳ���������---------------------------------------------------------------------------------------------
+//废除函数以上---------------------------------------------------------------------------------------------
+//废除函数以上---------------------------------------------------------------------------------------------
+//废除函数以上---------------------------------------------------------------------------------------------
+//废除函数以上---------------------------------------------------------------------------------------------
 
-//����������-----------------------------------------------------------------------------------------------
-//����������-----------------------------------------------------------------------------------------------
-//����������-----------------------------------------------------------------------------------------------
-//����������-----------------------------------------------------------------------------------------------
-//����������-----------------------------------------------------------------------------------------------
+//动作组以下-----------------------------------------------------------------------------------------------
+//动作组以下-----------------------------------------------------------------------------------------------
+//动作组以下-----------------------------------------------------------------------------------------------
+//动作组以下-----------------------------------------------------------------------------------------------
 /**
- * ����߽�ǽ����ǰ��һ�ξ���
+ * 对齐边界墙后向前走一段距离
  */
 void getReadyToGoOnStage(){
     // goFrontPosition();
@@ -819,7 +818,7 @@ void getReadyToGoOnStage(){
 }
 
 /**
- * ת�������������ڷ�ֹ���в嵽̨����
+ * 转向辅助函数，用于防止刀刃插到台子上
  */
 void GoStageAssistsTheRightTurn(){
     // roboclaw.ForwardM1(ADDRESS, 30);
@@ -833,7 +832,7 @@ void GoStageAssistsTheRightTurn(){
 }
 
 /**
- * �ж���̨�ϻ�����̨��
+ * 判断在台上还是在台下
  */
 void judgeWhetherOnStageOrUnderTheStage(){
     if(temp_analogRead_A0+temp_analogRead_A1<580 || analogRead(DETECTOR_BACK_A2)<300){
@@ -845,7 +844,7 @@ void judgeWhetherOnStageOrUnderTheStage(){
 }
 
 /**
- * �����ı���̨λ��
+ * 对齐后改变上台位置
  */
 void changeThePositionOnStage(){
     if(analogRead(DETECTOR_LEFT_A0)<600){
@@ -867,7 +866,7 @@ void changeThePositionOnStage(){
 }
 
 /**
- * Ϊ�˸ı���̨λ�ã���ǰ��
+ * 为了改变上台位置，向前走
  */
 void OnStagePositionMove(int which_side,int speed){
     //int last_deistance_from_wall;
@@ -915,7 +914,7 @@ void OnStagePositionMove(int which_side,int speed){
 }
 
 /**
- * ̨�¶�������ʱ�Ѿ��ж�ˤ��̨��
+ * 台下动作，此时已经判断摔下台了
  */
 void judgmentUnderTheStage(){
     //pinMode(13,OUTPUT);
@@ -950,16 +949,16 @@ void judgmentUnderTheStage(){
 }
 
 /**
- * ���˺�����Ϊ�˺��˵��ڱ߽�ǽ�϶�����
+ * 后退函数，为了后退抵在边界墙上对齐用
  */
 void backOnTheStage(){
     roboclaw.BackwardM1(ADDRESS,20);
     roboclaw.BackwardM2(ADDRESS,20);
 }
 /**
- * �жϲ���Ƿ��ܼ�⵽����
- * �����жϲ�߾��������Ƿ�����ı仯���������������Ǹ�����ת��
- * ֮����������ľ��볣��������һֱ�ĳ�����
+ * 判断侧边是否能检测到敌人
+ * 会先判断侧边距离数据是否发生大的变化，若发生，则向那个方向转向
+ * 之后会更新两侧的距离常数（不是一直的常数）
  */
 void detectEnemy(){
     //if()
@@ -980,11 +979,11 @@ void detectEnemy(){
 }
 
 /**
- * ����������δʹ�ã�
- * ����ݺ�����������������кͱ߽����
- * ������루��һ���������ӣ�������������ľ��볣����ͬʱǰ��һ��
+ * 对正函数（未使用）
+ * 会根据后面的两个传感器进行和边界对齐
+ * 如果对齐（有一定的误差忽视），则会更新两侧的距离常数，同时前进一点
  */
-//��������1��ͨ��ֻ���һ��������ˢ�²��ֵ
+//对正函数1，通过只检测一次来限制刷新侧边值
 void alignmentOnlyOnce(){
     if(analogRead(DETECTOR_BACK_A2)-analogRead(DETECTOR_BACK_A3)>OffSET_THRESHOLD){
         turnLeftPosition(TURN_SLOW_POSITION);
@@ -1002,7 +1001,7 @@ void alignmentOnlyOnce(){
 }
 
 /**
- * ���뺯������ÿһ�ζ���󶼻��ж�С��λ��
+ * 对齐函数，在每一次对齐后都会判断小车位置
  */
 void alignmentMoreStringent(){
     if(analogRead(DETECTOR_BACK_A2)+analogRead(DETECTOR_BACK_A3)>=1700){
@@ -1019,7 +1018,7 @@ void alignmentMoreStringent(){
     judgeWhetherOnStageOrUnderTheStage();
 }
 
-//������º���������Դ��������ص����ź�ֵ
+//距离更新函数，会忽略传感器返回的无信号值
 void uploadDetect(){
     //delay(100); temp_analogRead_A1-last_detect_right<ABNORMAL_INCREASE && temp_analogRead_A0-last_detect_left<ABNORMAL_INCREASE
     temp_analogRead_A1 = analogRead(DETECTOR_RIGHT_A1);
@@ -1035,7 +1034,7 @@ void uploadDetect(){
     // last_detect_right = analogRead(DETECTOR_RIGHT_A1);
 }
 
-//������Զ���ı��߸���
+//后退至远处的边线附近
 void BackToTheDefensivePosition(){
     // for(goBackOneStep();;){
     //     if(analogRead(DETECTOR_BACK_A2)-analogRead(DETECTOR_BACK_A3)>OffSET_THRESHOLD){
@@ -1074,7 +1073,7 @@ void BackToTheDefensivePosition(){
     //goBackOneStep();
 }
 
-//���˺��������˾���Ϊ̨�ӵĴ�ֱ����Сһ�㣬���ڽ��������º����
+//后退函数，后退距离为台子的垂直距离小一点，用于将敌人推下后后退
 void goBack(){
     roboclaw.ResetEncoders(ADDRESS);
     // roboclaw.BackwardM1(ADDRESS,speed);
@@ -1123,10 +1122,10 @@ void goBack(){
 
 
 /**
- * ��ǰ�����з�����
- * �����Ǹ��������ת��
- * ˢ����һ�����巽��
- * ����ǰ��̽��������ģʽ
+ * 侧前方检测敌方函数
+ * 会向那个方向进行转向
+ * 刷新上一次物体方向
+ * 进入前方探测器警戒模式
  */
 void detectEnemySide(){
     if(digitalRead(DETECTOR_LEFT_FRONT)==DETECT_YES){
@@ -1151,7 +1150,7 @@ void detectEnemySide(){
 }
 
 
-//ǰ̽����̽�⺯��
+//前探测器探测函数
 void detectEnemyFront(){
     // if(digitalRead(DETECTOR_FRONT)==DETECT_YES){
     //     do{
@@ -1207,7 +1206,7 @@ void detectEnemyFront(){
 }
 
 /**
- * ת�ǲ���������δ�ã�
+ * 转角补偿函数（未用）
  */
 void complementary(){
     if(last_detect_side==DETECT_LAST_LEFT){
@@ -1217,7 +1216,7 @@ void complementary(){
     }
 }
 
-//׼��������δ�⣬�ȴ�ǰ����Ե���������Է�����ȷ��λ�ã�
+//准备攻击（未测，等待前方边缘传感器可以放在正确的位置）
 void PrepareforAttack(){
     int16_t pwm1;
     int16_t pwm2;
@@ -1250,12 +1249,12 @@ void PrepareforAttack(){
     }
 }
 
-//��������
+//攻击函数
 void attack(){
     gofront(GO_SPEED_ATTACK);
 }
 
-//΢Сת��δʹ�ã�
+//微小转向（未使用）
 void turnSlowOrMove(int ready_to_turn){
     if(ready_to_turn==READY_TO_TURN_LEFT){
         turnLeft(TURN_SLOW_SPEED);
@@ -1266,7 +1265,7 @@ void turnSlowOrMove(int ready_to_turn){
     }
 }
 
-//ֹͣ
+//停止
 void stop(){
     roboclaw.ForwardM1(ADDRESS, 0);
     //roboclaw.ForwardM1(address,speed);
@@ -1274,7 +1273,7 @@ void stop(){
 }
 
 
-//ֹͣ�󱣳ֲ���
+//停止后保持不动
 void stop_stuck(){
     //for(;roboclaw.ReadEncM1(ADDRESS)>3 || roboclaw.ReadEncM2(ADDRESS)>3;){
         roboclaw.ResetEncoders(ADDRESS);
@@ -1284,38 +1283,38 @@ void stop_stuck(){
     
 }
 
-//ԭ����ת��ֱ����ͷ���ԣ�����֮�п��Ա����,0-127
+//原地左转，直到车头正对，在这之中可以被打断,0-127
 void turnLeft(int speed){
     //roboclaw.ForwardM1(address, speed);
     roboclaw.BackwardM1(ADDRESS,speed);
     roboclaw.ForwardM2(ADDRESS, speed);
     //roboclaw.BackwardM2(address,speed);
 }
-//ԭ����ת��ֱ����ͷ���ԣ�����֮�п��Ա����,0-127
+//原地右转，直到车头正对，在这之中可以被打断,0-127
 void turnRight(int speed){
     roboclaw.ForwardM1(ADDRESS, speed);
     //roboclaw.ForwardM1(address,speed);
     //roboclaw.ForwardM2(address, speed);
     roboclaw.BackwardM2(ADDRESS,speed);
 }
-//ֱ��,0-127
+//直行,0-127
 void gofront(int speed){
     roboclaw.ForwardM1(ADDRESS, speed);
     roboclaw.ForwardM2(ADDRESS, speed-1);
 }
-//����ת,0-127
+//向左转,0-127
 void goleft(int speed,int level){
     roboclaw.ForwardM1(ADDRESS, speed-level);
     roboclaw.ForwardM2(ADDRESS, speed+level);
 }
-//����ת,0-127
+//向右转,0-127
 void goright(int speed,int level){
     roboclaw.ForwardM1(ADDRESS, speed+level);
     roboclaw.ForwardM2(ADDRESS, speed-level);
 }
 /**
- * ��ⲻ������ʱ�ĳ��򣬻����400ms����ʱ����������ת�������������м�ʹ����˳���-
- * ����������һ��ת���н�˳�ŷ������ԭ����ת��δ�ã�
+ * 检测不到物体时的程序，会进行400ms的延时，用来避免转到两个传感器中间就触发此程序-
+ * 并会根据最后一次转向行进顺着方向进行原地旋转（未用）
  */
 void gonothing(){
     // static int temp = 0;
@@ -1346,7 +1345,7 @@ void gonothing(){
 }
 
 
-//M1���ǰ��λ�ú���
+//M1电机前进位置函数
 void M1PositionForward(int position){
     //static int M1PositionTemp = 0;
     //if(roboclaw.ReadEncM1(ADDRESS)==-position){
@@ -1360,7 +1359,7 @@ void M1PositionForward(int position){
         }
     }
 }
-//M1�������λ�ú���
+//M1电机后退位置函数
 void M1PositionBackward(int position){
     //roboclaw.SetEncM1(ADDRESS,0);
     
@@ -1374,7 +1373,7 @@ void M1PositionBackward(int position){
         }
     }
 }
-//M2�������λ�ú���
+//M2电机后退位置函数
 void M2PositionBackward(int position){
     //static int M1PositionTemp = 0;
     //if(roboclaw.ReadEncM1(ADDRESS)==-position){
@@ -1388,7 +1387,7 @@ void M2PositionBackward(int position){
         }
     }
 }
-//M2���ǰ��λ�ú���
+//M2电机前进位置函数
 void M2PositionForward(int position){
     //roboclaw.SetEncM1(ADDRESS,0);
     
@@ -1403,7 +1402,7 @@ void M2PositionForward(int position){
     }
 }
 
-//����תλ�ú���
+//向右转位置函数
 void turnRightPosition(int single){
     //M1PositionBackward(single);
     //M2PositionForward(single);
@@ -1432,7 +1431,7 @@ void turnRightPosition(int single){
     }
 }
 
-//����תλ�ú���
+//向左转位置函数
 void turnLeftPosition(int single){
     //static int M1PositionTemp = 0;
     //if(roboclaw.ReadEncM1(ADDRESS)==-position){
@@ -1462,7 +1461,7 @@ void turnLeftPosition(int single){
     }
 }
 
-//΢Сǰ��λ�ú���
+//微小前进位置函数
 void goFrontPosition(){
     roboclaw.ResetEncoders(ADDRESS);
     roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, GO_SLOW_POSITION, ACCEL2, 8000, DECCEL2, GO_SLOW_POSITION, 1);
@@ -1470,30 +1469,30 @@ void goFrontPosition(){
     delay(200);
 }
 
-//����������--------------------------------------------------------------------------------------------------
-//����������--------------------------------------------------------------------------------------------------
-//����������--------------------------------------------------------------------------------------------------
-//����������--------------------------------------------------------------------------------------------------
+//动作组以上--------------------------------------------------------------------------------------------------
+//动作组以上--------------------------------------------------------------------------------------------------
+//动作组以上--------------------------------------------------------------------------------------------------
+//动作组以上--------------------------------------------------------------------------------------------------
 
 
-//״̬������--------------------------------------------------------------------------------------------------
-//״̬������--------------------------------------------------------------------------------------------------
-//״̬������--------------------------------------------------------------------------------------------------
-//״̬������--------------------------------------------------------------------------------------------------
+//状态组以下--------------------------------------------------------------------------------------------------
+//状态组以下--------------------------------------------------------------------------------------------------
+//状态组以下--------------------------------------------------------------------------------------------------
+//状态组以下--------------------------------------------------------------------------------------------------
 
-//״̬������--------------------------------------------------------------------------------------------------
-//״̬������--------------------------------------------------------------------------------------------------
-//״̬������--------------------------------------------------------------------------------------------------
-//״̬������--------------------------------------------------------------------------------------------------
-
-
-//̽��������--------------------------------------------------------------------------------------------------
-//̽��������--------------------------------------------------------------------------------------------------
-//̽��������--------------------------------------------------------------------------------------------------
-//̽��������--------------------------------------------------------------------------------------------------
+//状态组以上--------------------------------------------------------------------------------------------------
+//状态组以上--------------------------------------------------------------------------------------------------
+//状态组以上--------------------------------------------------------------------------------------------------
+//状态组以上--------------------------------------------------------------------------------------------------
 
 
-//��������ݣ�����Ӧ�������ߣ�δʹ�ã�
+//探测器以下--------------------------------------------------------------------------------------------------
+//探测器以下--------------------------------------------------------------------------------------------------
+//探测器以下--------------------------------------------------------------------------------------------------
+//探测器以下--------------------------------------------------------------------------------------------------
+
+
+//检测后侧数据，返回应该向哪走（未使用）
 int detectorBack(){
     if(analogRead(DETECTOR_BACK_A2)-analogRead(DETECTOR_BACK_A3)>TURN_ERROR_VALUE){
         return READY_TO_TURN_LEFT;
@@ -1505,25 +1504,25 @@ int detectorBack(){
 }
 
 
-//̽��������---------------------------------------------------------------------------------------------------
-//̽��������---------------------------------------------------------------------------------------------------
-//̽��������---------------------------------------------------------------------------------------------------
-//̽��������---------------------------------------------------------------------------------------------------
+//探测器以上---------------------------------------------------------------------------------------------------
+//探测器以上---------------------------------------------------------------------------------------------------
+//探测器以上---------------------------------------------------------------------------------------------------
+//探测器以上---------------------------------------------------------------------------------------------------
 
 
-//��¼����-----------------------------------------------------------------------------------------------------
-//��¼����-----------------------------------------------------------------------------------------------------
-//��¼����-----------------------------------------------------------------------------------------------------
-//��¼����-----------------------------------------------------------------------------------------------------
+//记录以下-----------------------------------------------------------------------------------------------------
+//记录以下-----------------------------------------------------------------------------------------------------
+//记录以下-----------------------------------------------------------------------------------------------------
+//记录以下-----------------------------------------------------------------------------------------------------
 
-//��¼����-----------------------------------------------------------------------------------------------------
-//��¼����-----------------------------------------------------------------------------------------------------
-//��¼����-----------------------------------------------------------------------------------------------------
-//��¼����-----------------------------------------------------------------------------------------------------
+//记录以上-----------------------------------------------------------------------------------------------------
+//记录以上-----------------------------------------------------------------------------------------------------
+//记录以上-----------------------------------------------------------------------------------------------------
+//记录以上-----------------------------------------------------------------------------------------------------
 
 
 
-//��ʼ��׼�ߺ�����13�ŵ�˫��
+//初始基准线函数，13号灯双闪
 void baseline(){
     pinMode(13,OUTPUT);
     digitalWrite(13,HIGH);
@@ -1537,7 +1536,7 @@ void baseline(){
 }
 
 /**
- * ̽������ӡ��־����
+ * 探测器打印日志函数
  */
 void Println(){
     // if(roboclaw.ReadEncM2(ADDRESS)>=1){
@@ -1575,7 +1574,7 @@ void Println(){
     //delay(1000);
 }
 
-//����
+//测试
 void test_temp(){
     // //Serial.begin(9600);
     // Serial.print("1:");
@@ -1611,7 +1610,7 @@ void test_temp(){
     // for(;;){}
 }
 
-//���Ժ���
+//测试函数
 void test(){
     Serial.println(analogRead(A0));
     //delay(5000);
@@ -1638,7 +1637,7 @@ void test(){
 }
 
 
-//���������ܺ���
+//搜索敌人总函数
 void searchForEnemy(){
     if(detect_if_detected==DETECT_IF_DETECTED_NO){
         detectEnemy();//down
@@ -1653,12 +1652,12 @@ void searchForEnemy(){
 
 
 
-//ԭʼ������
+//原始函数：
 void setup(){
-    //����ģ�⴮��
+    //定义模拟串口
     roboclaw.begin(38400);
     Serial.begin(9600);
-    //���ô���������
+    //设置传感器引脚
     // pinMode(DETECTOR1,INPUT);
     // pinMode(DETECTOR2,INPUT);
     // pinMode(DETECTOR3,INPUT);
@@ -1669,13 +1668,13 @@ void setup(){
     // delay(300
     //stop();
     delay(2000);
-    //���ȸ���һ�³��ϵľ��볣�������ж�
+    //首先更新一下场上的距离常数，再行动
     uploadDetect();
     // last_detect_left = 400;
     // last_detect_right = 400;
 }
 
-//����ƽʱ�����-500��+500���ң��ܵ�����������2000+
+//两者平时大概在-500到+500左右，受到推力后大概在2000+
 
 
 void loop(){
