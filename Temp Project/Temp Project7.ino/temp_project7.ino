@@ -971,11 +971,11 @@ void detectEnemy(){
     if(last_detect_left-analogRead(DETECTOR_LEFT_A0)>=MIN_DETECT_CHANGE && analogRead(DETECTOR_LEFT_A0)+analogRead(DETECTOR_RIGHT_A1)<1100){
         turnLeftPosition(TURNLEFT90);
         uploadDetect();
-        alignment_only_once = 0;
+        //alignment_only_once = 0;
     }else if(last_detect_right-analogRead(DETECTOR_RIGHT_A1)>=MIN_DETECT_CHANGE && analogRead(DETECTOR_LEFT_A0)+analogRead(DETECTOR_RIGHT_A1)<1100){
         turnRightPosition(TURNRIGHT90);
         uploadDetect();
-        alignment_only_once = 0;
+        //alignment_only_once = 0;
     }
 }
 

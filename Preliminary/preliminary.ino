@@ -1,87 +1,89 @@
 /**
- * ç¬¬7é˜¶æ®µï¼šå°ä¸Šå’Œå°ä¸‹è”åˆèµ·æ¥
+ * Ô¤Èü³ÌĞò
  */
 
 /**
- * è®°å½•ï¼š
- * 1-343   A
- * 2-350   A
- * 3-å›ºå®š65mm
- * 4-å›ºå®š90mm
- * 5-å›ºå®š65mm
- * 6-333   A
- * 7-317   A
+ *¼ÇÂ¼£º
+ * µÈ´ı¸üĞÂÓÃ???±ê¼Ç
+ *
  */
 
-/**
- * è½¬åœˆè®°å½•ï¼š
- * ä¾é å»¶æ—¶è¿è¡Œ
- * å·¦è½¬ï¼Œ127é€Ÿåº¦ï¼Œ316-317msï¼Œå¤§æ¦‚90Â°ï¼Œç”¨æ—¶316msä»¥å†…
- * ä¾é ä½ç½®ä¿¡æ¯
- */
-/**
- * 30é€Ÿåº¦ï¼Œ5sï¼Œ3.75åœˆï¼Œ30*5ï¼š3.75=40ï¼š1åœˆï¼Œ0.25åœˆ=10(å³é€Ÿåº¦Ã—æ—¶é—´/msä¸º10)
- */
 
 /**
- * æ‰€éœ€çš„åº“
+ * ËùĞèµÄ¿â
  */
 #include <SoftwareSerial.h>
 #include <RoboClaw.h>
-#include <EEPROM.h>
+/**
+ * Ä¿Ç°ÓÃ²»µ½£¬Ôİ´æ
+ */
+// /**
+//  * ¼ì²â²»µ½ÎïÌåÊ±µÄ³ÌĞò£¬»á½øĞĞ400msµÄÑÓÊ±£¬ÓÃÀ´±ÜÃâ×ªµ½Á½¸ö´«¸ĞÆ÷ÖĞ¼ä¾Í´¥·¢´Ë³ÌĞò-
+//  * ²¢»á¸ù¾İ×îºóÒ»´Î×ªÏòĞĞ½øË³×Å·½Ïò½øĞĞÔ­µØĞı×ª£¨Î´ÓÃ£©
+//  */
+// void gonothing(){
+//     // static int temp = 0;
+//     // if(temp==0){
+//     //     long time_now = millis();
+//     //     temp = 1;
+//     // }
+//     // long time_now = millis();
+//     // for(;;){
+//     //     if(millis()-time_now>400){
+//     //         //turnLeft();
+//     //         if(last_move_status==ON_RIGHT || last_move_status==ON_RIGHT_FRONT){
+//     //             //turnRight();
+//     //         }else{
+//     //             //turnLeft();
+//     //         }
+//     //         //roboclaw.ReadSpeedM1(address);
+//     //         //roboclaw.ReadSpeedM2(address);
+            
 
-//å·¦è½¬90Â°
-#define TURNLEFT90 530
-//å·¦è½¬â€”â€”å¤§
-#define TURNLEFT_BIG 160
-//å·¦è½¬â€”â€”å°
-#define TURNLEFT_SMALL 140
-//å³è½¬â€”90Â°
-#define TURNRIGHT90 530
-//å³è½¬â€”â€”å¤§
-#define TURNRIGHT_BIG 175
-//å³è½¬â€”â€”å°
-#define TURNRIGHT_SMALL 160
+//     //     }
+//     //     if(detect()==ON_NOTHING){
 
-//ä½ç½®è¯¯å·®
-#define ERROR_POSITION 7
-
-//ç»æµ‹è¯•ï¼Œ900å·¦å³ENDå€¼æ˜¯ä¸€åœˆ
-#define ONE_ROUND 900
-
-// //å®šä¹‰æ—¥å¿—æ˜¯å¦å·²ç»å¼€å§‹
-// #define TIME_YES 1
-// #define TIME_NO 0
-
-//å®šä¹‰ç”µæœºé©±åŠ¨æ¨¡å—å¼•è„š
-#define DRIVER_S1 11
-#define DRIVER_S2 10
-
-//å®šä¹‰å¼‚å¸¸å¢é•¿å€¼
-#define ABNORMAL_INCREASE 300
-
-// //å®šä¹‰æ¢æµ‹è·ç¦»
-// #define DETECT_DISTANCE 250
+//     //     }else{
+//     //         return;
+//     //     }
+//     // }
+// }
 
 /**
- * è®¾å®šä¸€äº›å’Œä¼ è¾“å‘½ä»¤æœ‰å…³çš„å‚æ•°
+ * ÒÑ±»±àÂëÆ÷×ªÏòÏµÍ³È¡´ú
  */
-#define ADDRESS 0x80
+// //Ô­µØ×ó×ª£¬Ö±µ½³µÍ·Õı¶Ô£¬ÔÚÕâÖ®ÖĞ¿ÉÒÔ±»´ò¶Ï,0-127
+// void turnLeft(int speed){
+//     //roboclaw.ForwardM1(address, speed);
+//     roboclaw.BackwardM1(ADDRESS,speed);
+//     roboclaw.ForwardM2(ADDRESS, speed);
+//     //roboclaw.BackwardM2(address,speed);
+// }
+
+/**
+ * ÒÑ±»±àÂëÆ÷×ªÏòÏµÍ³È¡´ú
+ */
+// //Ô­µØÓÒ×ª£¬Ö±µ½³µÍ·Õı¶Ô£¬ÔÚÕâÖ®ÖĞ¿ÉÒÔ±»´ò¶Ï,0-127
+// void turnRight(int speed){
+//     roboclaw.ForwardM1(ADDRESS, speed);
+//     //roboclaw.ForwardM1(address,speed);
+//     //roboclaw.ForwardM2(address, speed);
+//     roboclaw.BackwardM2(ADDRESS,speed);
+// }
 
 
-//è®¾ç½®è¶…æ—¶å€¼
-#define TIME_OUT 10000
-
-//åŠ é€Ÿåº¦è®¾ç½®ï¼Œé»˜è®¤
-#define ACCEL 655360
-#define DECCEL 655360
-#define ACCEL1 655360
-#define ACCEL2 655360
-#define DECCEL1 655360
-#define DECCEL2 655360
-
-
-// //å®šä¹‰å¯¹æ–¹ä½ç½®
+// //¶ÔÆëÊ±ÅĞ¶ÏÊÇ·ñÒÑ¾­¶ÔÆë¹ı
+// int alignment_only_once = 0;
+// //¼ÇÂ¼Á½²àÌ½²âÆ÷µÄÊıÖµ×ÜºÍ£¬Ã»ÓÃ
+// int last_detect_sum = 1200;
+// #define DETECTOR1 5
+// #define DETECTOR2 A3
+// #define DETECTOR3 6
+// #define DETECTOR4 A2
+// #define DETECTOR5 7
+// #define DETECTOR6 7
+// #define DETECTOR7 A3
+// //¶¨Òå¶Ô·½Î»ÖÃ
 // #define ON_LEFT 1
 // #define ON_LEFT_FRONT 2
 // #define ON_FRONT 3
@@ -90,722 +92,198 @@
 // #define ON_LEFT_FRONT_MORE 7
 // #define ON_RIGHT_FRONT_MORE 8
 // #define ON_NOTHING 6
-
-//å®šä¹‰è¡Œè¿›é€Ÿåº¦
+//¶¨ÒåĞĞ½øËÙ¶È
 // #define GO_SPEED_FAST 25
 // #define GO_SPEED_SLOW 10
+// //¶¨ÒåÌ½²â¾àÀë
+// #define DETECT_DISTANCE 250
+// //¶¨ÒåÈÕÖ¾ÊÇ·ñÒÑ¾­¿ªÊ¼
+// #define TIME_YES 1
+// #define TIME_NO 0
+// //¶¨Òå×ªÏò×´Ì¬£¨Ä¿Ç°Î´Ê¹ÓÃ£©
+// #define READY_TO_TURN_RIGHT 1
+// #define READY_TO_TURN_LEFT 0
+// #define READY_TO_GO_FRONT 2
+// //×ªÏòÎó²îÖµ£¨Î´Ê¹ÓÃ£©
+// #define TURN_ERROR_VALUE 20
+// //Î¢Ğ¡½Ç¶È×ªÏòËÙ¶È£¨Î´Ê¹ÓÃ£©
+// #define TURN_SLOW_SPEED 9
+// //Î¢Ğ¡Ç°½øËÙ¶È£¨Î´Ê¹ÓÃ£©
+// #define GO_SLOW_SPEED 8
+// //¶¨ÒåºóÍËËÙ¶È
+// #define GO_BAKC_SPEED 50
+// //¶¨Òåµ±Á½²à¾àÀëÍ»È»¾çÔöÊ±ãĞÖµ
+// #define MINI_CHANGE 150
 
-/**
- * å®šä¹‰ä¼ æ„Ÿå™¨
- */
-#define DETECTOR_BACK_A2 A2
-#define DETECTOR_BACK_A3 A3
-#define DETECTOR_LEFT_A0 A0
-#define DETECTOR_RIGHT_A1 A1
-#define DETECTOR_LEFT_FRONT 7
-#define DETECTOR_FRONT 6
-#define DETECTOR_RIGHT_FRONT 5
-#define GRAYSCALE_SENSOR_PIN2 8
-#define GRAYSCALE_SENSOR_PIN1 9
-// #define DETECTOR1 5
-// #define DETECTOR2 A3
-// #define DETECTOR3 6
-// #define DETECTOR4 A2
-// #define DETECTOR5 7
-// #define DETECTOR6 7
-// #define DETECTOR7 A3
-
-//å®šä¹‰è½¬å‘çŠ¶æ€ï¼ˆç›®å‰æœªä½¿ç”¨ï¼‰
-#define READY_TO_TURN_RIGHT 1
-#define READY_TO_TURN_LEFT 0
-#define READY_TO_GO_FRONT 2
-
-//è½¬å‘è¯¯å·®å€¼ï¼ˆæœªä½¿ç”¨ï¼‰
-#define TURN_ERROR_VALUE 20
-
-//å¾®å°è§’åº¦è½¬å‘é€Ÿåº¦ï¼ˆæœªä½¿ç”¨ï¼‰
-#define TURN_SLOW_SPEED 9
-
-//å¾®å°å‰è¿›é€Ÿåº¦ï¼ˆæœªä½¿ç”¨ï¼‰
-#define GO_SLOW_SPEED 8
-
+//×ó×ª90¡ã
+#define TURNLEFT90 530//¾É
+#define TURN_LEFT_POSITION_90 530
+//×ó×ª¡ª¡ª´ó
+#define TURNLEFT_BIG 160//¾É
+#define TURN_LEFT_BIG 160
+//×ó×ª¡ª¡ªĞ¡
+#define TURNLEFT_SMALL 140//¾É
+#define TURN_LEFT_SMALL 140
+//ÓÒ×ª¡ª90¡ã
+#define TURNRIGHT90 530//¾É
+#define TURN_RIGHT_POSITION_90 530
+//ÓÒ×ª¡ª¡ª´ó
+#define TURNRIGHT_BIG 175//¾É
+#define TURN_RIGHT_BIG 175
+//ÓÒ×ª¡ª¡ªĞ¡
+#define TURNRIGHT_SMALL 160//¾É
+#define TURN_RIGHT_SMALL 160
+//Î»ÖÃÎó²î,ÓÃÓÚÔÚ×óÓÒ¹Ì¶¨×ªÏòÊ±ÔÚÎó²î·¶Î§ÄÚÈ¡ÏûÂÖÌ¥Ëø¶¨£¬Ê¹Æä²»»á»Ø°Ú
+#define ERROR_POSITION 7
+//¾­²âÊÔ£¬900×óÓÒENDÖµÊÇÒ»È¦
+#define ONE_ROUND 900//¾É
+#define ONE_ROUND_POSITION 900
+//¶¨Òåµç»úÇı¶¯Ä£¿éÒı½Å
+//µç»úºÍÖ÷°åÄ£ÄâÒı½Å1
+#define DRIVER_S1 11//¾É
+#define MOTOR_DRIVER_S1 11
+//µç»úºÍÖ÷°åÄ£ÄâÒı½Å2
+#define DRIVER_S2 10//¾É
+#define MOTOR_DRIVER_S2 10
+//¶¨ÒåÒì³£Ôö³¤Öµ£¬±¾ÊÇÎªÁË·ÀÖ¹´«¸ĞÆ÷·µ»ØÒì³£´óµÄÖµºó»ØÂäÊ¹µÃĞ¡³µÎóÒÔÎª¼à²âµ½µĞÈË£¬ÒÑ¾­±»È¡´ú
+#define ABNORMAL_INCREASE 300
+//ÉèÖÃµç»ú°åÃüÁî´æ´¢Î»ÖÃ
+#define ADDRESS 0x80
+//ÉèÖÃµç»úºÍÖ÷°åÁ¬½Ó³¬Ê±Öµ
+#define TIME_OUT 10000
+//¼ÓËÙ¶ÈÉèÖÃ£¬Ä¬ÈÏ
+#define ACCEL 655360
+#define DECCEL 655360
+#define ACCEL1 655360
+#define ACCEL2 655360
+#define DECCEL1 655360
+#define DECCEL2 655360
+//ºó²à×ó±ß´«¸ĞÆ÷,ÒÑ¸ü¸Ä
+#define DETECTOR_BACK_A2 A2//¾É
+#define DETECTOR_BACK_LEFT_A1 A1
+//ºó²àÓÒ±ß´«¸ĞÆ÷
+#define DETECTOR_BACK_A3 A3//¾É
+#define DETECTOR_BACK_RIGHT_A0 A0
+//×ó²à´«¸ĞÆ÷
+#define DETECTOR_LEFT_A0 A0//¾É
+#define DETECTOR_LEFT_A3 A3
+//ÓÒ²à´«¸ĞÆ÷
+#define DETECTOR_RIGHT_A1 A1//¾É
+#define DETECTOR_RIGHT_A2 A2
+//³ı4¸ö¾àÀë´«¸ĞÆ÷ÍâÆäËû´«¸ĞÆ÷£¬µÈ´ı¸ü¸Ä
+//×óÇ°·½´«¸ĞÆ÷
+#define DETECTOR_LEFT_FRONT ???
+//¸ü¿¿½üÇ°·½µÄ×óÇ°·½´«¸ĞÆ÷
+#define DETECTOR_LEFT_FRONT_MORE ???
+//ÕıÇ°·½´«¸ĞÆ÷
+#define DETECTOR_FRONT ???
+//ÓÒÇ°·½´«¸ĞÆ÷
+#define DETECTOR_RIGHT_FRONT ???
+//¸ü¿¿½üÇ°·½µÄÓÒÇ°·½´«¸ĞÆ÷
+#define DETECTOR_RIGHT_FRONT_MORE ???
+//±ßÔµ´«¸ĞÆ÷1
+#define GRAYSCALE_SENSOR_PIN2 ???//¾É
+#define GRAYSCALE_SENSOR_LEFT ???
+//±ßÔµ´«¸ĞÆ÷
+#define GRAYSCALE_SENSOR_PIN1 ???//¾É
+#define GRAYSCALE_SENSOT_RIGHT ???
+//½ø¹¥Ê±µÄËÙ¶È
 #define GO_SPEED_ATTACK 15
-
-//å¾®å°è§’åº¦è½¬å‘ä½ç½®ï¼ˆä½¿ç”¨ï¼‰
+//Î¢Ğ¡½Ç¶È×ªÏò
 #define TURN_SLOW_POSITION 25
-
-//å¾®å°å‰è¿›ä½ç½®ï¼ˆä½¿ç”¨ï¼‰
+//Î¢Ğ¡Ç°½ø
 #define GO_SLOW_POSITION 25
-
-//æœ€å°æ£€æµ‹å˜åŒ–ï¼Œç”¨äºä¸¤ä¾§90Â°è½¬å‘æ—¶åˆ¤æ–­æ˜¯å¦æœ‰ç‰©ä½“
-#define MIN_DETECT_CHANGE 177
-
-//å¯¹æ­£æ—¶ä¸¤ä¸ªæ¢æµ‹å™¨æ•°å€¼å·®å¼‚èŒƒå›´
-#define OffSET_THRESHOLD 10
-
-//å®šä¹‰ä¼ è¾“å€¼no_signalå€¼
+//×îĞ¡¼ì²â±ä»¯£¬ÓÃÓÚÁ½²à90¡ã×ªÏòÊ±ÅĞ¶ÏÊÇ·ñÓĞÎïÌå,Èç¹û±ä»¯´óÓÚÕâ¸öÖµ£¬ÔòÅĞ¶¨ÓĞµĞÈË
+#define MIN_DETECT_CHANGE 177//¾É
+#define MIN_DETECT_TO_90_ENEMY_JUDGE 177
+//¶ÔÕıÊ±Á½¸öÌ½²âÆ÷ÊıÖµ²îÒì·¶Î§£¬³¬¹ıÕâ¸öÖµÔò»áµ÷Õû
+#define OffSET_THRESHOLD 10//¾É
+#define OFFSET_THRESHOLD_ADJUST_SLOW 10
+//¶¨Òå´«ÊäÖµno_signalÖµ£¬µ±Öµ´óÓÚµÈÓÚËüÊ±£¬ÈÏÎª´ËÖµÎŞĞ§
 #define NO_SIGNAL_VALUE 870
-
-/**
- * å®šä¹‰æ£€æµ‹åˆ°ç‰©ä½“æ²¡æœ‰
- */
+//´«¸ĞÆ÷¼ì²âµ½ÎïÌå
 #define DETECT_YES 0
+//´«¸ĞÆ÷Î´¼ì²âµ½ÎïÌå
 #define DETECT_NO 1
-
-//å®šä¹‰ä¸Šä¸€æ¬¡æ£€æµ‹åˆ°ç‰©ä½“çš„æ–¹å‘
+//ÉÏÒ»´Î¼ì²âµ½ÎïÌåµÄ·½Ïò£¬ÓÃÓÚÊ¹Ğ¡³µÔÙ´Î×ªÏò²¹³¥
 #define DETECT_LAST_LEFT 1
 #define DETECT_LAST_RIGHT 2
 #define DETECT_LAST_FRONT 3
-
-//å®šä¹‰å·¦å‰è½¬å‘ä½ç½®
-#define TURN_LEFT_SIDE 210
-//å®šä¹‰å³å‰è½¬å‘ä½ç½®
-#define TURN_RIGHT_SIDE 200
-
-//å®šä¹‰å·¦å‰è¡¥è§’è½¬å‘ä½ç½®
-#define TURN_LEFT_SIDE_COMPLEMENTARY 210
-//å®šä¹‰å³å‰è¡¥è§’è½¬å‘ä½ç½®
-#define TURN_RIGHT_SIDE_COMPLEMENTARY 220
-
-//å®šä¹‰è®¡æ—¶æ˜¯å¦å·²ç»å¼€å§‹
+//×óÇ°×ªÏòÎ»ÖÃ£¬µÈ´ı¸üĞÂ
+#define TURN_LEFT_SIDE ???//¾É
+#define TURN_LEFT_FRONT ???
+#define TURN_LEFT_FRONT_MORE ???
+//ÓÒÇ°×ªÏò£¬µÈ´ı¸üĞÂ
+#define TURN_RIGHT_SIDE ???//¾É
+#define TURN_RIGHT_FRONT ???
+#define TURN_RIGHT_FRONT_MORE ???
+//×óÇ°²¹½Ç×ªÏò,ÓÃÓÚÎïÌåÌÓÍÑºó²¹³¥×ªÏò£¬µÈ´ı¸üĞÂ
+#define TURN_LEFT_SIDE_COMPLEMENTARY ???//¾É
+#define TURN_LEFT_FRONT_COMPLEMENTARY ???
+#define TURN_LEFT_FRONT_MORE_COMPLEMENTARY ???
+//ÓÒÇ°²¹½Ç×ªÏò£¬ÓÃÓÚÎïÌåÌÓÍÑºó²¹³¥×ªÏò£¬µÈ´ı¸üĞÂ
+#define TURN_RIGHT_SIDE_COMPLEMENTARY ???//¾É
+#define TURN_RIGHT_FRONT_COMPLEMENTARY ???
+#define TURN_RIGHT_FRONT_MORE_COMPLEMENTARY ???
+//²¹³¥¼ÆÊ±ÊÇ·ñÒÑ¾­¿ªÊ¼£¬Êµ¼ÊÉÏÊÇÔÚ²àÃæ¼ì²âµ½µĞÈËºó¶ªÊ§ºó¿ªÊ¼¼ÆÊ±£¬ÒÔ±ã¼ÌĞø×·×Ù
 #define COMPLEMENTARY_TIME_YES 1
 #define COMPLEMENTARY_TIME_NO 0
-//å®šä¹‰è®¡æ—¶å¤šä¹…ååˆ¤å®šä¸¢å¤±ç›®æ ‡
+//²¹³¥¼ÆÊ±¶à¾ÃºóÅĞ¶¨¶ªÊ§Ä¿±ê
 #define COMPLEMENTARY_TIME_DELAY 400
-
-//åˆ¤æ–­å‰æ–¹æ˜¯å¦å·²ç»æ£€æµ‹åˆ°ç‰©ä½“
+//ÅĞ¶ÏÇ°·½ÊÇ·ñÒÑ¾­¼ì²âµ½ÎïÌå
 #define DETECT_IF_DETECTED_YES 1
 #define DETECT_IF_DETECTED_NO 0
-
-//å®šä¹‰åé€€é€Ÿåº¦
-#define GO_BAKC_SPEED 50
-
-//å®šä¹‰å½“ä¸¤ä¾§è·ç¦»çªç„¶å‰§å¢æ—¶é˜ˆå€¼
-#define MINI_CHANGE 150
-
-//å®šä¹‰å¯ä»¥å¼€å§‹è¿›å…¥è­¦æˆ’çŠ¶æ€
+//¿ÉÒÔ¿ªÊ¼½øÈë¾¯½ä×´Ì¬£¬ÔÚ¼ì²âÇ°·½Ê±£¬»á°éËæ¼ì²âÕâ¸öÖµ£¬Ä¿µÄÊÇÎªÁË±ÜÃâÇ°·½´«¸ĞÆ÷ÎŞÓÃ¼ì²â£¬½ÚÊ¡Ê±¼ä
 #define ENABLE_TO_TIMING 1
-
-//å®šä¹‰ä¸èƒ½è¿›å…¥è­¦æˆ’çŠ¶æ€
 #define NOT_ENABLE_TO_TIMING 0
-
-//å®šä¹‰180Â°æ—‹è½¬
-#define TURN_LEFT_180 1060
-
-//å®šä¹‰ä¸Šå°æ—¶è¦ç”¨çš„é€Ÿåº¦
+//180¡ãĞı×ª,ĞèÒª¸üĞÂ
+#define TURN_LEFT_180 ???
+//ÔÚÌ¨ÏÂÎªÁË¸Ä±äÎ»ÖÃÒÆ¶¯Ê±ÒªÓÃµÄËÙ¶È
 #define ON_STAGE_SPEED 15
 
-//åˆå§‹åŒ–æ˜¯å¦å¯ä»¥è¿›å…¥è­¦æˆ’çŠ¶æ€
+
+/**
+ * ±äÁ¿Öµ
+ */
+//³õÊ¼»¯ÊÇ·ñ¿ÉÒÔ½øÈë¾¯½ä×´Ì¬£¬¼´ÊÇ·ñĞèÒª¼àÊÓÇ°·½´«¸ĞÆ÷
 int timing = NOT_ENABLE_TO_TIMING;
-
-//å®šä¹‰ä¸Šä¸€æ¬¡ç‰©ä½“ä½ç½®å˜é‡
+//³õÊ¼»¯ÉÏÒ»´ÎÎïÌåÎ»ÖÃ±äÁ¿
 int last_detect_side = DETECT_LAST_FRONT;
-//å®šä¹‰æ˜¯å¦å·²ç»å¼€å§‹è®¡æ—¶å˜é‡
+//³õÊ¼»¯ÊÇ·ñÒÑ¾­¿ªÊ¼¼ÆÊ±±äÁ¿
 int complementary_time_judge = COMPLEMENTARY_TIME_NO;
-//å®šä¹‰è®¡æ—¶å˜é‡
+//³õÊ¼»¯¼ÆÊ±Ê±¼ä
 long complementary_time = 0;
-
-//å®šä¹‰æ—‹è½¬æ¬¡æ•°
+//³õÊ¼»¯Ğı×ª´ÎÊı£¬ÎªÁËÈÃĞ¡³µ²»»á¹ı¶È²¹³¥Ğı×ª
 int times_of_turns = 0;
-
-//è®°å½•æ— æ•Œäººæ—¶ï¼Œå·¦ä¾§è¾¹ç•Œçš„è·ç¦»
+//¼ÇÂ¼ÎŞµĞÈËÊ±£¬×ó²à±ß½çµÄ¾àÀë
 int last_detect_left = 0;
-
-//è®°å½•æ— æ•Œäººæ—¶ï¼Œå³ä¾§è¾¹ç•Œçš„è·ç¦»
+//¼ÇÂ¼ÎŞµĞÈËÊ±£¬ÓÒ²à±ß½çµÄ¾àÀë
 int last_detect_right = 0;
-
-//è®°å½•ä¸¤ä¾§æ¢æµ‹å™¨çš„æ•°å€¼æ€»å’Œï¼Œæ²¡ç”¨
-int last_detect_sum = 1200;
-
-//å¯¹é½æ—¶åˆ¤æ–­æ˜¯å¦å·²ç»å¯¹é½è¿‡
-int alignment_only_once = 0;
-
-//å®šä¹‰å‰æ–¹æ˜¯å¦æ£€æµ‹åˆ°ç‰©ä½“çš„å˜é‡
+//³õÊ¼»¯Ç°·½ÊÇ·ñ¼ì²âµ½ÎïÌåµÄ±äÁ¿£¬ÊÇÎªÁËÔÚ¼ì²âµ½ÎïÌåºó½ûÓÃÇ°½øºÍ¶ÔÆë¶¯×÷
 int detect_if_detected = DETECT_IF_DETECTED_NO;
-
-//æ›´æ–°æ—¶çš„æš‚å­˜å˜é‡
+//¸üĞÂÊ±µÄÔİ´æ±äÁ¿£¬ÔÚ¸üĞÂ¾àÀëÖĞºÍÅĞ¶ÏÌ¨ÉÏÌ¨ÏÂÊ±ÓÃ£¬³õÊ¼»¯Õâ¸öÊÇÎªÁË·ÀÖ¹Á½´Î¼ì²âµÄÖµ²»Í¬
 int temp_analogRead_A1 = 0;
 int temp_analogRead_A0 = 0;
 
 /**
- * å®šä¹‰è½¬å‘é€Ÿåº¦ï¼ˆ0-127ï¼‰
+ * ÊµÀı»¯¶ÔÏóºÍÒ»Ğ©×¼±¸ÉèÖÃ
  */
-// #define TURN_SPEED_FAST 127
-// #define TURN_SPEED_MIDDLE 100
-// #define TURN_SPEED_SLOW 100
+//ĞÂ½¨Ò»¸öÄ£Äâ´®¿Ú,S1=P11,S2=P10£¬Èç¹ûÒªÓÃĞÂµÄ°å×Ó¿ÉÄÜ»á²»Í¬
+SoftwareSerial serial = SoftwareSerial(DRIVER_S2,DRIVER_S1);//???
 
-
-//ç”¨äºå‚¨å­˜æ¢æµ‹å™¨æ”¶é›†åˆ°çš„æ•°æ®
-//int infrared[5] = {no,no,no,no,no};
-
-// //å®šä¹‰æ—¥å¿—åœ°å€
-// int addr = 0;
-
-// //å®šä¹‰ä¸Šä¸€æ¬¡çš„è½¬å‘ç§»åŠ¨çŠ¶æ€
-// int last_move_status = 0;
-
-// //å®šä¹‰æ—¥å¿—è®°å½•æ¬¡æ•°
-// int log_times = 0;
-
-// //å®šä¹‰æ—¶é—´èµ·å§‹å¤„
-// long time_start = 0;
-
-// //å®šä¹‰æ˜¯å¦å·²ç»å¼€å§‹è®¡æ—¶ï¼Œ1ä¸ºå·²ç»å¼€å§‹ï¼Œ0ä¸ºæœªå¼€å§‹
-// int time_temp = 0;
-
-// //å®šä¹‰æ—¥å¿—çŠ¶æ€
-// int time_status = 0;
-
-//æ–°å»ºä¸€ä¸ªæ¨¡æ‹Ÿä¸²å£,S1=P11,S2=P10
-SoftwareSerial serial = SoftwareSerial(DRIVER_S2,DRIVER_S1);
-
-//åˆ©ç”¨åˆšæ‰æ–°å»ºçš„ä¸²å£å’Œé€šä¿¡è¶…æ—¶å€¼æ¥æ–°å»ºä¸€ä¸ªå¯¹è±¡
+//ÀûÓÃ¸Õ²ÅĞÂ½¨µÄ´®¿ÚºÍÍ¨ĞÅ³¬Ê±ÖµÀ´ĞÂ½¨Ò»¸ö¶ÔÏó
 RoboClaw roboclaw = RoboClaw(&serial,TIME_OUT);
 
-//å®šä¹‰æ—¥å¿—æ ¼å¼
-// struct MyObject {
-//     //æ‰§è¡Œæ¬¡æ•°
-//     int times;
-//     //è®°å½•çŠ¶æ€
-//     /**
-//      * çŠ¶æ€è§„å®šï¼šå·¦-1ï¼Œå·¦å‰-2ï¼Œå³å‰-4ï¼Œå³-5
-//      */
-//     int statue;
-//     //è®°å½•æ—¶é—´ï¼Œåº”è¯¥æ˜¯ä¸€æ¬¡å®Œæ•´è½¬å‘æ‰€ç”¨çš„æ—¶é—´
-//     long time;
-// };
 
-//åºŸé™¤å‡½æ•°ä»¥ä¸‹---------------------------------------------------------------------------------------------
-//åºŸé™¤å‡½æ•°ä»¥ä¸‹---------------------------------------------------------------------------------------------
-//åºŸé™¤å‡½æ•°ä»¥ä¸‹---------------------------------------------------------------------------------------------
-//åºŸé™¤å‡½æ•°ä»¥ä¸‹---------------------------------------------------------------------------------------------
-
-//è¡Œè¿›ç¨‹åº
-// void move(int status){
-//     switch (status){
-//     case ON_LEFT:
-//         //çŠ¶æ€1
-//         //record(1);
-//         //åœ¨æ­£å·¦æ–¹
-//         //left();
-//         //goleft(goSpeedFast);
-//         break;
-//     case ON_LEFT_FRONT:
-//         //çŠ¶æ€2
-//         //record(2);
-//         //åœ¨å·¦å‰æ–¹
-//         //left_front();
-//         //goleft(goSpeedSlow);
-//         break;
-//     case ON_FRONT:
-//         //çŠ¶æ€3
-//         //record(3);
-//         //åœ¨å‰æ–¹
-//         //forward();
-//         //gofront();
-//         break;
-//     case ON_RIGHT_FRONT:
-//         //çŠ¶æ€4
-//         //record(4);
-//         //åœ¨å³å‰æ–¹
-//         //right_front();
-//         //goright(goSpeedSlow);
-//         break;
-//     case ON_RIGHT:
-//         //çŠ¶æ€5
-//         //record(5);
-//         //åœ¨æ­£å³æ–¹
-//         //right();
-//         //goright(goSpeedFast);
-//         break;
-//     case ON_NOTHING:
-//         //çŠ¶æ€6
-//         //record(6);
-//         //æš‚æ—¶æ²¡æœ‰æ£€æµ‹åˆ°
-//         //å¦‚æœæ²¡æœ‰æ£€æµ‹åˆ°ï¼Œå¯èƒ½æ˜¯çœŸçš„æ²¡æœ‰æ£€æµ‹åˆ°ï¼Œä¹Ÿæœ‰å¯èƒ½æ˜¯åœ¨è½¬å¼¯è¿‡ç¨‹ä¸­åˆšåˆšå¥½è½¬åˆ°äº†ä¸€ä¸ªä¸­é—´çš„ä½ç½®-
-//         //æ‰€ä»¥ä¸ä½œä¸º
-//         //turnLeft();
-//         //stop();
-//         //gonothing();
-//         break;
-//     default:
-//         //çŠ¶æ€7
-//         //record(7);
-//         //å…¶ä»–æƒ…å†µ
-//         break;
-//     }
-//     //roboclaw.ForwardM1(address, speed);
-//     //roboclaw.ForwardM2(address, speed);
-// }
-
+//¶¯×÷×éÒÔÏÂ-----------------------------------------------------------------------------------------------
+//¶¯×÷×éÒÔÏÂ-----------------------------------------------------------------------------------------------
+//¶¯×÷×éÒÔÏÂ-----------------------------------------------------------------------------------------------
+//¶¯×÷×éÒÔÏÂ-----------------------------------------------------------------------------------------------
+//¶¯×÷×éÒÔÏÂ-----------------------------------------------------------------------------------------------
 /**
- * åŸåœ°è½¬å‘å‡½æ•°
+ * ¶ÔÆë±ß½çÇ½ºóÏòÇ°×ßÒ»¶Î¾àÀë
  */
-// void faceToEnemy(){
-
-//     switch (detect()){
-//     case ON_LEFT:
-//         turnLeftPosition(TURNLEFT90);
-//         break;
-//     case ON_LEFT_FRONT:
-//         turnLeftPosition(TURNLEFT_SMALL);
-//         break;
-//     case ON_RIGHT:
-//         turnRightPosition(TURNRIGHT90);
-//         break;
-//     case ON_RIGHT_FRONT:
-//         turnRightPosition(TURNRIGHT_SMALL);
-//         break;
-//     default:
-//         stop();
-//         break;
-//     }
-    // switch (detect()){
-    // // case ON_LEFT:
-    // //     //çŠ¶æ€1
-    // //     //record(1);
-    // //     //åœ¨æ­£å·¦æ–¹
-    // //     //time_begin(onleft);
-    // //     //turnLeft(TURN_SPEED_FAST);
-    // //     //time_begin(ON_LEFT);
-    // //     turnLeftPosition(TURNLEFT90);
-    // //     //record();
-    // //     //delay(2000);
-    // //     //for(;;){}
-    // //     break;
-    // case ON_LEFT:
-    //     //çŠ¶æ€2
-    //     //record(2);
-    //     //åœ¨å·¦å‰æ–¹
-    //     //time_begin(onleftfront);
-    //     //turnLeft(TURN_SPEED_MIDDLE);
-    //     turnLeftPosition(TURNLEFT90);
-    //     //delay(2000);
-    //     //for(;;){}
-    //     break;
-    // // case ON_FRONT:
-    // //     //çŠ¶æ€3
-    // //     //record(3);
-    // //     //åœ¨å‰æ–¹
-    // //     //record();
-    // //     //forward();
-    // //     //delay(14);
-    // //     stop();
-    // //     //stop_stuck();
-    // //     //stop_stuck_fixed();
-    // //     break;
-    // case ON_RIGHT:
-    //     //çŠ¶æ€4
-    //     //record(4);
-    //     //åœ¨å³å‰æ–¹
-    //     //time_begin(onrightfront);
-    //     //right_front();
-    //     turnRightPosition(TURNRIGHT90);
-    //     //turnRight(TURN_SPEED_MIDDLE);
-    //     //for(;;){}
-    //     //delay(2000);
-    //     break;
-    // // case ON_RIGHT:
-    // //     //çŠ¶æ€5
-    // //     //record(5);
-    // //     //åœ¨æ­£å³æ–¹
-    // //     //time_begin(onright);
-    // //     //right();
-    // //     turnRightPosition(TURNRIGHT90);
-    // //     //turnRight(TURN_SPEED_FAST);
-    // //     //for(;;){}
-    // //     //delay(2000);
-    // //     break;
-    // case ON_LEFT_FRONT:
-    //     //çŠ¶æ€7
-    //     //record(6);
-    //     //åœ¨å·¦å‰æ–¹æ›´é è¿‘å‰æ–¹
-    //     //turnLeft(TURN_SPEED_SLOW);
-    //     turnLeftPosition(TURNLEFT_SMALL);
-    //     //delay(2000);
-    //     //for(;;){}
-    //     break;
-    // case ON_RIGHT_FRONT:
-    //     //çŠ¶æ€8
-    //     //record(6);
-    //     //åœ¨å³å‰æ–¹æ›´é è¿‘å‰æ–¹
-    //     //turnRight(TURN_SPEED_SLOW);
-        
-    //     turnRightPosition(TURNRIGHT_SMALL);
-    //     //delay(2000);
-    //     //for(;;){}
-    //     break;
-    // // case onnothing:
-    // //     //çŠ¶æ€6
-    // //     //record(6);
-    // //     //æš‚æ—¶æ²¡æœ‰æ£€æµ‹åˆ°
-    // //     //å¦‚æœæ²¡æœ‰æ£€æµ‹åˆ°ï¼Œå¯èƒ½æ˜¯çœŸçš„æ²¡æœ‰æ£€æµ‹åˆ°ï¼Œä¹Ÿæœ‰å¯èƒ½æ˜¯åœ¨è½¬å¼¯è¿‡ç¨‹ä¸­åˆšåˆšå¥½è½¬åˆ°äº†ä¸€ä¸ªä¸­é—´çš„ä½ç½®-
-    // //     //æ‰€ä»¥ä¸ä½œä¸º
-    // //     break;
-    // default:
-    //     stop();
-    //     //çŠ¶æ€7
-    //     //record(7);
-    //     //å…¶ä»–æƒ…å†µ
-    //     break;
-    // }
-//}
-
-// /**
-//  * å‰æ¢æµ‹å™¨è­¦æˆ’å‡½æ•°ï¼Œä¸€æ—¦ä¸¢å¤±ç›®æ ‡ï¼Œå…ˆå¼€å§‹è®¡æ—¶ï¼Œå¦‚æœè¶…è¿‡ä¸€å®šå€¼å°±åˆ¤å®šä¸¢å¤±ç›®æ ‡
-//  */
-// void detectEnemyFrontAlert(){
-//     delay(200);
-//     if(digitalRead(DETECTOR_FRONT)==DETECT_YES){
-//         stop();
-//     }else{
-//         //if(complementary_time_judge==COMPLEMENTARY_TIME_NO){
-//         complementary_time = millis();
-//         //}
-//         for(;;){
-//             if(millis()-complementary_time>COMPLEMENTARY_TIME_DELAY){
-//                 complementary();
-//                 return;
-//             } 
-//         }
-        
-//     }
-// }
-/**
- * ç›®å‰å¯ä»¥é€šè¿‡åœ¨è¿è¡Œç¨‹åºä¸­ç›´æ¥æ·»åŠ åŠ¨ä½œå®Œæˆï¼Œä¸éœ€è¦çŠ¶æ€å‡½æ•°ï¼Œå…ˆæ”¾ç€
- */
-// void statusForward(){
-//     //åœæ­¢
-//     stop();
-// }
-// void statusleft_front(){
-//     //å‘å·¦æ—‹è½¬
-//     //turnLeft();
-// }
-// void statusright_front(){
-//     //å‘å³æ—‹è½¬
-//     //turnRight();
-// }
-// void statusleft(){
-//     //å‘å·¦æ—‹è½¬
-//     //turnLeft();
-// }
-// void statusright(){
-//     //å‘å³æ—‹è½¬
-//     //turnRight();
-// }
-/**
- * è¡Œè¿›è½¬å‘å‡½æ•°
- */
-// void moveToEnemy(){
-//     switch (detect()){
-//     case ON_LEFT:
-//         //çŠ¶æ€1
-//         //record(1);
-//         //åœ¨æ­£å·¦æ–¹
-//         last_move_status = onleft;
-//         move(on);
-//         break;
-//     case onleftfront:
-//         //çŠ¶æ€2
-//         //record(2);
-//         //åœ¨å·¦å‰æ–¹
-//         last_move_status = onleftfront;
-//         move(onleftfront);
-//         break;
-//     case onfront:
-//         //çŠ¶æ€3
-//         //record(3);
-//         //åœ¨å‰æ–¹
-//         last_move_status = onfront;
-//         move(onfront);
-//         break;
-//     case onrightfront:
-//         //çŠ¶æ€4
-//         //record(4);
-//         //åœ¨å³å‰æ–¹
-//         last_move_status = onrightfront;
-//         move(onrightfront);
-//         break;
-//     case onright:
-//         //çŠ¶æ€5
-//         //record(5);
-//         //åœ¨æ­£å³æ–¹
-//         last_move_status = onright;
-//         move(onright);
-//         break;
-//     case onnothing:
-//         //çŠ¶æ€6
-//         //record(6);
-//         //æš‚æ—¶æ²¡æœ‰æ£€æµ‹åˆ°
-//         //å¦‚æœæ²¡æœ‰æ£€æµ‹åˆ°ï¼Œå¯èƒ½æ˜¯çœŸçš„æ²¡æœ‰æ£€æµ‹åˆ°ï¼Œä¹Ÿæœ‰å¯èƒ½æ˜¯åœ¨è½¬å¼¯è¿‡ç¨‹ä¸­åˆšåˆšå¥½è½¬åˆ°äº†ä¸€ä¸ªä¸­é—´çš„ä½ç½®-
-//         //æ‰€ä»¥ä¸ä½œä¸º
-//         move(onnothing);
-//         break;
-//     default:
-//         //çŠ¶æ€7
-//         //record(7);
-//         //å…¶ä»–æƒ…å†µ
-//         break;
-//     }
-// }
-
-//è®°å½•å¼€å§‹æ—¶é—´
-// void time_begin(int status){
-//     if(time_temp==TIME_NO){
-//         time_start = millis();
-//         time_temp = TIME_YES;
-//         time_status = status;
-//     }
-// }
-
-/**
- * ä¼ æ„Ÿå™¨æ£€æµ‹å‡½æ•°ï¼ˆæœªä½¿ç”¨ï¼‰
- */
-//int detect(){
-    // if(digitalRead(detector5)==LOW){
-    //     //infrared[5] = {no,no,yes,no,no};
-    //     return onright;
-    // }else if(digitalRead(detector1)==LOW){
-    //     //infrared[5] = {no,yes,no,no,no};
-    //     return onleft;
-    // }else if(digitalRead(detector4)==LOW){
-    //     //infrared[5] = {no,no,no,yes,no};
-    //     return onrightfront;
-    // }else if(digitalRead(detector2)==LOW){
-    //     //infrared[5] = {yes,no,no,no,no};
-    //     return onleftfront;
-    // }else if(digitalRead(detector3)==LOW){
-    //     //infrared[5] = {no,no,no,no,yes};
-    //     return onfront;
-    // }else{
-    //     //infrared[5] = {no,no,no,no,no};
-    //     return onnothing;
-    // }
-
-    /**
-     * åœ¨è¿™ä¸ªæ¨¡å—ä¸­ï¼Œå…ˆæ£€æµ‹æœ€ä¾§è¾¹ï¼Œä¾æ¬¡å¾€å‰ï¼Œä½†æ˜¯ä¼šæœ‰ä¸€äº›é—®é¢˜ï¼Œå¾…ç”¨
-     */
-    // if(detect_left()==yes){
-    //     return onleft;
-    // }else if(detect_right()==yes){
-    //     return onright;
-    // }else if(detect_leftfront()==yes){
-    //     return onleftfront;
-    // }else if(detect_rightfront()==yes){
-    //     return onrightfront;
-    // }else if(detect_leftfrontmore()==yes){
-    //     return onleftfrontmore;
-    // }else if(detect_rightfrontmore()==yes){
-    //     return onrightfrontmore;
-    // }else if(detect_front()==yes){
-    //     return onfront;
-    // }else{
-    //     return onnothing;
-    // }
-
-    // /**
-    //  * è¿™ä¸ªæ¨¡å—ä¸­ï¼Œä¼˜å…ˆæ£€æµ‹å‰æ–¹ï¼Œåœ¨ä»ä¾§è¾¹å‘å‰æ–¹é€’è¿›
-    //  */
-    // if(detectFront()==DETECT_YES){
-    //     return ON_FRONT;
-    // // }else if(detectLeftFrontMore()==DETECT_YES){
-    // //     return ON_LEFT_FRONT_MORE;
-    // // }else if(detectRightFrontMore()==DETECT_YES){
-    // //     return ON_RIGHT_FRONT_MORE;
-    // }else if(detectLeftFront()==DETECT_YES){
-    //     return ON_LEFT_FRONT;
-    // }else if(detectRightFront()==DETECT_YES){
-    //     return ON_RIGHT_FRONT;
-    // }else if(detectLeft()==DETECT_YES){
-    //     return ON_LEFT;
-    // }else if(detectRight()==DETECT_YES){
-    //     return ON_RIGHT;
-    // }else{
-    //     return ON_NOTHING;
-    // }
-
-//     if(detectFront()==DETECT_YES){
-//         return ON_FRONT;
-//     }else if(detectLeft()==DETECT_YES){
-//         return ON_LEFT;
-//     }else if(detectRight()==DETECT_YES){
-//         return ON_RIGHT;
-//     }else if(detectLeftFront()==DETECT_YES){
-//         return ON_LEFT_FRONT;
-//     }else if(detectRightFront()==DETECT_YES){
-//         return ON_RIGHT_FRONT;
-//     }else if(detectLeftFrontMore()==DETECT_YES){
-//         return ON_LEFT_FRONT_MORE;
-//     }else if(detectRightFrontMore()==DETECT_YES){
-//         return ON_RIGHT_FRONT_MORE;
-    
-    
-//     }else{
-//         return ON_NOTHING;
-//     }
-//}
-// long detect_time = 0;
-// int detect_time_if_begun = COMPLEMENTARY_TIME_NO;
-// void detectEnemyFrontAlert(){
-//     while (digitalRead(DETECTOR_FRONT)==DETECT_YES){
-//         stop();
-//     }
-//     if(digitalRead(DETECTOR_FRONT)==DETECT_NO && timing==ENABLE_TO_TIMING){
-//         if(complementary_time_judge==COMPLEMENTARY_TIME_NO){
-//             complementary_time = millis();
-//             complementary_time_judge = COMPLEMENTARY_TIME_YES;
-//         }
-//         if(millis()-complementary_time>COMPLEMENTARY_TIME_DELAY){
-//             complementary_time_judge = COMPLEMENTARY_TIME_NO;
-//             detect_if_detected = DETECT_IF_DETECTED_NO;
-//             timing = NOT_ENABLE_TO_TIMING;
-//             //uploadDetect();
-//             //return;
-//             switch (last_detect_side){
-//             case DETECT_LAST_FRONT:
-//                 return;
-//                 break;
-//             case DETECT_LAST_LEFT:
-//                 turnLeftPosition(TURN_LEFT_SIDE_COMPLEMENTARY);
-//                 last_detect_side = DETECT_LAST_FRONT;
-//                 uploadDetect();
-//                 return;
-//                 break;
-//             case DETECT_LAST_RIGHT:
-//                 turnRightPosition(TURN_RIGHT_SIDE_COMPLEMENTARY);
-//                 last_detect_side = DETECT_LAST_FRONT;
-//                 uploadDetect();
-//                 return;
-//                 break;
-//             }
-//         }
-//     }
-// }
-// //åœæ­¢åä¿æŒä¸åŠ¨â€”â€”ä¿®æ”¹å
-// void stop_stuck_fixed(){
-//     //for(int i=0;i<1500;++i){
-//         stop_stuck();
-//         //delay(1);
-//     //}
-// }
-//å­˜å‚¨æ—¥å¿—å‡½æ•°
-// void record(){
-//     if(time_temp==TIME_YES){
-//         MyObject mylog;
-//         mylog.times = ++log_times;
-//         mylog.time = millis()-time_start;
-//         //mylog.time = 12233;
-//         mylog.statue = time_status;
-//         EEPROM.put(addr,mylog);
-//         addr += sizeof(MyObject);
-//         time_temp = TIME_NO;
-//     }
-//     // if(addr>1000){
-
-//     // }else{
-//     //     MyObject jilu;
-//     //     jilu.time_record = millis();
-//     //     jilu.status = choice;
-//     //     EEPROM.put(addr,jilu);
-//     //     addr += sizeof(MyObject);
-//     // }
-// }
-//æ£€æµ‹å·¦ä¾§ä¼ æ„Ÿå™¨
-// int detectLeft(){
-//     // if(analogRead(DETECTOR1)<313){
-//     //     return DETECT_YES;
-//     // }else{
-//     //    return DETECT_NO; 
-//     // }
-
-//     if(digitalRead(DETECTOR1)==LOW){
-//         return DETECT_YES;
-//     }else{
-//         return DETECT_NO;
-//     }
-// }
-//æ£€æµ‹å·¦åå‰ä¼ æ„Ÿå™¨
-// int detectLeftFront(){
-//     // if(digitalRead(DETECTOR2)==LOW){
-//     //     return DETECT_YES;
-//     // }else{
-//     //     return DETECT_NO;
-//     // }
-    
-//     if(analogRead(DETECTOR2)<310){
-//         return DETECT_YES;
-//     }else{
-//        return DETECT_NO; 
-//     }
-// }
-//æ£€æµ‹å‰åå·¦ä¼ æ„Ÿå™¨
-// int detectLeftFrontMore(){
-//     if(analogRead(DETECTOR3)<310){
-//         return DETECT_YES;
-//     }else{
-//        return DETECT_NO; 
-//     }
-// }
-//æ£€æµ‹å‰æ–¹ä¼ æ„Ÿå™¨
-// int detectFront(){
-//     if(digitalRead(DETECTOR3)==LOW){
-//         return DETECT_YES;
-//     }else{
-//         return DETECT_NO;
-//     }
-// }
-//æ£€æµ‹å³æ–¹ä¼ æ„Ÿå™¨
-// int detectRight(){
-//     // if(analogRead(DETECTOR7)<317){
-//     //     return DETECT_YES;
-//     // }else{
-//     //    return DETECT_NO; 
-//     // }
-
-//     if(digitalRead(DETECTOR5)==LOW){
-//         return DETECT_YES;
-//     }else{
-//         return DETECT_NO;
-//     }
-// }
-//æ£€æµ‹å³åå‰ä¼ æ„Ÿå™¨
-// int detectRightFront(){
-//     // if(digitalRead(DETECTOR4)==LOW){
-//     //     return DETECT_YES;
-//     // }else{
-//     //     return DETECT_NO;
-//     // }
-
-//     if(analogRead(DETECTOR4)<333){
-//         return DETECT_YES;
-//     }else{
-//        return DETECT_NO; 
-//     }
-// }
-//æ£€æµ‹å‰åå³ä¼ æ„Ÿå™¨
-// int detectRightFrontMore(){
-//     if(analogRead(DETECTOR5)<333){
-//         return DETECT_YES;
-//     }else{
-//        return DETECT_NO; 
-//     }
-    
-// }
-
-//åºŸé™¤å‡½æ•°ä»¥ä¸Š---------------------------------------------------------------------------------------------
-//åºŸé™¤å‡½æ•°ä»¥ä¸Š---------------------------------------------------------------------------------------------
-//åºŸé™¤å‡½æ•°ä»¥ä¸Š---------------------------------------------------------------------------------------------
-//åºŸé™¤å‡½æ•°ä»¥ä¸Š---------------------------------------------------------------------------------------------
-
-//åŠ¨ä½œç»„ä»¥ä¸‹-----------------------------------------------------------------------------------------------
-//åŠ¨ä½œç»„ä»¥ä¸‹-----------------------------------------------------------------------------------------------
-//åŠ¨ä½œç»„ä»¥ä¸‹-----------------------------------------------------------------------------------------------
-//åŠ¨ä½œç»„ä»¥ä¸‹-----------------------------------------------------------------------------------------------
-/**
- * å¯¹é½è¾¹ç•Œå¢™åå‘å‰èµ°ä¸€æ®µè·ç¦»
- */
-void getReadyToGoOnStage(){
+void goForwardAfterAlignedTheWall(){
     // goFrontPosition();
     // goFrontPosition();
     // goFrontPosition();
@@ -818,9 +296,9 @@ void getReadyToGoOnStage(){
 }
 
 /**
- * è½¬å‘è¾…åŠ©å‡½æ•°ï¼Œç”¨äºé˜²æ­¢åˆ€åˆƒæ’åˆ°å°å­ä¸Š
+ * ×ªÏò¸¨Öúº¯Êı£¬ÓÃÓÚ·ÀÖ¹µ¶ÈĞ²åµ½Ì¨×ÓÉÏ
  */
-void GoStageAssistsTheRightTurn(){
+void preventsTheBladeFromGettingStuckUnderTable(){
     // roboclaw.ForwardM1(ADDRESS, 30);
     // roboclaw.ForwardM2(ADDRESS, 10);
     roboclaw.ResetEncoders(ADDRESS);
@@ -832,43 +310,42 @@ void GoStageAssistsTheRightTurn(){
 }
 
 /**
- * åˆ¤æ–­åœ¨å°ä¸Šè¿˜æ˜¯åœ¨å°ä¸‹
+ * ÅĞ¶ÏÔÚÌ¨ÉÏ»¹ÊÇÔÚÌ¨ÏÂ
  */
 void judgeWhetherOnStageOrUnderTheStage(){
-    if(temp_analogRead_A0+temp_analogRead_A1<580 || analogRead(DETECTOR_BACK_A2)<300){
-        judgmentUnderTheStage();
+    if(temp_analogRead_A0+temp_analogRead_A1<580 || analogRead(DETECTOR_BACK_LEFT_A1)<300){//???
+        DecidedTheCarHadFallenOff();
     }else{
         //pinMode(13,OUTPUT);
-        digitalWrite(13,LOW);
+        digitalWrite(13,LOW);//???
     }
 }
 
 /**
- * å¯¹é½åæ”¹å˜ä¸Šå°ä½ç½®
+ * ¶ÔÆëºó¸Ä±äÉÏÌ¨Î»ÖÃ
  */
-void changeThePositionOnStage(){
-    if(analogRead(DETECTOR_LEFT_A0)<600){
+void changeThePositionGoingToStage(){
+    if(analogRead(DETECTOR_LEFT_A3)<600){
         turnRightPosition(TURNRIGHT90);
         delay(100);
-        OnStagePositionMove(0,ON_STAGE_SPEED);
+        forChangeThePositionToMoveAlongWall(0,ON_STAGE_SPEED);
         delay(100);
         //delay(2000);
         turnRightPosition(TURNRIGHT90);
     }else{
         turnLeftPosition(TURNLEFT90);
         delay(100);
-        OnStagePositionMove(1,ON_STAGE_SPEED);
+        forChangeThePositionToMoveAlongWall(1,ON_STAGE_SPEED);
         delay(100);
         //delay(2000);
         turnLeftPosition(TURNLEFT90);
     }
-    
 }
 
 /**
- * ä¸ºäº†æ”¹å˜ä¸Šå°ä½ç½®ï¼Œå‘å‰èµ°
+ * ÎªÁË¸Ä±äÉÏÌ¨Î»ÖÃ£¬ÏòÇ°×ß
  */
-void OnStagePositionMove(int which_side,int speed){
+void forChangeThePositionToMoveAlongWall(int which_side,int speed){//???
     //int last_deistance_from_wall;
     if(which_side==0){
         int time_go_along_with_wall = millis();
@@ -876,7 +353,7 @@ void OnStagePositionMove(int which_side,int speed){
         //last_deistance_from_wall = analogRead(DETECTOR_LEFT_A0);
         
         //delay(200);
-            if(analogRead(DETECTOR_LEFT_A0)>238){
+            if(analogRead(DETECTOR_LEFT_A3)>238){
                 roboclaw.ForwardM1(ADDRESS, speed);
                 roboclaw.ForwardM2(ADDRESS, speed+13);
             }else if(analogRead(DETECTOR_LEFT_A0)<200){
@@ -907,103 +384,88 @@ void OnStagePositionMove(int which_side,int speed){
             //delay(200);
         }while(millis()-time_go_along_with_wall<2800);
     }
-    
-    
     // roboclaw.ResetEncoders(ADDRESS);
     // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2000, DECCEL1, position, ACCEL2, 2000, DECCEL2, position, 1);
 }
 
 /**
- * å°ä¸‹åŠ¨ä½œï¼Œæ­¤æ—¶å·²ç»åˆ¤æ–­æ‘”ä¸‹å°äº†
+ * Ì¨ÏÂ¶¯×÷£¬´ËÊ±ÒÑ¾­ÅĞ¶ÏË¤ÏÂÌ¨ÁË
  */
-void judgmentUnderTheStage(){
+void DecidedTheCarHadFallenOff(){
     //pinMode(13,OUTPUT);
-    digitalWrite(13,HIGH);
+    digitalWrite(13,HIGH);//???
     // goFrontPosition();
     // goFrontPosition();
     // goFrontPosition();
     // goFrontPosition();
-    while(analogRead(DETECTOR_BACK_A2)-analogRead(DETECTOR_BACK_A3)>20 || analogRead(DETECTOR_BACK_A2)+analogRead(DETECTOR_BACK_A3)>550){
+    //×ªÏò£¬Ê¹³µÂÖ×ªÏò±ß½ç
+    while(analogRead(DETECTOR_BACK_LEFT_A1)-analogRead(DETECTOR_BACK_RIGHT_A0)>20 || analogRead(DETECTOR_BACK_LEFT_A1)+analogRead(DETECTOR_BACK_RIGHT_A0)>550){
         turnLeftPosition(3*TURN_SLOW_POSITION);
-        if(analogRead(DETECTOR_LEFT_A0)<180){
+        //·ÀÖ¹µ¶ÈĞ¿¨×¡
+        if(analogRead(DETECTOR_LEFT_A3)<180){
             // turnLeftPosition(4*TURN_SLOW_POSITION);
             // goFrontPosition();
-            GoStageAssistsTheRightTurn();
+            preventsTheBladeFromGettingStuckUnderTable();
         }
     }
     // while(analogRead(DETECTOR_BACK_A2)-analogRead(DETECTOR_BACK_A3)>2 && analogRead(DETECTOR_BACK_A2)>analogRead(DETECTOR_BACK_A3)){
     //     turnLeftPosition(TURN_SLOW_POSITION);
     // }
     //goBack(GO_BAKC_SPEED)
-    backOnTheStage();
+    //ºóÍË£¬ÓÃ±ß½çÀ´¶ÔÕı
+    BackToTouchTheWall();
     delay(1500);
-    getReadyToGoOnStage();
-    changeThePositionOnStage();
+    //¶ÔÕıºóÇ°½øÒ»¶Î
+    goForwardAfterAlignedTheWall();
+    //¸Ä±äÉÏÌ¨µÄÎ»ÖÃ
+    changeThePositionGoingToStage();
     //delay(1500);
     //stop();
-    while(1){
-       baseline(); 
-    }
+    // while(1){
+    //    baseline(); 
+    // }
     //
     //delay(10000);
 }
 
 /**
- * åé€€å‡½æ•°ï¼Œä¸ºäº†åé€€æŠµåœ¨è¾¹ç•Œå¢™ä¸Šå¯¹é½ç”¨
+ * ºóÍËº¯Êı£¬ÎªÁËºóÍËµÖÔÚ±ß½çÇ½ÉÏ¶ÔÆëÓÃ
  */
-void backOnTheStage(){
+void BackToTouchTheWall(){
     roboclaw.BackwardM1(ADDRESS,20);
     roboclaw.BackwardM2(ADDRESS,20);
 }
+
+
+//void detectEnemy(){//¾É
 /**
- * åˆ¤æ–­ä¾§è¾¹æ˜¯å¦èƒ½æ£€æµ‹åˆ°æ•Œäºº
- * ä¼šå…ˆåˆ¤æ–­ä¾§è¾¹è·ç¦»æ•°æ®æ˜¯å¦å‘ç”Ÿå¤§çš„å˜åŒ–ï¼Œè‹¥å‘ç”Ÿï¼Œåˆ™å‘é‚£ä¸ªæ–¹å‘è½¬å‘
- * ä¹‹åä¼šæ›´æ–°ä¸¤ä¾§çš„è·ç¦»å¸¸æ•°ï¼ˆä¸æ˜¯ä¸€ç›´çš„å¸¸æ•°ï¼‰
+ * ÅĞ¶Ï²à±ßÊÇ·ñÄÜ¼ì²âµ½µĞÈË
+ * »áÏÈÅĞ¶Ï²à±ß¾àÀëÊı¾İÊÇ·ñ·¢Éú´óµÄ±ä»¯£¬Èô·¢Éú£¬ÔòÏòÄÇ¸ö·½Ïò×ªÏò
+ * Ö®ºó»á¸üĞÂÁ½²àµÄ¾àÀë³£Êı£¨²»ÊÇÒ»Ö±µÄ³£Êı£©
  */
-void detectEnemy(){
+void DetectTheTwoSidesOfTheRightSideForEnemies(){
     //if()
     //last_detect_sum = analogRead(DETECTOR_LEFT_A0)+analogRead(DETECTOR_RIGHT_A1);
     // Serial.print("A0 cha:");
     // Serial.print(last_detect_left-analogRead(DETECTOR_LEFT_A0));
     // Serial.print(".....A1 cha:");
     // Serial.println(last_detect_right-analogRead(DETECTOR_RIGHT_A1));
-    if(last_detect_left-analogRead(DETECTOR_LEFT_A0)>=MIN_DETECT_CHANGE && analogRead(DETECTOR_LEFT_A0)+analogRead(DETECTOR_RIGHT_A1)<1100){
-        turnLeftPosition(TURNLEFT90);
+    if(last_detect_left-analogRead(DETECTOR_LEFT_A3)>=MIN_DETECT_CHANGE && analogRead(DETECTOR_LEFT_A3)+analogRead(DETECTOR_RIGHT_A2)<1100){
+        turnLeftPosition(TURN_LEFT_POSITION_90);
         uploadDetect();
-        alignment_only_once = 0;
-    }else if(last_detect_right-analogRead(DETECTOR_RIGHT_A1)>=MIN_DETECT_CHANGE && analogRead(DETECTOR_LEFT_A0)+analogRead(DETECTOR_RIGHT_A1)<1100){
-        turnRightPosition(TURNRIGHT90);
+        //alignment_only_once = 0;
+    }else if(last_detect_right-analogRead(DETECTOR_RIGHT_A2)>=MIN_DETECT_TO_90_ENEMY_JUDGE && analogRead(DETECTOR_LEFT_A3)+analogRead(DETECTOR_RIGHT_A2)<1100){
+        turnRightPosition(TURN_RIGHT_POSITION_90);
         uploadDetect();
-        alignment_only_once = 0;
+        //alignment_only_once = 0;
     }
 }
 
 /**
- * å¯¹æ­£å‡½æ•°ï¼ˆæœªä½¿ç”¨ï¼‰
- * ä¼šæ ¹æ®åé¢çš„ä¸¤ä¸ªä¼ æ„Ÿå™¨è¿›è¡Œå’Œè¾¹ç•Œå¯¹é½
- * å¦‚æœå¯¹é½ï¼ˆæœ‰ä¸€å®šçš„è¯¯å·®å¿½è§†ï¼‰ï¼Œåˆ™ä¼šæ›´æ–°ä¸¤ä¾§çš„è·ç¦»å¸¸æ•°ï¼ŒåŒæ—¶å‰è¿›ä¸€ç‚¹
+ * ¶ÔÆëº¯Êı£¬ÔÚÃ¿Ò»´Î¶ÔÆëºó¶¼»áÅĞ¶ÏĞ¡³µÎ»ÖÃ
  */
-//å¯¹æ­£å‡½æ•°1ï¼Œé€šè¿‡åªæ£€æµ‹ä¸€æ¬¡æ¥é™åˆ¶åˆ·æ–°ä¾§è¾¹å€¼
-void alignmentOnlyOnce(){
-    if(analogRead(DETECTOR_BACK_A2)-analogRead(DETECTOR_BACK_A3)>OffSET_THRESHOLD){
-        turnLeftPosition(TURN_SLOW_POSITION);
-    }else if(analogRead(DETECTOR_BACK_A3)-analogRead(DETECTOR_BACK_A2)>OffSET_THRESHOLD){
-        turnRightPosition(TURN_SLOW_POSITION);
-    }else{
-        //baseline();
-        //last_detect_left = 
-        if(alignment_only_once==0){
-            uploadDetect();
-            alignment_only_once = 1;
-        }
-        goFrontPosition();
-    }
-}
-
-/**
- * å¯¹é½å‡½æ•°ï¼Œåœ¨æ¯ä¸€æ¬¡å¯¹é½åéƒ½ä¼šåˆ¤æ–­å°è½¦ä½ç½®
- */
-void alignmentMoreStringent(){
+//void alignmentMoreStringent(){//¾É
+void AlignWithWalls(){
     if(analogRead(DETECTOR_BACK_A2)+analogRead(DETECTOR_BACK_A3)>=1700){
         turnLeftPosition(2*TURN_SLOW_POSITION);
     }else if(analogRead(DETECTOR_BACK_A2)-analogRead(DETECTOR_BACK_A3)>OffSET_THRESHOLD){
@@ -1011,14 +473,13 @@ void alignmentMoreStringent(){
     }else if(analogRead(DETECTOR_BACK_A3)-analogRead(DETECTOR_BACK_A2)-5>OffSET_THRESHOLD){
         turnRightPosition(TURN_SLOW_POSITION);
     }else{
-        
         uploadDetect();
         goFrontPosition();
     }
     judgeWhetherOnStageOrUnderTheStage();
 }
 
-//è·ç¦»æ›´æ–°å‡½æ•°ï¼Œä¼šå¿½ç•¥ä¼ æ„Ÿå™¨è¿”å›çš„æ— ä¿¡å·å€¼
+//¾àÀë¸üĞÂº¯Êı£¬»áºöÂÔ´«¸ĞÆ÷·µ»ØµÄÎŞĞÅºÅÖµ
 void uploadDetect(){
     //delay(100); temp_analogRead_A1-last_detect_right<ABNORMAL_INCREASE && temp_analogRead_A0-last_detect_left<ABNORMAL_INCREASE
     temp_analogRead_A1 = analogRead(DETECTOR_RIGHT_A1);
@@ -1034,8 +495,10 @@ void uploadDetect(){
     // last_detect_right = analogRead(DETECTOR_RIGHT_A1);
 }
 
-//åé€€è‡³è¿œå¤„çš„è¾¹çº¿é™„è¿‘
-void BackToTheDefensivePosition(){
+//ºóÍËÖÁÔ¶´¦µÄ±ßÏß¸½½ü
+//void BackToTheDefensivePosition(){//¾É
+//void AftertheEnemyDownAndReturnToTheSideOfTheField(){//¾É
+void detectsWhetherTheEdgeIsReachedWhenPushingEnemy(){
     // for(goBackOneStep();;){
     //     if(analogRead(DETECTOR_BACK_A2)-analogRead(DETECTOR_BACK_A3)>OffSET_THRESHOLD){
     //         turnLeftPosition(TURN_SLOW_POSITION);
@@ -1073,8 +536,9 @@ void BackToTheDefensivePosition(){
     //goBackOneStep();
 }
 
-//åé€€å‡½æ•°ï¼Œåé€€è·ç¦»ä¸ºå°å­çš„å‚ç›´è·ç¦»å°ä¸€ç‚¹ï¼Œç”¨äºå°†æ•Œäººæ¨ä¸‹ååé€€
-void goBack(){
+//ºóÍËº¯Êı£¬½«µĞÈËÍÆÏÂÈ¥ºó·µ»Ø·ÀÊØÎ»ÖÃ
+//void goBack(){//¾É
+void AftertheEnemyDownAndReturnToTheSideOfTheField(){
     roboclaw.ResetEncoders(ADDRESS);
     // roboclaw.BackwardM1(ADDRESS,speed);
     // roboclaw.BackwardM2(ADDRESS,speed-1);
@@ -1122,12 +586,13 @@ void goBack(){
 
 
 /**
- * ä¾§å‰æ–¹æ£€æµ‹æ•Œæ–¹å‡½æ•°
- * ä¼šå‘é‚£ä¸ªæ–¹å‘è¿›è¡Œè½¬å‘
- * åˆ·æ–°ä¸Šä¸€æ¬¡ç‰©ä½“æ–¹å‘
- * è¿›å…¥å‰æ–¹æ¢æµ‹å™¨è­¦æˆ’æ¨¡å¼
+ * ²àÇ°·½¼ì²âµĞ·½º¯Êı
+ * »áÏòÄÇ¸ö·½Ïò½øĞĞ×ªÏò
+ * Ë¢ĞÂÉÏÒ»´ÎÎïÌå·½Ïò
+ * ½øÈëÇ°·½Ì½²âÆ÷¾¯½äÄ£Ê½
  */
-void detectEnemySide(){
+//void detectEnemySide(){//¾É
+void SideFrontToDetectIfThereAreEnemies(){
     if(digitalRead(DETECTOR_LEFT_FRONT)==DETECT_YES){
         turnLeftPosition(TURN_LEFT_SIDE);
         last_detect_side = DETECT_LAST_LEFT;
@@ -1150,7 +615,7 @@ void detectEnemySide(){
 }
 
 
-//å‰æ¢æµ‹å™¨æ¢æµ‹å‡½æ•°
+//Ç°Ì½²âÆ÷Ì½²âº¯Êı
 void detectEnemyFront(){
     // if(digitalRead(DETECTOR_FRONT)==DETECT_YES){
     //     do{
@@ -1205,19 +670,8 @@ void detectEnemyFront(){
         //}
 }
 
-/**
- * è½¬è§’è¡¥å¿å‡½æ•°ï¼ˆæœªç”¨ï¼‰
- */
-void complementary(){
-    if(last_detect_side==DETECT_LAST_LEFT){
-        turnLeftPosition(TURN_LEFT_SIDE_COMPLEMENTARY);
-    }else if(last_detect_side==DETECT_LAST_RIGHT){
-        turnRightPosition(TURN_RIGHT_SIDE_COMPLEMENTARY);
-    }
-}
-
-//å‡†å¤‡æ”»å‡»ï¼ˆæœªæµ‹ï¼Œç­‰å¾…å‰æ–¹è¾¹ç¼˜ä¼ æ„Ÿå™¨å¯ä»¥æ”¾åœ¨æ­£ç¡®çš„ä½ç½®ï¼‰
-void PrepareforAttack(){
+//×¼±¸¹¥»÷()
+void PrepareforAttack(){//???
     int16_t pwm1;
     int16_t pwm2;
     stop_stuck();
@@ -1234,7 +688,7 @@ void PrepareforAttack(){
             {0,0},
             {0,0}
         };
-        do{
+        do{//???¿ÉÄÜ¿ÉÒÔ¸ÄÒ»ÏÂË³Ğò
             for(int i=0;i<7;++i){
             storage_front_end_sensors[i][1] = digitalRead(GRAYSCALE_SENSOR_PIN1);
             storage_front_end_sensors[i][2] = digitalRead(GRAYSCALE_SENSOR_PIN2);
@@ -1249,32 +703,21 @@ void PrepareforAttack(){
     }
 }
 
-//æ”»å‡»å‡½æ•°
+//¹¥»÷º¯Êı
 void attack(){
     gofront(GO_SPEED_ATTACK);
 }
 
-//å¾®å°è½¬å‘ï¼ˆæœªä½¿ç”¨ï¼‰
-void turnSlowOrMove(int ready_to_turn){
-    if(ready_to_turn==READY_TO_TURN_LEFT){
-        turnLeft(TURN_SLOW_SPEED);
-    }else if(ready_to_turn==READY_TO_TURN_RIGHT){
-        turnRight(TURN_SLOW_SPEED);
-    }else if(ready_to_turn==READY_TO_GO_FRONT){
-        gofront(TURN_SLOW_SPEED);
-    }
-}
-
-//åœæ­¢
+//Í£Ö¹
 void stop(){
     roboclaw.ForwardM1(ADDRESS, 0);
     //roboclaw.ForwardM1(address,speed);
     roboclaw.ForwardM2(ADDRESS, 0);
 }
 
-
-//åœæ­¢åä¿æŒä¸åŠ¨
-void stop_stuck(){
+//Í£Ö¹ºó±£³Ö²»¶¯
+//void stop_stuck(){//¾É
+void stopStuck(){
     //for(;roboclaw.ReadEncM1(ADDRESS)>3 || roboclaw.ReadEncM2(ADDRESS)>3;){
         roboclaw.ResetEncoders(ADDRESS);
         //stop();
@@ -1283,69 +726,25 @@ void stop_stuck(){
     
 }
 
-//åŸåœ°å·¦è½¬ï¼Œç›´åˆ°è½¦å¤´æ­£å¯¹ï¼Œåœ¨è¿™ä¹‹ä¸­å¯ä»¥è¢«æ‰“æ–­,0-127
-void turnLeft(int speed){
-    //roboclaw.ForwardM1(address, speed);
-    roboclaw.BackwardM1(ADDRESS,speed);
-    roboclaw.ForwardM2(ADDRESS, speed);
-    //roboclaw.BackwardM2(address,speed);
-}
-//åŸåœ°å³è½¬ï¼Œç›´åˆ°è½¦å¤´æ­£å¯¹ï¼Œåœ¨è¿™ä¹‹ä¸­å¯ä»¥è¢«æ‰“æ–­,0-127
-void turnRight(int speed){
-    roboclaw.ForwardM1(ADDRESS, speed);
-    //roboclaw.ForwardM1(address,speed);
-    //roboclaw.ForwardM2(address, speed);
-    roboclaw.BackwardM2(ADDRESS,speed);
-}
-//ç›´è¡Œ,0-127
+
+//Ö±ĞĞ,0-127
 void gofront(int speed){
     roboclaw.ForwardM1(ADDRESS, speed);
     roboclaw.ForwardM2(ADDRESS, speed-1);
 }
-//å‘å·¦è½¬,0-127
+//Ïò×ó×ª,0-127
 void goleft(int speed,int level){
     roboclaw.ForwardM1(ADDRESS, speed-level);
     roboclaw.ForwardM2(ADDRESS, speed+level);
 }
-//å‘å³è½¬,0-127
+//ÏòÓÒ×ª,0-127
 void goright(int speed,int level){
     roboclaw.ForwardM1(ADDRESS, speed+level);
     roboclaw.ForwardM2(ADDRESS, speed-level);
 }
-/**
- * æ£€æµ‹ä¸åˆ°ç‰©ä½“æ—¶çš„ç¨‹åºï¼Œä¼šè¿›è¡Œ400msçš„å»¶æ—¶ï¼Œç”¨æ¥é¿å…è½¬åˆ°ä¸¤ä¸ªä¼ æ„Ÿå™¨ä¸­é—´å°±è§¦å‘æ­¤ç¨‹åº-
- * å¹¶ä¼šæ ¹æ®æœ€åä¸€æ¬¡è½¬å‘è¡Œè¿›é¡ºç€æ–¹å‘è¿›è¡ŒåŸåœ°æ—‹è½¬ï¼ˆæœªç”¨ï¼‰
- */
-void gonothing(){
-    // static int temp = 0;
-    // if(temp==0){
-    //     long time_now = millis();
-    //     temp = 1;
-    // }
-    // long time_now = millis();
-    // for(;;){
-    //     if(millis()-time_now>400){
-    //         //turnLeft();
-    //         if(last_move_status==ON_RIGHT || last_move_status==ON_RIGHT_FRONT){
-    //             //turnRight();
-    //         }else{
-    //             //turnLeft();
-    //         }
-    //         //roboclaw.ReadSpeedM1(address);
-    //         //roboclaw.ReadSpeedM2(address);
-            
 
-    //     }
-    //     if(detect()==ON_NOTHING){
-
-    //     }else{
-    //         return;
-    //     }
-    // }
-}
-
-
-//M1ç”µæœºå‰è¿›ä½ç½®å‡½æ•°
+//M1µç»úÇ°½øÎ»ÖÃº¯Êı
+//²»½¨ÒéÊ¹ÓÃ£¬ÒòÎª±àÂëÆ÷µÄ¸ºÖµÎŞ·¨±È½Ï´óĞ¡
 void M1PositionForward(int position){
     //static int M1PositionTemp = 0;
     //if(roboclaw.ReadEncM1(ADDRESS)==-position){
@@ -1354,12 +753,14 @@ void M1PositionForward(int position){
     //roboclaw.ReadEncM1(ADDRESS)
     roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, position, 0);
     for(;;){
-        if(roboclaw.ReadEncM1(ADDRESS)<(position+4)&&roboclaw.ReadEncM1(ADDRESS)>(position-4)){
+        if(roboclaw.ReadEncM1(ADDRESS)<(position+ERROR_POSITION)&&roboclaw.ReadEncM1(ADDRESS)>(position-ERROR_POSITION)){
             return;
         }
     }
 }
-//M1ç”µæœºåé€€ä½ç½®å‡½æ•°
+
+//M1µç»úºóÍËÎ»ÖÃº¯Êı
+//²»½¨ÒéÊ¹ÓÃ£¬ÒòÎª±àÂëÆ÷µÄ¸ºÖµÎŞ·¨±È½Ï´óĞ¡
 void M1PositionBackward(int position){
     //roboclaw.SetEncM1(ADDRESS,0);
     
@@ -1368,12 +769,14 @@ void M1PositionBackward(int position){
     //roboclaw.ReadEncM1(ADDRESS)
     roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, -position, 1);
     for(;;){
-        if(roboclaw.ReadEncM1(ADDRESS)<(-position+4)&&roboclaw.ReadEncM1(ADDRESS)>(-position-4)){
+        if(roboclaw.ReadEncM1(ADDRESS)<(-position+ERROR_POSITION)&&roboclaw.ReadEncM1(ADDRESS)>(-position-ERROR_POSITION)){
             return;
         }
     }
 }
-//M2ç”µæœºåé€€ä½ç½®å‡½æ•°
+
+//M2µç»úºóÍËÎ»ÖÃº¯Êı
+//²»½¨ÒéÊ¹ÓÃ£¬ÒòÎª±àÂëÆ÷µÄ¸ºÖµÎŞ·¨±È½Ï´óĞ¡
 void M2PositionBackward(int position){
     //static int M1PositionTemp = 0;
     //if(roboclaw.ReadEncM1(ADDRESS)==-position){
@@ -1382,12 +785,14 @@ void M2PositionBackward(int position){
     //roboclaw.ReadEncM1(ADDRESS)
     roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, -position, 0);
     for(;;){
-        if(roboclaw.ReadEncM2(ADDRESS)<(-position+4)&&roboclaw.ReadEncM2(ADDRESS)>(-position-4)){
+        if(roboclaw.ReadEncM2(ADDRESS)<(-position+ERROR_POSITION)&&roboclaw.ReadEncM2(ADDRESS)>(-position-ERROR_POSITION)){
             return;
         }
     }
 }
-//M2ç”µæœºå‰è¿›ä½ç½®å‡½æ•°
+
+//M2µç»úÇ°½øÎ»ÖÃº¯Êı
+//²»½¨ÒéÊ¹ÓÃ£¬ÒòÎª±àÂëÆ÷µÄ¸ºÖµÎŞ·¨±È½Ï´óĞ¡
 void M2PositionForward(int position){
     //roboclaw.SetEncM1(ADDRESS,0);
     
@@ -1396,13 +801,13 @@ void M2PositionForward(int position){
     //roboclaw.ReadEncM1(ADDRESS)
     roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, position, 1);
     for(;;){
-        if(roboclaw.ReadEncM2(ADDRESS)<(position+4)&&roboclaw.ReadEncM2(ADDRESS)>(position-4)){
+        if(roboclaw.ReadEncM2(ADDRESS)<(position+ERROR_POSITION)&&roboclaw.ReadEncM2(ADDRESS)>(position-ERROR_POSITION)){
             return;
         }
     }
 }
 
-//å‘å³è½¬ä½ç½®å‡½æ•°
+//ÏòÓÒ×ªÎ»ÖÃº¯Êı
 void turnRightPosition(int single){
     //M1PositionBackward(single);
     //M2PositionForward(single);
@@ -1431,7 +836,7 @@ void turnRightPosition(int single){
     }
 }
 
-//å‘å·¦è½¬ä½ç½®å‡½æ•°
+//Ïò×ó×ªÎ»ÖÃº¯Êı
 void turnLeftPosition(int single){
     //static int M1PositionTemp = 0;
     //if(roboclaw.ReadEncM1(ADDRESS)==-position){
@@ -1461,228 +866,17 @@ void turnLeftPosition(int single){
     }
 }
 
-//å¾®å°å‰è¿›ä½ç½®å‡½æ•°
-void goFrontPosition(){
+//Î¢Ğ¡Ç°½øÎ»ÖÃº¯Êı
+//void goFrontPosition(){
+void MoveALittleForward(){
     roboclaw.ResetEncoders(ADDRESS);
     roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, GO_SLOW_POSITION, ACCEL2, 8000, DECCEL2, GO_SLOW_POSITION, 1);
     for(;roboclaw.ReadEncM1(ADDRESS)<GO_SLOW_POSITION-ERROR_POSITION;){}
     delay(200);
 }
 
-//åŠ¨ä½œç»„ä»¥ä¸Š--------------------------------------------------------------------------------------------------
-//åŠ¨ä½œç»„ä»¥ä¸Š--------------------------------------------------------------------------------------------------
-//åŠ¨ä½œç»„ä»¥ä¸Š--------------------------------------------------------------------------------------------------
-//åŠ¨ä½œç»„ä»¥ä¸Š--------------------------------------------------------------------------------------------------
-
-
-//çŠ¶æ€ç»„ä»¥ä¸‹--------------------------------------------------------------------------------------------------
-//çŠ¶æ€ç»„ä»¥ä¸‹--------------------------------------------------------------------------------------------------
-//çŠ¶æ€ç»„ä»¥ä¸‹--------------------------------------------------------------------------------------------------
-//çŠ¶æ€ç»„ä»¥ä¸‹--------------------------------------------------------------------------------------------------
-
-//çŠ¶æ€ç»„ä»¥ä¸Š--------------------------------------------------------------------------------------------------
-//çŠ¶æ€ç»„ä»¥ä¸Š--------------------------------------------------------------------------------------------------
-//çŠ¶æ€ç»„ä»¥ä¸Š--------------------------------------------------------------------------------------------------
-//çŠ¶æ€ç»„ä»¥ä¸Š--------------------------------------------------------------------------------------------------
-
-
-//æ¢æµ‹å™¨ä»¥ä¸‹--------------------------------------------------------------------------------------------------
-//æ¢æµ‹å™¨ä»¥ä¸‹--------------------------------------------------------------------------------------------------
-//æ¢æµ‹å™¨ä»¥ä¸‹--------------------------------------------------------------------------------------------------
-//æ¢æµ‹å™¨ä»¥ä¸‹--------------------------------------------------------------------------------------------------
-
-
-//æ£€æµ‹åä¾§æ•°æ®ï¼Œè¿”å›åº”è¯¥å‘å“ªèµ°ï¼ˆæœªä½¿ç”¨ï¼‰
-int detectorBack(){
-    if(analogRead(DETECTOR_BACK_A2)-analogRead(DETECTOR_BACK_A3)>TURN_ERROR_VALUE){
-        return READY_TO_TURN_LEFT;
-    }else if(analogRead(DETECTOR_BACK_A2)-analogRead(DETECTOR_BACK_A3)<TURN_ERROR_VALUE){
-        return READY_TO_TURN_RIGHT;
-    }else{
-        return READY_TO_GO_FRONT;
-    }
-}
-
-
-//æ¢æµ‹å™¨ä»¥ä¸Š---------------------------------------------------------------------------------------------------
-//æ¢æµ‹å™¨ä»¥ä¸Š---------------------------------------------------------------------------------------------------
-//æ¢æµ‹å™¨ä»¥ä¸Š---------------------------------------------------------------------------------------------------
-//æ¢æµ‹å™¨ä»¥ä¸Š---------------------------------------------------------------------------------------------------
-
-
-//è®°å½•ä»¥ä¸‹-----------------------------------------------------------------------------------------------------
-//è®°å½•ä»¥ä¸‹-----------------------------------------------------------------------------------------------------
-//è®°å½•ä»¥ä¸‹-----------------------------------------------------------------------------------------------------
-//è®°å½•ä»¥ä¸‹-----------------------------------------------------------------------------------------------------
-
-//è®°å½•ä»¥ä¸Š-----------------------------------------------------------------------------------------------------
-//è®°å½•ä»¥ä¸Š-----------------------------------------------------------------------------------------------------
-//è®°å½•ä»¥ä¸Š-----------------------------------------------------------------------------------------------------
-//è®°å½•ä»¥ä¸Š-----------------------------------------------------------------------------------------------------
-
-
-
-//åˆå§‹åŸºå‡†çº¿å‡½æ•°ï¼Œ13å·ç¯åŒé—ª
-void baseline(){
-    pinMode(13,OUTPUT);
-    digitalWrite(13,HIGH);
-    delay(1000);
-    digitalWrite(13,LOW);
-    delay(100);
-    digitalWrite(13,HIGH);
-    delay(100);
-    digitalWrite(13,LOW);
-    delay(100);
-}
-
-/**
- * æ¢æµ‹å™¨æ‰“å°æ—¥å¿—å‡½æ•°
- */
-void Println(){
-    // if(roboclaw.ReadEncM2(ADDRESS)>=1){
-    //     Serial.println("YES");
-    // }else{
-    //     Serial.println("NO");
-    // }
-    //Serial.println(roboclaw.ReadEncM2(ADDRESS));
-    // static int lastsum = 0;
-    // Serial.print("A0:");
-    // Serial.print(analogRead(A0));
-    // Serial.print("....A1:");
-    // Serial.print(analogRead(A1));
-    // Serial.print("....cha:");
-    // Serial.print(analogRead(A1)-analogRead(A0));
-    // Serial.print("....he:");
-    // Serial.print(analogRead(A1)+analogRead(A0));
-    // Serial.print("....change:");
-    // Serial.println(analogRead(A1)+analogRead(A0)-lastsum);
-    // lastsum = analogRead(A1)+analogRead(A0);
-    //Serial.rintln()
-    // Serial.print(analogRead(DETECTOR1));
-    // Serial.print(".....");
-    // Serial.println(analogRead(DETECTOR7));
-    //Serial.println(analogRead(detector7));
-    // Serial.print(digitalRead(detector3));
-    // Serial.print(":");
-    // Serial.print(digitalRead(detector4));
-    // Serial.print(":");
-    // Serial.println(digitalRead(detector5));
-    // Serial.print(":");
-    // Serial.print(digitalRead(detector4));
-    // Serial.print(":");
-    // Serial.println(digitalRead(detector5));
-    //delay(1000);
-}
-
-//æµ‹è¯•
-void test_temp(){
-    // //Serial.begin(9600);
-    // Serial.print("1:");
-    // Serial.print(digitalRead(DETECTOR1));
-    // Serial.print(",2:");
-    // Serial.print(analogRead(DETECTOR2));
-    // //Serial.print(analogRead(DETECTOR2));
-    // Serial.print(",3:");
-    // Serial.print(digitalRead(DETECTOR3));
-    // //Serial.print(digitalRead(DETECTOR3));
-    // Serial.print(",4:");
-    // Serial.print(analogRead(DETECTOR4));
-    // Serial.print(",5:");
-    // Serial.println(digitalRead(DETECTOR5));
-    //Serial.print(digitalRead(DETECTOR5));
-    // Serial.print(",6:");
-    // Serial.print(digitalRead(DETECTOR6));
-    // //Serial.print(analogRead(DETECTOR6));
-    // Serial.print(",7:");
-    // Serial.print(analogRead(DETECTOR7));
-    // Serial.println(":");
-    //Serial.println(analogRead(A1));
-    //Serial.
-    //delay(400);
-    // delay(3000);
-    // time_begin(onleft);
-    // turnLeft();
-    // delay(250);
-    // //stop();
-    // //stop_stuck();
-    // record();
-    // stop_stuck_fixed();
-    // for(;;){}
-}
-
-//æµ‹è¯•å‡½æ•°
-void test(){
-    Serial.println(analogRead(A0));
-    //delay(5000);
-    //for(int i=0;i<10;++i){
-        // Serial.print("left:");
-        // Serial.print(analogRead(DETECTOR_LEFT_A0));
-        // Serial.print("....right:");
-        // Serial.println(analogRead(DETECTOR_RIGHT_A1));
-        // Serial.print("....A2-A3:");
-        // Serial.println(analogRead(A2)-analogRead(A3));
-        //delay(1000);
-    //}
-    // turnLeftPosition(TURN_SLOW_POSITION);
-    // for(;;){
-    //     Serial.print("left:");
-    //     Serial.print(analogRead(A2));
-    //     Serial.print("....right:");
-    //     Serial.print(analogRead(A3));
-    //     Serial.print("....A2-A3:");
-    //     Serial.println(analogRead(A2)-analogRead(A3));
-    //     delay(1000);
-    // }
-    
-}
-
-
-//æœç´¢æ•Œäººæ€»å‡½æ•°
-void searchForEnemy(){
-    if(detect_if_detected==DETECT_IF_DETECTED_NO){
-        detectEnemy();//down
-    // //alignmentOnlyOnce();//down
-        alignmentMoreStringent();
-    }
-    detectEnemySide();
-    detectEnemyFront();
-    //uploadDetect();
-    //goFrontPosition();//down
-}
-
-
-
-//åŸå§‹å‡½æ•°ï¼š
-void setup(){
-    //å®šä¹‰æ¨¡æ‹Ÿä¸²å£
-    roboclaw.begin(38400);
-    Serial.begin(9600);
-    //è®¾ç½®ä¼ æ„Ÿå™¨å¼•è„š
-    // pinMode(DETECTOR1,INPUT);
-    // pinMode(DETECTOR2,INPUT);
-    // pinMode(DETECTOR3,INPUT);
-    // pinMode(DETECTOR4,INPUT);
-    // pinMode(DETECTOR5,INPUT);
-    // pinMode(DETECTOR6,INPUT);
-    // pinMode(DETECTOR7,INPUT);
-    // delay(300
-    //stop();
-    delay(2000);
-    //é¦–å…ˆæ›´æ–°ä¸€ä¸‹åœºä¸Šçš„è·ç¦»å¸¸æ•°ï¼Œå†è¡ŒåŠ¨
-    uploadDetect();
-    // last_detect_left = 400;
-    // last_detect_right = 400;
-}
-
-//ä¸¤è€…å¹³æ—¶å¤§æ¦‚åœ¨-500åˆ°+500å·¦å³ï¼Œå—åˆ°æ¨åŠ›åå¤§æ¦‚åœ¨2000+
-
-
-void loop(){
-    test();
-    //PrepareforAttack();
-    // delay(10000);
-    //searchForEnemy();
-    // roboclaw.BackwardM1(address,speed);
-    // roboclaw.BackwardM2(address,speed);
-}
+//¶¯×÷×éÒÔÉÏ--------------------------------------------------------------------------------------------------
+//¶¯×÷×éÒÔÉÏ--------------------------------------------------------------------------------------------------
+//¶¯×÷×éÒÔÉÏ--------------------------------------------------------------------------------------------------
+//¶¯×÷×éÒÔÉÏ--------------------------------------------------------------------------------------------------
 

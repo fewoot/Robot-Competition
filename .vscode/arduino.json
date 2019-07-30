@@ -1,5 +1,6 @@
 {
     "board": "arduino:avr:uno",
     "sketch": "Preliminary\\preliminary.ino",
-    "port": "COM8"
+    "port": "COM12",
+    "programmer": "AVRISP mkII"
 }
