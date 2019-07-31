@@ -4,16 +4,20 @@
 
 /**
  *记录：
- * 等待更新用???标记
- *
+ * 等待更新用122333标记
+ * 当两个后侧传感器走到台子的边缘时，两个传感器的数值为360-370左右，而且因为结-
+ * 构的原因，左边的传感器平均比右边的少一些，可以在读数后面加上2来平衡。
+ * 
+ * 两个后侧传感器在台下正中时，读数为235-245，同样加上2，和边界紧挨的时候-
+ * 读数为178左右
+ * 
+ * 两个后侧传感器在刀刃距离边缘3-5cm时读书为890左右
+ * 
+ * 两个后侧传感器的红外折射盲区依然存在
+ * 
+ * 在台子下两个后侧传感器可以正常工作
  */
 
-
-/**
- * 所需的库
- */
-#include <SoftwareSerial.h>
-#include <RoboClaw.h>
 /**
  * 目前用不到，暂存
  */
@@ -115,6 +119,13 @@
 // //定义当两侧距离突然剧增时阈值
 // #define MINI_CHANGE 150
 
+
+/**
+ * 所需的库
+ */
+#include <SoftwareSerial.h>
+#include <RoboClaw.h>
+
 //左转90°
 #define TURNLEFT90 530//旧
 #define TURN_LEFT_POSITION_90 530
@@ -172,21 +183,21 @@
 #define DETECTOR_RIGHT_A2 A2
 //除4个距离传感器外其他传感器，等待更改
 //左前方传感器
-#define DETECTOR_LEFT_FRONT ???
+#define DETECTOR_LEFT_FRONT 122333
 //更靠近前方的左前方传感器
-#define DETECTOR_LEFT_FRONT_MORE ???
+#define DETECTOR_LEFT_FRONT_MORE 122333
 //正前方传感器
-#define DETECTOR_FRONT ???
+#define DETECTOR_FRONT 122333
 //右前方传感器
-#define DETECTOR_RIGHT_FRONT ???
+#define DETECTOR_RIGHT_FRONT 122333
 //更靠近前方的右前方传感器
-#define DETECTOR_RIGHT_FRONT_MORE ???
+#define DETECTOR_RIGHT_FRONT_MORE 122333
 //边缘传感器1
-#define GRAYSCALE_SENSOR_PIN2 ???//旧
-#define GRAYSCALE_SENSOR_LEFT ???
+#define GRAYSCALE_SENSOR_PIN2 122333//旧
+#define GRAYSCALE_SENSOR_LEFT 122333
 //边缘传感器
-#define GRAYSCALE_SENSOR_PIN1 ???//旧
-#define GRAYSCALE_SENSOT_RIGHT ???
+#define GRAYSCALE_SENSOR_PIN1 122333//旧
+#define GRAYSCALE_SENSOT_RIGHT 122333
 //进攻时的速度
 #define GO_SPEED_ATTACK 15
 //微小角度转向
@@ -210,21 +221,21 @@
 #define DETECT_LAST_RIGHT 2
 #define DETECT_LAST_FRONT 3
 //左前转向位置，等待更新
-#define TURN_LEFT_SIDE ???//旧
-#define TURN_LEFT_FRONT ???
-#define TURN_LEFT_FRONT_MORE ???
+#define TURN_LEFT_SIDE 122333//旧
+#define TURN_LEFT_FRONT 122333
+#define TURN_LEFT_FRONT_MORE 122333
 //右前转向，等待更新
-#define TURN_RIGHT_SIDE ???//旧
-#define TURN_RIGHT_FRONT ???
-#define TURN_RIGHT_FRONT_MORE ???
+#define TURN_RIGHT_SIDE 122333//旧
+#define TURN_RIGHT_FRONT 122333
+#define TURN_RIGHT_FRONT_MORE 122333
 //左前补角转向,用于物体逃脱后补偿转向，等待更新
-#define TURN_LEFT_SIDE_COMPLEMENTARY ???//旧
-#define TURN_LEFT_FRONT_COMPLEMENTARY ???
-#define TURN_LEFT_FRONT_MORE_COMPLEMENTARY ???
+#define TURN_LEFT_SIDE_COMPLEMENTARY 122333//旧
+#define TURN_LEFT_FRONT_COMPLEMENTARY 122333
+#define TURN_LEFT_FRONT_MORE_COMPLEMENTARY 122333
 //右前补角转向，用于物体逃脱后补偿转向，等待更新
-#define TURN_RIGHT_SIDE_COMPLEMENTARY ???//旧
-#define TURN_RIGHT_FRONT_COMPLEMENTARY ???
-#define TURN_RIGHT_FRONT_MORE_COMPLEMENTARY ???
+#define TURN_RIGHT_SIDE_COMPLEMENTARY 122333//旧
+#define TURN_RIGHT_FRONT_COMPLEMENTARY 122333
+#define TURN_RIGHT_FRONT_MORE_COMPLEMENTARY 122333
 //补偿计时是否已经开始，实际上是在侧面检测到敌人后丢失后开始计时，以便继续追踪
 #define COMPLEMENTARY_TIME_YES 1
 #define COMPLEMENTARY_TIME_NO 0
@@ -237,7 +248,7 @@
 #define ENABLE_TO_TIMING 1
 #define NOT_ENABLE_TO_TIMING 0
 //180°旋转,需要更新
-#define TURN_LEFT_180 ???
+#define TURN_LEFT_180 122333
 //在台下为了改变位置移动时要用的速度
 #define ON_STAGE_SPEED 15
 
@@ -269,7 +280,7 @@ int temp_analogRead_A0 = 0;
  * 实例化对象和一些准备设置
  */
 //新建一个模拟串口,S1=P11,S2=P10，如果要用新的板子可能会不同
-SoftwareSerial serial = SoftwareSerial(DRIVER_S2,DRIVER_S1);//???
+SoftwareSerial serial = SoftwareSerial(MOTOR_DRIVER_S2,MOTOR_DRIVER_S1);//122333
 
 //利用刚才新建的串口和通信超时值来新建一个对象
 RoboClaw roboclaw = RoboClaw(&serial,TIME_OUT);
@@ -302,9 +313,9 @@ void preventsTheBladeFromGettingStuckUnderTable(){
     // roboclaw.ForwardM1(ADDRESS, 30);
     // roboclaw.ForwardM2(ADDRESS, 10);
     roboclaw.ResetEncoders(ADDRESS);
-    roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, 300, ACCEL2, 8000, DECCEL2, -300, 1);
+    roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, 400, ACCEL2, 8000, DECCEL2, -400, 1);
     delay(200);
-    roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2000, DECCEL1, 600, ACCEL2, 2000, DECCEL2, 200, 1);
+    roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2000, DECCEL1, 800, ACCEL2, 2000, DECCEL2, 0, 1);
     delay(200);
     //stop();
 }
@@ -313,11 +324,11 @@ void preventsTheBladeFromGettingStuckUnderTable(){
  * 判断在台上还是在台下
  */
 void judgeWhetherOnStageOrUnderTheStage(){
-    if(temp_analogRead_A0+temp_analogRead_A1<580 || analogRead(DETECTOR_BACK_LEFT_A1)<300){//???
+    if(temp_analogRead_A0+temp_analogRead_A1<580 || analogRead(DETECTOR_BACK_LEFT_A1)<300){//122333
         DecidedTheCarHadFallenOff();
     }else{
         //pinMode(13,OUTPUT);
-        digitalWrite(13,LOW);//???
+        digitalWrite(13,LOW);//122333
     }
 }
 
@@ -326,26 +337,26 @@ void judgeWhetherOnStageOrUnderTheStage(){
  */
 void changeThePositionGoingToStage(){
     if(analogRead(DETECTOR_LEFT_A3)<600){
-        turnRightPosition(TURNRIGHT90);
+        turnRightPosition(TURN_RIGHT_POSITION_90);
         delay(100);
         forChangeThePositionToMoveAlongWall(0,ON_STAGE_SPEED);
         delay(100);
         //delay(2000);
-        turnRightPosition(TURNRIGHT90);
+        turnRightPosition(TURN_RIGHT_POSITION_90);
     }else{
-        turnLeftPosition(TURNLEFT90);
+        turnLeftPosition(TURN_LEFT_POSITION_90);
         delay(100);
         forChangeThePositionToMoveAlongWall(1,ON_STAGE_SPEED);
         delay(100);
         //delay(2000);
-        turnLeftPosition(TURNLEFT90);
+        turnLeftPosition(TURN_LEFT_POSITION_90);
     }
 }
 
 /**
  * 为了改变上台位置，向前走
  */
-void forChangeThePositionToMoveAlongWall(int which_side,int speed){//???
+void forChangeThePositionToMoveAlongWall(int which_side,int speed){//122333
     //int last_deistance_from_wall;
     if(which_side==0){
         int time_go_along_with_wall = millis();
@@ -356,7 +367,7 @@ void forChangeThePositionToMoveAlongWall(int which_side,int speed){//???
             if(analogRead(DETECTOR_LEFT_A3)>238){
                 roboclaw.ForwardM1(ADDRESS, speed);
                 roboclaw.ForwardM2(ADDRESS, speed+13);
-            }else if(analogRead(DETECTOR_LEFT_A0)<200){
+            }else if(analogRead(DETECTOR_LEFT_A3)<200){
                 roboclaw.ForwardM1(ADDRESS, speed+10);
                 roboclaw.ForwardM2(ADDRESS, speed);
             }else{
@@ -371,10 +382,10 @@ void forChangeThePositionToMoveAlongWall(int which_side,int speed){//???
             //last_deistance_from_wall = analogRead(DETECTOR_LEFT_A0);
             
             //delay(200);
-            if(analogRead(DETECTOR_RIGHT_A1)>238){
+            if(analogRead(DETECTOR_RIGHT_A2)>238){
                 roboclaw.ForwardM1(ADDRESS, speed+13);
                 roboclaw.ForwardM2(ADDRESS, speed);
-            }else if(analogRead(DETECTOR_RIGHT_A1)<200){
+            }else if(analogRead(DETECTOR_RIGHT_A2)<200){
                 roboclaw.ForwardM1(ADDRESS, speed);
                 roboclaw.ForwardM2(ADDRESS, speed+13);
             }else{
@@ -393,7 +404,7 @@ void forChangeThePositionToMoveAlongWall(int which_side,int speed){//???
  */
 void DecidedTheCarHadFallenOff(){
     //pinMode(13,OUTPUT);
-    digitalWrite(13,HIGH);//???
+    digitalWrite(13,HIGH);//122333
     // goFrontPosition();
     // goFrontPosition();
     // goFrontPosition();
@@ -450,7 +461,7 @@ void DetectTheTwoSidesOfTheRightSideForEnemies(){
     // Serial.print(last_detect_left-analogRead(DETECTOR_LEFT_A0));
     // Serial.print(".....A1 cha:");
     // Serial.println(last_detect_right-analogRead(DETECTOR_RIGHT_A1));
-    if(last_detect_left-analogRead(DETECTOR_LEFT_A3)>=MIN_DETECT_CHANGE && analogRead(DETECTOR_LEFT_A3)+analogRead(DETECTOR_RIGHT_A2)<1100){
+    if(last_detect_left-analogRead(DETECTOR_LEFT_A3)>=MIN_DETECT_TO_90_ENEMY_JUDGE && analogRead(DETECTOR_LEFT_A3)+analogRead(DETECTOR_RIGHT_A2)<1100){
         turnLeftPosition(TURN_LEFT_POSITION_90);
         uploadDetect();
         //alignment_only_once = 0;
@@ -466,15 +477,15 @@ void DetectTheTwoSidesOfTheRightSideForEnemies(){
  */
 //void alignmentMoreStringent(){//旧
 void AlignWithWalls(){
-    if(analogRead(DETECTOR_BACK_A2)+analogRead(DETECTOR_BACK_A3)>=1700){
+    if(analogRead(DETECTOR_BACK_LEFT_A1)+analogRead(DETECTOR_BACK_RIGHT_A0)>=1700){
         turnLeftPosition(2*TURN_SLOW_POSITION);
-    }else if(analogRead(DETECTOR_BACK_A2)-analogRead(DETECTOR_BACK_A3)>OffSET_THRESHOLD){
+    }else if(analogRead(DETECTOR_BACK_LEFT_A1)-analogRead(DETECTOR_BACK_RIGHT_A0)>OFFSET_THRESHOLD_ADJUST_SLOW){
         turnLeftPosition(TURN_SLOW_POSITION);
-    }else if(analogRead(DETECTOR_BACK_A3)-analogRead(DETECTOR_BACK_A2)-5>OffSET_THRESHOLD){
+    }else if(analogRead(DETECTOR_BACK_RIGHT_A0)-analogRead(DETECTOR_BACK_LEFT_A1)-5>OFFSET_THRESHOLD_ADJUST_SLOW){
         turnRightPosition(TURN_SLOW_POSITION);
     }else{
         uploadDetect();
-        goFrontPosition();
+        MoveALittleForward();
     }
     judgeWhetherOnStageOrUnderTheStage();
 }
@@ -482,8 +493,8 @@ void AlignWithWalls(){
 //距离更新函数，会忽略传感器返回的无信号值
 void uploadDetect(){
     //delay(100); temp_analogRead_A1-last_detect_right<ABNORMAL_INCREASE && temp_analogRead_A0-last_detect_left<ABNORMAL_INCREASE
-    temp_analogRead_A1 = analogRead(DETECTOR_RIGHT_A1);
-    temp_analogRead_A0 = analogRead(DETECTOR_LEFT_A0);
+    temp_analogRead_A1 = analogRead(DETECTOR_RIGHT_A2);
+    temp_analogRead_A0 = analogRead(DETECTOR_LEFT_A3);
     if(temp_analogRead_A1<NO_SIGNAL_VALUE){
         //uploadDetect();
         last_detect_right = temp_analogRead_A1;
@@ -497,7 +508,6 @@ void uploadDetect(){
 
 //后退至远处的边线附近
 //void BackToTheDefensivePosition(){//旧
-//void AftertheEnemyDownAndReturnToTheSideOfTheField(){//旧
 void detectsWhetherTheEdgeIsReachedWhenPushingEnemy(){
     // for(goBackOneStep();;){
     //     if(analogRead(DETECTOR_BACK_A2)-analogRead(DETECTOR_BACK_A3)>OffSET_THRESHOLD){
@@ -514,18 +524,18 @@ void detectsWhetherTheEdgeIsReachedWhenPushingEnemy(){
     //     }
     // }        //delay(1000);
     do{
-        if(digitalRead(GRAYSCALE_SENSOR_PIN1)==DETECT_YES){
+        if(digitalRead(GRAYSCALE_SENSOT_RIGHT)==DETECT_YES){
             roboclaw.ResetEncoders(ADDRESS);
             roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, TURN_SLOW_POSITION, 1);
             roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, -(TURN_SLOW_POSITION), 1);
             //stop();
-        }else if(digitalRead(GRAYSCALE_SENSOR_PIN2)==DETECT_YES){
+        }else if(digitalRead(GRAYSCALE_SENSOR_LEFT)==DETECT_YES){
             roboclaw.ResetEncoders(ADDRESS);
             roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, TURN_SLOW_POSITION, 1);
             roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, -(TURN_SLOW_POSITION), 1);
             //stop();
-        }else if(digitalRead(GRAYSCALE_SENSOR_PIN1)==DETECT_NO && digitalRead(GRAYSCALE_SENSOR_PIN2)==DETECT_NO){
-            goBack();
+        }else if(digitalRead(GRAYSCALE_SENSOT_RIGHT)==DETECT_NO && digitalRead(GRAYSCALE_SENSOR_LEFT)==DETECT_NO){
+            AftertheEnemyDownAndReturnToTheSideOfTheField();
             stop();
             return;
         }
@@ -592,7 +602,7 @@ void AftertheEnemyDownAndReturnToTheSideOfTheField(){
  * 进入前方探测器警戒模式
  */
 //void detectEnemySide(){//旧
-void SideFrontToDetectIfThereAreEnemies(){
+void SideFrontToDetectIfThereAreEnemies(){//122333
     if(digitalRead(DETECTOR_LEFT_FRONT)==DETECT_YES){
         turnLeftPosition(TURN_LEFT_SIDE);
         last_detect_side = DETECT_LAST_LEFT;
@@ -616,7 +626,7 @@ void SideFrontToDetectIfThereAreEnemies(){
 
 
 //前探测器探测函数
-void detectEnemyFront(){
+void detectEnemyFront(){//122333
     // if(digitalRead(DETECTOR_FRONT)==DETECT_YES){
     //     do{
     //         stop();
@@ -671,10 +681,10 @@ void detectEnemyFront(){
 }
 
 //准备攻击()
-void PrepareforAttack(){//???
+void PrepareforAttack(){//122333
     int16_t pwm1;
     int16_t pwm2;
-    stop_stuck();
+    stopStuck();
     roboclaw.ReadPWMs(ADDRESS,pwm1,pwm2);
     if(pwm1>1000 && pwm2>1000){
         //do{
@@ -688,14 +698,14 @@ void PrepareforAttack(){//???
             {0,0},
             {0,0}
         };
-        do{//???可能可以改一下顺序
+        do{//122333可能可以改一下顺序
             for(int i=0;i<7;++i){
-            storage_front_end_sensors[i][1] = digitalRead(GRAYSCALE_SENSOR_PIN1);
-            storage_front_end_sensors[i][2] = digitalRead(GRAYSCALE_SENSOR_PIN2);
+            storage_front_end_sensors[i][1] = digitalRead(GRAYSCALE_SENSOT_RIGHT);
+            storage_front_end_sensors[i][2] = digitalRead(GRAYSCALE_SENSOR_LEFT);
             }
             attack();
         }while(storage_front_end_sensors==storage_front_end_sensors_temp);
-        BackToTheDefensivePosition();  
+        detectsWhetherTheEdgeIsReachedWhenPushingEnemy();  
         //delay(4000);
         //stop();
         //}while(1);
@@ -879,4 +889,59 @@ void MoveALittleForward(){
 //动作组以上--------------------------------------------------------------------------------------------------
 //动作组以上--------------------------------------------------------------------------------------------------
 //动作组以上--------------------------------------------------------------------------------------------------
+
+
+
+//搜索敌人总函数
+void searchForEnemy(){
+    if(detect_if_detected==DETECT_IF_DETECTED_NO){
+        DetectTheTwoSidesOfTheRightSideForEnemies();//down
+    // //alignmentOnlyOnce();//down
+        AlignWithWalls();
+    }
+    SideFrontToDetectIfThereAreEnemies();
+    detectEnemyFront();
+    //uploadDetect();
+    //goFrontPosition();//down
+}
+
+
+
+//原始函数：
+void setup(){
+    //定义模拟串口
+    roboclaw.begin(38400);
+    Serial.begin(9600);
+    //设置传感器引脚
+    // pinMode(DETECTOR1,INPUT);
+    // pinMode(DETECTOR2,INPUT);
+    // pinMode(DETECTOR3,INPUT);
+    // pinMode(DETECTOR4,INPUT);
+    // pinMode(DETECTOR5,INPUT);
+    // pinMode(DETECTOR6,INPUT);
+    // pinMode(DETECTOR7,INPUT);
+    // delay(300
+    //stop();
+    delay(2000);
+    //首先更新一下场上的距离常数，再行动
+    uploadDetect();
+    // last_detect_left = 400;
+    // last_detect_right = 400;
+}
+
+//两者平时大概在-500到+500左右，受到推力后大概在2000+
+void test(){
+    Serial.print(analogRead(DETECTOR_BACK_LEFT_A1)+2);
+    Serial.print("    ");
+    Serial.println(analogRead(DETECTOR_BACK_RIGHT_A0));
+    delay(1000);
+}
+
+void loop(){
+    //test();
+    // preventsTheBladeFromGettingStuckUnderTable();
+    // stop();
+    // searchForEnemy();
+    delay(10000);
+}
 
