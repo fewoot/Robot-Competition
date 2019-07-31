@@ -5,17 +5,15 @@
 /**
  *记录：
  * 等待更新用122333标记
- * 当两个后侧传感器走到台子的边缘时，两个传感器的数值为360-370左右，而且因为结-
- * 构的原因，左边的传感器平均比右边的少一些，可以在读数后面加上2来平衡。
- * 
+ * 2019年7月31日：当两个后侧传感器走到台子的边缘时，两个传感器的数值为360-370左右，而且因为结-
+ * 构的原因，左边的传感器平均比右边的少一些，可以在读数后面加上2来平衡。(2好像有点大，可以试试1)-
  * 两个后侧传感器在台下正中时，读数为235-245，同样加上2，和边界紧挨的时候-
- * 读数为178左右
- * 
- * 两个后侧传感器在刀刃距离边缘3-5cm时读书为890左右
- * 
- * 两个后侧传感器的红外折射盲区依然存在
- * 
+ * 读数为178左右-
+ * 两个后侧传感器在刀刃距离边缘3-5cm时读书为890左右-
+ * 两个后侧传感器的红外折射盲区依然存在-
  * 在台子下两个后侧传感器可以正常工作
+ * 2019年7月31日：经过测试，还是将两个后侧传感器分开了一定角度，这样才好增大两者的读数差异，减小-
+ * 电压波动等的影响
  */
 
 /**
@@ -324,7 +322,7 @@ void preventsTheBladeFromGettingStuckUnderTable(){
  * 判断在台上还是在台下
  */
 void judgeWhetherOnStageOrUnderTheStage(){
-    if(temp_analogRead_A0+temp_analogRead_A1<580 || analogRead(DETECTOR_BACK_LEFT_A1)<300){//122333
+    if(temp_analogRead_A0+temp_analogRead_A1<580 || analogRead(DETECTOR_BACK_LEFT_A1)<330){//122333
         DecidedTheCarHadFallenOff();
     }else{
         //pinMode(13,OUTPUT);
@@ -352,51 +350,95 @@ void changeThePositionGoingToStage(){
         turnLeftPosition(TURN_LEFT_POSITION_90);
     }
 }
+// void UseForMoreSubtleAdjustmentJudgmentWhenAdjustingInSitu(){
+
+// }
+/**
+ * 为了之后尽量沿直线走，先原地调整
+ */
+void inOrderToGoAlongStraightFirstSteeralignment(){
+    int last_detect_temp1[3];
+    int last_detect_temp2[3];
+    int last_detect_temp_averge1;
+    int last_detect_temp_averge2;
+    while (1){
+        last_detect_temp1[0] = analogRead(DETECTOR_BACK_LEFT_A1)+1;
+        last_detect_temp2[0] = analogRead(DETECTOR_BACK_RIGHT_A0);
+        last_detect_temp1[1] = analogRead(DETECTOR_BACK_LEFT_A1)+1;
+        last_detect_temp2[1] = analogRead(DETECTOR_BACK_RIGHT_A0);
+        last_detect_temp1[2] = analogRead(DETECTOR_BACK_LEFT_A1)+1;
+        last_detect_temp2[2] = analogRead(DETECTOR_BACK_RIGHT_A0);
+        last_detect_temp_averge1 = (last_detect_temp1[1]+last_detect_temp1[2]+last_detect_temp1[0])/3;
+        last_detect_temp_averge2 = (last_detect_temp2[1]+last_detect_temp2[2]+last_detect_temp2[0])/3;
+        // if(last_detect_temp1-last_detect_temp2>(OFFSET_THRESHOLD_ADJUST_SLOW-9)){
+        //     turnLeftPosition(TURN_SLOW_POSITION);
+        // }else if(last_detect_temp2-last_detect_temp1>(OFFSET_THRESHOLD_ADJUST_SLOW-9)){
+        //     turnRightPosition(TURN_SLOW_POSITION);
+        // }else{
+        //     //roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2000, DECCEL1, 1800, ACCEL2, 2000, DECCEL2, 1800, 1);
+        //     //delay(1000);
+        //     return;
+        // }
+        if(last_detect_temp_averge1>last_detect_temp_averge2){
+            turnLeftPosition(TURN_SLOW_POSITION);
+        }else if(last_detect_temp_averge2>last_detect_temp_averge1){
+            turnRightPosition(TURN_SLOW_POSITION);
+        }else{
+            roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2000, DECCEL1, 1800, ACCEL2, 2000, DECCEL2, 1800, 1);
+            //delay(1000);
+            return;
+        }
+    }
+}
 
 /**
  * 为了改变上台位置，向前走
  */
 void forChangeThePositionToMoveAlongWall(int which_side,int speed){//122333
-    //int last_deistance_from_wall;
-    if(which_side==0){
-        int time_go_along_with_wall = millis();
-        do{
-        //last_deistance_from_wall = analogRead(DETECTOR_LEFT_A0);
+    inOrderToGoAlongStraightFirstSteeralignment();
+
+    
+    // //int last_deistance_from_wall;
+    // if(which_side==0){
+    //     int time_go_along_with_wall = millis();
+    //     do{
+    //     //last_deistance_from_wall = analogRead(DETECTOR_LEFT_A0);
         
-        //delay(200);
-            if(analogRead(DETECTOR_LEFT_A3)>238){
-                roboclaw.ForwardM1(ADDRESS, speed);
-                roboclaw.ForwardM2(ADDRESS, speed+13);
-            }else if(analogRead(DETECTOR_LEFT_A3)<200){
-                roboclaw.ForwardM1(ADDRESS, speed+10);
-                roboclaw.ForwardM2(ADDRESS, speed);
-            }else{
-                roboclaw.ForwardM1(ADDRESS, speed);
-                roboclaw.ForwardM2(ADDRESS, speed);
-            }
-        //delay(200);
-        }while(millis()-time_go_along_with_wall<2800);
-    }else{
-            int time_go_along_with_wall = millis();
-        do{
-            //last_deistance_from_wall = analogRead(DETECTOR_LEFT_A0);
+    //     //delay(200);
+    //         if(analogRead(DETECTOR_LEFT_A3)>238){
+    //             roboclaw.ForwardM1(ADDRESS, speed);
+    //             roboclaw.ForwardM2(ADDRESS, speed+13);
+    //         }else if(analogRead(DETECTOR_LEFT_A3)<200){
+    //             roboclaw.ForwardM1(ADDRESS, speed+10);
+    //             roboclaw.ForwardM2(ADDRESS, speed);
+    //         }else{
+    //             roboclaw.ForwardM1(ADDRESS, speed);
+    //             roboclaw.ForwardM2(ADDRESS, speed);
+    //         }
+    //     //delay(200);
+    //     }while(millis()-time_go_along_with_wall<2800);
+    // }else{
+    //         int time_go_along_with_wall = millis();
+    //     do{
+    //         //last_deistance_from_wall = analogRead(DETECTOR_LEFT_A0);
             
-            //delay(200);
-            if(analogRead(DETECTOR_RIGHT_A2)>238){
-                roboclaw.ForwardM1(ADDRESS, speed+13);
-                roboclaw.ForwardM2(ADDRESS, speed);
-            }else if(analogRead(DETECTOR_RIGHT_A2)<200){
-                roboclaw.ForwardM1(ADDRESS, speed);
-                roboclaw.ForwardM2(ADDRESS, speed+13);
-            }else{
-                roboclaw.ForwardM1(ADDRESS, speed);
-                roboclaw.ForwardM2(ADDRESS, speed);
-            }
-            //delay(200);
-        }while(millis()-time_go_along_with_wall<2800);
-    }
+    //         //delay(200);
+    //         if(analogRead(DETECTOR_RIGHT_A2)>238){
+    //             roboclaw.ForwardM1(ADDRESS, speed+13);
+    //             roboclaw.ForwardM2(ADDRESS, speed);
+    //         }else if(analogRead(DETECTOR_RIGHT_A2)<200){
+    //             roboclaw.ForwardM1(ADDRESS, speed);
+    //             roboclaw.ForwardM2(ADDRESS, speed+13);
+    //         }else{
+    //             roboclaw.ForwardM1(ADDRESS, speed);
+    //             roboclaw.ForwardM2(ADDRESS, speed);
+    //         }
+    //         //delay(200);
+    //     }while(millis()-time_go_along_with_wall<2800);
+    // }
+
     // roboclaw.ResetEncoders(ADDRESS);
-    // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2000, DECCEL1, position, ACCEL2, 2000, DECCEL2, position, 1);
+    
 }
 
 /**
@@ -931,17 +973,32 @@ void setup(){
 
 //两者平时大概在-500到+500左右，受到推力后大概在2000+
 void test(){
-    Serial.print(analogRead(DETECTOR_BACK_LEFT_A1)+2);
+    int last_detect_temp1[3];
+    int last_detect_temp2[3];
+    int last_detect_temp_averge1;
+    int last_detect_temp_averge2;
+    last_detect_temp1[0] = analogRead(DETECTOR_BACK_LEFT_A1)+1;
+        last_detect_temp2[0] = analogRead(DETECTOR_BACK_RIGHT_A0);
+        last_detect_temp1[1] = analogRead(DETECTOR_BACK_LEFT_A1)+1;
+        last_detect_temp2[1] = analogRead(DETECTOR_BACK_RIGHT_A0);
+        last_detect_temp1[2] = analogRead(DETECTOR_BACK_LEFT_A1)+1;
+        last_detect_temp2[2] = analogRead(DETECTOR_BACK_RIGHT_A0);
+        last_detect_temp_averge1 = (last_detect_temp1[1]+last_detect_temp1[2]+last_detect_temp1[0])/3;
+        last_detect_temp_averge2 = (last_detect_temp2[1]+last_detect_temp2[2]+last_detect_temp2[0])/3;
+    Serial.print(last_detect_temp_averge1);
     Serial.print("    ");
-    Serial.println(analogRead(DETECTOR_BACK_RIGHT_A0));
+    Serial.print(last_detect_temp_averge2);
+    Serial.print("    ");
+    Serial.println(last_detect_temp_averge1-last_detect_temp_averge2);
     delay(1000);
 }
 
 void loop(){
-    //test();
+    //forChangeThePositionToMoveAlongWall(2,0);
+    test();
     // preventsTheBladeFromGettingStuckUnderTable();
     // stop();
     // searchForEnemy();
-    delay(10000);
+    //delay(10000);
 }
 
