@@ -17,11 +17,74 @@
  * 很危险
  * 2019年7月31日：经过改进，使得后侧两个传感器的夹角不会特别大，现在可以正常工作了。-
  * 更新记录：两个后侧传感器在边缘之上时数值为370左右，台下中点250左右，差值可以限定在3左右
+ * 2019年7月31日：向右缓慢旋转90°编码器值约在390左右,台子一半的编码器值为2800左右
  */
 
 /**
  * 目前用不到，暂存
  */
+
+// void UseForMoreSubtleAdjustmentJudgmentWhenAdjustingInSitu(){
+// // }
+// /**
+//  * 为了之后尽量沿直线走，先原地调整（利用慢速转向已经解决）
+//  */
+// void inOrderToGoAlongStraightFirstSteeralignment(){
+//     // int last_detect_temp1[7];
+//     // int last_detect_temp2[7];
+//     // int last_detect_temp_averge1;
+//     // int last_detect_temp_averge2;
+//     // last_detect_temp1[0] = analogRead(DETECTOR_BACK_LEFT_A1)+3;
+//     // last_detect_temp2[0] = analogRead(DETECTOR_BACK_RIGHT_A0);
+//     // last_detect_temp1[1] = analogRead(DETECTOR_BACK_LEFT_A1)+3;
+//     // last_detect_temp2[1] = analogRead(DETECTOR_BACK_RIGHT_A0);
+//     // last_detect_temp1[2] = analogRead(DETECTOR_BACK_LEFT_A1)+3;
+//     // last_detect_temp2[2] = analogRead(DETECTOR_BACK_RIGHT_A0);
+//     // last_detect_temp1[3] = analogRead(DETECTOR_BACK_LEFT_A1)+3;
+//     // last_detect_temp2[3] = analogRead(DETECTOR_BACK_RIGHT_A0);
+//     // last_detect_temp1[4] = analogRead(DETECTOR_BACK_LEFT_A1)+3;
+//     // last_detect_temp2[4] = analogRead(DETECTOR_BACK_RIGHT_A0);
+//     // last_detect_temp1[5] = analogRead(DETECTOR_BACK_LEFT_A1)+3;
+//     // last_detect_temp2[5] = analogRead(DETECTOR_BACK_RIGHT_A0);
+//     // last_detect_temp1[6] = analogRead(DETECTOR_BACK_LEFT_A1)+3;
+//     // last_detect_temp2[6] = analogRead(DETECTOR_BACK_RIGHT_A0);
+//     // last_detect_temp_averge1 = (last_detect_temp1[1]+last_detect_temp1[2]+last_detect_temp1[0]+last_detect_temp1[3]+last_detect_temp1[4]+last_detect_temp1[5]+last_detect_temp1[6])/7;
+//     // last_detect_temp_averge2 = (last_detect_temp2[1]+last_detect_temp2[2]+last_detect_temp2[0]+last_detect_temp2[3]+last_detect_temp2[4]+last_detect_temp2[5]+last_detect_temp2[6])/7;
+    
+//     // int last_detect_temp1[3];
+//     // int last_detect_temp2[3];
+//     // int last_detect_temp_averge1;
+//     // int last_detect_temp_averge2;
+//     // while (1){
+//     //     last_detect_temp1[0] = analogRead(DETECTOR_BACK_LEFT_A1)+1;
+//     //     last_detect_temp2[0] = analogRead(DETECTOR_BACK_RIGHT_A0);
+//     //     last_detect_temp1[1] = analogRead(DETECTOR_BACK_LEFT_A1)+1;
+//     //     last_detect_temp2[1] = analogRead(DETECTOR_BACK_RIGHT_A0);
+//     //     last_detect_temp1[2] = analogRead(DETECTOR_BACK_LEFT_A1)+1;
+//     //     last_detect_temp2[2] = analogRead(DETECTOR_BACK_RIGHT_A0);
+//     //     last_detect_temp_averge1 = (last_detect_temp1[1]+last_detect_temp1[2]+last_detect_temp1[0])/3;
+//     //     last_detect_temp_averge2 = (last_detect_temp2[1]+last_detect_temp2[2]+last_detect_temp2[0])/3;
+//         // if(last_detect_temp1-last_detect_temp2>(OFFSET_THRESHOLD_ADJUST_SLOW-9)){
+//         //     turnLeftPosition(TURN_SLOW_POSITION);
+//         // }else if(last_detect_temp2-last_detect_temp1>(OFFSET_THRESHOLD_ADJUST_SLOW-9)){
+//         //     turnRightPosition(TURN_SLOW_POSITION);
+//         // }else{
+//         //     //roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2000, DECCEL1, 1800, ACCEL2, 2000, DECCEL2, 1800, 1);
+//         //     //delay(1000);
+//         //     return;
+//         // }
+//         // if(last_detect_temp_averge1-last_detect_temp_averge2>(OFFSET_THRESHOLD_ADJUST_SLOW-5)){
+//         //     turnLeftPosition(TURN_SLOW_POSITION);
+//         // }else if(last_detect_temp_averge2-last_detect_temp_averge1>(OFFSET_THRESHOLD_ADJUST_SLOW-5)){
+//         //     turnRightPosition(TURN_SLOW_POSITION);
+//         // }else{
+//         //     roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2000, DECCEL1, 1800, ACCEL2, 2000, DECCEL2, 1800, 1);
+//         //     //delay(1000);
+//         //     return;
+//         // }
+// }
+
+
 // /**
 //  * 检测不到物体时的程序，会进行400ms的延时，用来避免转到两个传感器中间就触发此程序-
 //  * 并会根据最后一次转向行进顺着方向进行原地旋转（未用）
@@ -119,7 +182,8 @@
 // #define GO_BAKC_SPEED 50
 // //定义当两侧距离突然剧增时阈值
 // #define MINI_CHANGE 150
-
+// //定义异常增长值，本是为了防止传感器返回异常大的值后回落使得小车误以为监测到敌人，已经被取代
+// #define ABNORMAL_INCREASE 300
 
 /**
  * 所需的库
@@ -129,42 +193,55 @@
 
 #define LEFT_REAR_SENSOR_COMPENSATION_VALUE 3
 #define RIGHT_REAR_SENSOR_COMPENSATION_VALUE 0
+
 //左转90°
 #define TURNLEFT90 530//旧
 #define TURN_LEFT_POSITION_90 530
+#define TURN_LEFT_POSITION_90_SLOWLY 433
+
 //左转——大
 #define TURNLEFT_BIG 160//旧
 #define TURN_LEFT_BIG 160
+
 //左转——小
 #define TURNLEFT_SMALL 140//旧
 #define TURN_LEFT_SMALL 140
+
 //右转—90°
 #define TURNRIGHT90 530//旧
 #define TURN_RIGHT_POSITION_90 530
+#define TURN_RIGHT_POSITION_90_SLOWLY 433
+
 //右转——大
 #define TURNRIGHT_BIG 175//旧
 #define TURN_RIGHT_BIG 175
+
 //右转——小
 #define TURNRIGHT_SMALL 160//旧
 #define TURN_RIGHT_SMALL 160
+
 //位置误差,用于在左右固定转向时在误差范围内取消轮胎锁定，使其不会回摆
 #define ERROR_POSITION 7
+
 //经测试，900左右END值是一圈
 #define ONE_ROUND 900//旧
 #define ONE_ROUND_POSITION 900
+
 //定义电机驱动模块引脚
 //电机和主板模拟引脚1
 #define DRIVER_S1 11//旧
 #define MOTOR_DRIVER_S1 11
+
 //电机和主板模拟引脚2
 #define DRIVER_S2 10//旧
 #define MOTOR_DRIVER_S2 10
-//定义异常增长值，本是为了防止传感器返回异常大的值后回落使得小车误以为监测到敌人，已经被取代
-#define ABNORMAL_INCREASE 300
+
 //设置电机板命令存储位置
 #define ADDRESS 0x80
+
 //设置电机和主板连接超时值
 #define TIME_OUT 10000
+
 //加速度设置，默认
 #define ACCEL 655360
 #define DECCEL 655360
@@ -172,86 +249,116 @@
 #define ACCEL2 655360
 #define DECCEL1 655360
 #define DECCEL2 655360
+
 //后侧左边传感器,已更改
 #define DETECTOR_BACK_A2 A2//旧
 #define DETECTOR_BACK_LEFT_A1 A1
+
 //后侧右边传感器
 #define DETECTOR_BACK_A3 A3//旧
 #define DETECTOR_BACK_RIGHT_A0 A0
+
 //左侧传感器
 #define DETECTOR_LEFT_A0 A0//旧
 #define DETECTOR_LEFT_A3 A3
+
 //右侧传感器
 #define DETECTOR_RIGHT_A1 A1//旧
 #define DETECTOR_RIGHT_A2 A2
+
 //除4个距离传感器外其他传感器，等待更改
 //左前方传感器
 #define DETECTOR_LEFT_FRONT 122333
+
 //更靠近前方的左前方传感器
 #define DETECTOR_LEFT_FRONT_MORE 122333
+
 //正前方传感器
 #define DETECTOR_FRONT 122333
+
 //右前方传感器
 #define DETECTOR_RIGHT_FRONT 122333
+
 //更靠近前方的右前方传感器
 #define DETECTOR_RIGHT_FRONT_MORE 122333
+
 //边缘传感器1
 #define GRAYSCALE_SENSOR_PIN2 122333//旧
 #define GRAYSCALE_SENSOR_LEFT 122333
+
 //边缘传感器
 #define GRAYSCALE_SENSOR_PIN1 122333//旧
 #define GRAYSCALE_SENSOT_RIGHT 122333
+
 //进攻时的速度
 #define GO_SPEED_ATTACK 15
+
 //微小角度转向
 #define TURN_SLOW_POSITION 25
+
 //微小前进
 #define GO_SLOW_POSITION 25
+
 //最小检测变化，用于两侧90°转向时判断是否有物体,如果变化大于这个值，则判定有敌人
 #define MIN_DETECT_CHANGE 177//旧
 #define MIN_DETECT_TO_90_ENEMY_JUDGE 177
+
 //对正时两个探测器数值差异范围，超过这个值则会调整
 #define OffSET_THRESHOLD 10//旧
 #define OFFSET_THRESHOLD_ADJUST_SLOW 10
+
 //定义传输值no_signal值，当值大于等于它时，认为此值无效
 #define NO_SIGNAL_VALUE 870
+
 //传感器检测到物体
 #define DETECT_YES 0
+
 //传感器未检测到物体
 #define DETECT_NO 1
+
 //上一次检测到物体的方向，用于使小车再次转向补偿
 #define DETECT_LAST_LEFT 1
 #define DETECT_LAST_RIGHT 2
 #define DETECT_LAST_FRONT 3
+
 //左前转向位置，等待更新
 #define TURN_LEFT_SIDE 122333//旧
 #define TURN_LEFT_FRONT 122333
 #define TURN_LEFT_FRONT_MORE 122333
+
 //右前转向，等待更新
 #define TURN_RIGHT_SIDE 122333//旧
 #define TURN_RIGHT_FRONT 122333
 #define TURN_RIGHT_FRONT_MORE 122333
+
 //左前补角转向,用于物体逃脱后补偿转向，等待更新
 #define TURN_LEFT_SIDE_COMPLEMENTARY 122333//旧
 #define TURN_LEFT_FRONT_COMPLEMENTARY 122333
 #define TURN_LEFT_FRONT_MORE_COMPLEMENTARY 122333
+
 //右前补角转向，用于物体逃脱后补偿转向，等待更新
 #define TURN_RIGHT_SIDE_COMPLEMENTARY 122333//旧
 #define TURN_RIGHT_FRONT_COMPLEMENTARY 122333
 #define TURN_RIGHT_FRONT_MORE_COMPLEMENTARY 122333
+
 //补偿计时是否已经开始，实际上是在侧面检测到敌人后丢失后开始计时，以便继续追踪
 #define COMPLEMENTARY_TIME_YES 1
 #define COMPLEMENTARY_TIME_NO 0
+
 //补偿计时多久后判定丢失目标
 #define COMPLEMENTARY_TIME_DELAY 400
+
 //判断前方是否已经检测到物体
 #define DETECT_IF_DETECTED_YES 1
 #define DETECT_IF_DETECTED_NO 0
+
 //可以开始进入警戒状态，在检测前方时，会伴随检测这个值，目的是为了避免前方传感器无用检测，节省时间
 #define ENABLE_TO_TIMING 1
 #define NOT_ENABLE_TO_TIMING 0
+
 //180°旋转,需要更新
 #define TURN_LEFT_180 122333
+
 //在台下为了改变位置移动时要用的速度
 #define ON_STAGE_SPEED 15
 
@@ -261,20 +368,28 @@
  */
 //初始化是否可以进入警戒状态，即是否需要监视前方传感器
 int timing = NOT_ENABLE_TO_TIMING;
+
 //初始化上一次物体位置变量
 int last_detect_side = DETECT_LAST_FRONT;
+
 //初始化是否已经开始计时变量
 int complementary_time_judge = COMPLEMENTARY_TIME_NO;
+
 //初始化计时时间
 long complementary_time = 0;
+
 //初始化旋转次数，为了让小车不会过度补偿旋转
 int times_of_turns = 0;
+
 //记录无敌人时，左侧边界的距离
 int last_detect_left = 0;
+
 //记录无敌人时，右侧边界的距离
 int last_detect_right = 0;
+
 //初始化前方是否检测到物体的变量，是为了在检测到物体后禁用前进和对齐动作
 int detect_if_detected = DETECT_IF_DETECTED_NO;
+
 //更新时的暂存变量，在更新距离中和判断台上台下时用，初始化这个是为了防止两次检测的值不同
 int temp_analogRead_A1 = 0;
 int temp_analogRead_A0 = 0;
@@ -294,6 +409,238 @@ RoboClaw roboclaw = RoboClaw(&serial,TIME_OUT);
 //动作组以下-----------------------------------------------------------------------------------------------
 //动作组以下-----------------------------------------------------------------------------------------------
 //动作组以下-----------------------------------------------------------------------------------------------
+
+//攻击函数
+void attack(){
+    gofront(GO_SPEED_ATTACK);
+}
+
+//停止
+void stop(){
+    roboclaw.ForwardM1(ADDRESS, 0);
+    //roboclaw.ForwardM1(address,speed);
+    roboclaw.ForwardM2(ADDRESS, 0);
+}
+
+//停止后保持不动
+//void stop_stuck(){//旧
+void stopStuck(){
+    //for(;roboclaw.ReadEncM1(ADDRESS)>3 || roboclaw.ReadEncM2(ADDRESS)>3;){
+        roboclaw.ResetEncoders(ADDRESS);
+        //stop();
+        roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, 0, ACCEL2, 8000, DECCEL2, 0, 1);
+    //}
+    
+}
+
+//直行,0-127
+void gofront(int speed){
+    roboclaw.ForwardM1(ADDRESS, speed);
+    roboclaw.ForwardM2(ADDRESS, speed-1);
+}
+//向左转,0-127
+void goleft(int speed,int level){
+    roboclaw.ForwardM1(ADDRESS, speed-level);
+    roboclaw.ForwardM2(ADDRESS, speed+level);
+}
+//向右转,0-127
+void goright(int speed,int level){
+    roboclaw.ForwardM1(ADDRESS, speed+level);
+    roboclaw.ForwardM2(ADDRESS, speed-level);
+}
+
+//M1电机前进位置函数
+//不建议使用，因为编码器的负值无法比较大小
+void M1PositionForward(int position){
+    //static int M1PositionTemp = 0;
+    //if(roboclaw.ReadEncM1(ADDRESS)==-position){
+    roboclaw.SetEncM1(ADDRESS,0);
+    //}
+    //roboclaw.ReadEncM1(ADDRESS)
+    roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, position, 0);
+    for(;;){
+        if(roboclaw.ReadEncM1(ADDRESS)<(position+ERROR_POSITION)&&roboclaw.ReadEncM1(ADDRESS)>(position-ERROR_POSITION)){
+            return;
+        }
+    }
+}
+
+//M1电机后退位置函数
+//不建议使用，因为编码器的负值无法比较大小
+void M1PositionBackward(int position){
+    //roboclaw.SetEncM1(ADDRESS,0);
+    
+    roboclaw.SetEncM1(ADDRESS,0);
+    //}
+    //roboclaw.ReadEncM1(ADDRESS)
+    roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, -position, 1);
+    for(;;){
+        if(roboclaw.ReadEncM1(ADDRESS)<(-position+ERROR_POSITION)&&roboclaw.ReadEncM1(ADDRESS)>(-position-ERROR_POSITION)){
+            return;
+        }
+    }
+}
+
+//M2电机后退位置函数
+//不建议使用，因为编码器的负值无法比较大小
+void M2PositionBackward(int position){
+    //static int M1PositionTemp = 0;
+    //if(roboclaw.ReadEncM1(ADDRESS)==-position){
+    roboclaw.SetEncM2(ADDRESS,0);
+    //}
+    //roboclaw.ReadEncM1(ADDRESS)
+    roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, -position, 0);
+    for(;;){
+        if(roboclaw.ReadEncM2(ADDRESS)<(-position+ERROR_POSITION)&&roboclaw.ReadEncM2(ADDRESS)>(-position-ERROR_POSITION)){
+            return;
+        }
+    }
+}
+
+//M2电机前进位置函数
+//不建议使用，因为编码器的负值无法比较大小
+void M2PositionForward(int position){
+    //roboclaw.SetEncM1(ADDRESS,0);
+    
+    roboclaw.SetEncM2(ADDRESS,0);
+    //}
+    //roboclaw.ReadEncM1(ADDRESS)
+    roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, position, 1);
+    for(;;){
+        if(roboclaw.ReadEncM2(ADDRESS)<(position+ERROR_POSITION)&&roboclaw.ReadEncM2(ADDRESS)>(position-ERROR_POSITION)){
+            return;
+        }
+    }
+}
+
+//向右转位置函数
+void turnRightPosition(int single){
+    //M1PositionBackward(single);
+    //M2PositionForward(single);
+    roboclaw.ResetEncoders(ADDRESS);
+    //roboclaw.SetEncM1(ADDRESS,0);
+    //}
+    //roboclaw.ReadEncM1(ADDRESS)
+    // roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, single, 1);
+    // // for(;;){
+    // //     if(roboclaw.ReadEncM1(ADDRESS)<(position+4)&&roboclaw.ReadEncM1(ADDRESS)>(position-4)){
+    // //         return;
+    // //     }
+    // // }
+
+    // //roboclaw.SetEncM2(ADDRESS,0);
+    // //}
+    // //roboclaw.ReadEncM1(ADDRESS)
+    // roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, single, 1);
+    roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, single, ACCEL2, 8000, DECCEL2, -single, 1);
+    for(;;){
+        if(roboclaw.ReadEncM1(ADDRESS)>=single-ERROR_POSITION){
+            stop();
+            //stop_stuck();
+            return;
+        }
+    }
+}
+
+//减速版向右转
+void turnRightPositionSlowly(int single){
+    //M1PositionBackward(single);
+    //M2PositionForward(single);
+    roboclaw.ResetEncoders(ADDRESS);
+    //roboclaw.SetEncM1(ADDRESS,0);
+    //}
+    //roboclaw.ReadEncM1(ADDRESS)
+    // roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, single, 1);
+    // // for(;;){
+    // //     if(roboclaw.ReadEncM1(ADDRESS)<(position+4)&&roboclaw.ReadEncM1(ADDRESS)>(position-4)){
+    // //         return;
+    // //     }
+    // // }
+
+    // //roboclaw.SetEncM2(ADDRESS,0);
+    // //}
+    // //roboclaw.ReadEncM1(ADDRESS)
+    // roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, single, 1);
+    roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 1000, DECCEL1, single, ACCEL2, 1000, DECCEL2, -single, 1);
+    // for(;;){
+    //     if(roboclaw.ReadEncM1(ADDRESS)>=single-ERROR_POSITION){
+    //         stop();
+    //         //stop_stuck();
+    //         return;
+    //     }
+    // }
+    
+}
+
+//向左转位置函数
+void turnLeftPosition(int single){
+    //static int M1PositionTemp = 0;
+    //if(roboclaw.ReadEncM1(ADDRESS)==-position){
+    //roboclaw.SetEncM2(ADDRESS,0);
+    roboclaw.ResetEncoders(ADDRESS);
+    //}
+    //roboclaw.ReadEncM1(ADDRESS)
+    // roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, -single, 0);
+    // // for(;;){
+    // //     if(roboclaw.ReadEncM2(ADDRESS)<(-position+4)&&roboclaw.ReadEncM2(ADDRESS)>(-position-4)){
+    // //         return;
+    // //     }
+    // // }
+
+    // //static int M1PositionTemp = 0;
+    // //if(roboclaw.ReadEncM1(ADDRESS)==-position){
+    // //roboclaw.SetEncM1(ADDRESS,0);
+    // //}
+    // //roboclaw.ReadEncM1(ADDRESS)
+    // roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, -single, 0);
+    roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, -single, ACCEL2, 8000, DECCEL2, single, 1);
+    for(;;){
+        if(roboclaw.ReadEncM2(ADDRESS)>=single-ERROR_POSITION){
+            stop();
+            return;
+        }
+    }
+}
+
+//减速版向左转位置函数
+void turnLeftPositionSlowly(int single){
+    //static int M1PositionTemp = 0;
+    //if(roboclaw.ReadEncM1(ADDRESS)==-position){
+    //roboclaw.SetEncM2(ADDRESS,0);
+    roboclaw.ResetEncoders(ADDRESS);
+    //}
+    //roboclaw.ReadEncM1(ADDRESS)
+    // roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, -single, 0);
+    // // for(;;){
+    // //     if(roboclaw.ReadEncM2(ADDRESS)<(-position+4)&&roboclaw.ReadEncM2(ADDRESS)>(-position-4)){
+    // //         return;
+    // //     }
+    // // }
+
+    // //static int M1PositionTemp = 0;
+    // //if(roboclaw.ReadEncM1(ADDRESS)==-position){
+    // //roboclaw.SetEncM1(ADDRESS,0);
+    // //}
+    // //roboclaw.ReadEncM1(ADDRESS)
+    // roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, -single, 0);
+    roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 1000, DECCEL1, -single, ACCEL2, 1000, DECCEL2, single, 1);
+    // for(;;){
+    //     if(roboclaw.ReadEncM2(ADDRESS)>=single-ERROR_POSITION){
+    //         stop();
+    //         return;
+    //     }
+    // }
+}
+
+//微小前进位置函数
+//void goFrontPosition(){
+void MoveALittleForward(){
+    roboclaw.ResetEncoders(ADDRESS);
+    roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, GO_SLOW_POSITION, ACCEL2, 8000, DECCEL2, GO_SLOW_POSITION, 1);
+    for(;roboclaw.ReadEncM1(ADDRESS)<GO_SLOW_POSITION-ERROR_POSITION;){}
+    delay(200);
+}
+
 /**
  * 对齐边界墙后向前走一段距离
  */
@@ -324,6 +671,54 @@ void preventsTheBladeFromGettingStuckUnderTable(){
 }
 
 /**
+ * 后退函数，为了后退抵在边界墙上对齐用
+ */
+void BackToTouchTheWall(){
+    roboclaw.BackwardM1(ADDRESS,20);
+    roboclaw.BackwardM2(ADDRESS,20);
+}
+
+/**
+ * 台下动作，此时已经判断摔下台了
+ */
+void DecidedTheCarHadFallenOff(){
+    //pinMode(13,OUTPUT);
+    //digitalWrite(13,HIGH);//122333
+    // goFrontPosition();
+    // goFrontPosition();
+    // goFrontPosition();
+    // goFrontPosition();
+    //转向，使车轮转向边界
+    while(analogRead(DETECTOR_BACK_LEFT_A1)-analogRead(DETECTOR_BACK_RIGHT_A0)>20 || analogRead(DETECTOR_BACK_LEFT_A1)+analogRead(DETECTOR_BACK_RIGHT_A0)>550){
+        turnLeftPosition(3*TURN_SLOW_POSITION);
+        //防止刀刃卡住
+        if(analogRead(DETECTOR_LEFT_A3)<180){
+            // turnLeftPosition(4*TURN_SLOW_POSITION);
+            // goFrontPosition();
+            preventsTheBladeFromGettingStuckUnderTable();
+        }
+    }
+    // while(analogRead(DETECTOR_BACK_A2)-analogRead(DETECTOR_BACK_A3)>2 && analogRead(DETECTOR_BACK_A2)>analogRead(DETECTOR_BACK_A3)){
+    //     turnLeftPosition(TURN_SLOW_POSITION);
+    // }
+    //goBack(GO_BAKC_SPEED)
+    //后退，用边界来对正
+    BackToTouchTheWall();
+    delay(1500);
+    //对正后前进一段
+    goForwardAfterAlignedTheWall();
+    //改变上台的位置
+    changeThePositionGoingToStage();//122333
+    //delay(1500);
+    //stop();
+    // while(1){
+    //    baseline(); 
+    // }
+    //
+    //delay(10000);
+}
+
+/**
  * 判断在台上还是在台下
  */
 void judgeWhetherOnStageOrUnderTheStage(){
@@ -331,99 +726,18 @@ void judgeWhetherOnStageOrUnderTheStage(){
         DecidedTheCarHadFallenOff();
     }else{
         //pinMode(13,OUTPUT);
-        digitalWrite(13,LOW);//122333
-    }
-}
-
-/**
- * 对齐后改变上台位置
- */
-void changeThePositionGoingToStage(){
-    if(analogRead(DETECTOR_LEFT_A3)<600){
-        turnRightPosition(TURN_RIGHT_POSITION_90);
-        delay(100);
-        forChangeThePositionToMoveAlongWall(0,ON_STAGE_SPEED);
-        delay(100);
-        //delay(2000);
-        turnRightPosition(TURN_RIGHT_POSITION_90);
-    }else{
-        turnLeftPosition(TURN_LEFT_POSITION_90);
-        delay(100);
-        forChangeThePositionToMoveAlongWall(1,ON_STAGE_SPEED);
-        delay(100);
-        //delay(2000);
-        turnLeftPosition(TURN_LEFT_POSITION_90);
-    }
-}
-// void UseForMoreSubtleAdjustmentJudgmentWhenAdjustingInSitu(){
-
-// }
-/**
- * 为了之后尽量沿直线走，先原地调整
- */
-void inOrderToGoAlongStraightFirstSteeralignment(){
-    int last_detect_temp1[7];
-    int last_detect_temp2[7];
-    int last_detect_temp_averge1;
-    int last_detect_temp_averge2;
-    last_detect_temp1[0] = analogRead(DETECTOR_BACK_LEFT_A1)+3;
-    last_detect_temp2[0] = analogRead(DETECTOR_BACK_RIGHT_A0);
-    last_detect_temp1[1] = analogRead(DETECTOR_BACK_LEFT_A1)+3;
-    last_detect_temp2[1] = analogRead(DETECTOR_BACK_RIGHT_A0);
-    last_detect_temp1[2] = analogRead(DETECTOR_BACK_LEFT_A1)+3;
-    last_detect_temp2[2] = analogRead(DETECTOR_BACK_RIGHT_A0);
-    last_detect_temp1[3] = analogRead(DETECTOR_BACK_LEFT_A1)+3;
-    last_detect_temp2[3] = analogRead(DETECTOR_BACK_RIGHT_A0);
-    last_detect_temp1[4] = analogRead(DETECTOR_BACK_LEFT_A1)+3;
-    last_detect_temp2[4] = analogRead(DETECTOR_BACK_RIGHT_A0);
-    last_detect_temp1[5] = analogRead(DETECTOR_BACK_LEFT_A1)+3;
-    last_detect_temp2[5] = analogRead(DETECTOR_BACK_RIGHT_A0);
-    last_detect_temp1[6] = analogRead(DETECTOR_BACK_LEFT_A1)+3;
-    last_detect_temp2[6] = analogRead(DETECTOR_BACK_RIGHT_A0);
-    last_detect_temp_averge1 = (last_detect_temp1[1]+last_detect_temp1[2]+last_detect_temp1[0]+last_detect_temp1[3]+last_detect_temp1[4]+last_detect_temp1[5]+last_detect_temp1[6])/7;
-    last_detect_temp_averge2 = (last_detect_temp2[1]+last_detect_temp2[2]+last_detect_temp2[0]+last_detect_temp2[3]+last_detect_temp2[4]+last_detect_temp2[5]+last_detect_temp2[6])/7;
-    
-    // int last_detect_temp1[3];
-    // int last_detect_temp2[3];
-    // int last_detect_temp_averge1;
-    // int last_detect_temp_averge2;
-    // while (1){
-    //     last_detect_temp1[0] = analogRead(DETECTOR_BACK_LEFT_A1)+1;
-    //     last_detect_temp2[0] = analogRead(DETECTOR_BACK_RIGHT_A0);
-    //     last_detect_temp1[1] = analogRead(DETECTOR_BACK_LEFT_A1)+1;
-    //     last_detect_temp2[1] = analogRead(DETECTOR_BACK_RIGHT_A0);
-    //     last_detect_temp1[2] = analogRead(DETECTOR_BACK_LEFT_A1)+1;
-    //     last_detect_temp2[2] = analogRead(DETECTOR_BACK_RIGHT_A0);
-    //     last_detect_temp_averge1 = (last_detect_temp1[1]+last_detect_temp1[2]+last_detect_temp1[0])/3;
-    //     last_detect_temp_averge2 = (last_detect_temp2[1]+last_detect_temp2[2]+last_detect_temp2[0])/3;
-        // if(last_detect_temp1-last_detect_temp2>(OFFSET_THRESHOLD_ADJUST_SLOW-9)){
-        //     turnLeftPosition(TURN_SLOW_POSITION);
-        // }else if(last_detect_temp2-last_detect_temp1>(OFFSET_THRESHOLD_ADJUST_SLOW-9)){
-        //     turnRightPosition(TURN_SLOW_POSITION);
-        // }else{
-        //     //roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2000, DECCEL1, 1800, ACCEL2, 2000, DECCEL2, 1800, 1);
-        //     //delay(1000);
-        //     return;
-        // }
-        if(last_detect_temp_averge1>last_detect_temp_averge2){
-            turnLeftPosition(TURN_SLOW_POSITION);
-        }else if(last_detect_temp_averge2>last_detect_temp_averge1){
-            turnRightPosition(TURN_SLOW_POSITION);
-        }else{
-            roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2000, DECCEL1, 1800, ACCEL2, 2000, DECCEL2, 1800, 1);
-            //delay(1000);
-            return;
-        }
+        //digitalWrite(13,LOW);//122333
     }
 }
 
 /**
  * 为了改变上台位置，向前走
  */
-void forChangeThePositionToMoveAlongWall(int which_side,int speed){//122333
-    inOrderToGoAlongStraightFirstSteeralignment();
+void forChangeThePositionToMoveAlongWall(){//122333
+    //inOrderToGoAlongStraightFirstSteeralignment();
+    //if(analogRead(DETECTOR_BACK_LEFT_A1)>)
+    roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2000, DECCEL1, 2800, ACCEL2, 2000, DECCEL2, 2800, 1);
 
-    
     // //int last_deistance_from_wall;
     // if(which_side==0){
     //     int time_go_along_with_wall = millis();
@@ -468,53 +782,27 @@ void forChangeThePositionToMoveAlongWall(int which_side,int speed){//122333
 }
 
 /**
- * 台下动作，此时已经判断摔下台了
+ * 对齐后改变上台位置
  */
-void DecidedTheCarHadFallenOff(){
-    //pinMode(13,OUTPUT);
-    digitalWrite(13,HIGH);//122333
-    // goFrontPosition();
-    // goFrontPosition();
-    // goFrontPosition();
-    // goFrontPosition();
-    //转向，使车轮转向边界
-    while(analogRead(DETECTOR_BACK_LEFT_A1)-analogRead(DETECTOR_BACK_RIGHT_A0)>20 || analogRead(DETECTOR_BACK_LEFT_A1)+analogRead(DETECTOR_BACK_RIGHT_A0)>550){
-        turnLeftPosition(3*TURN_SLOW_POSITION);
-        //防止刀刃卡住
-        if(analogRead(DETECTOR_LEFT_A3)<180){
-            // turnLeftPosition(4*TURN_SLOW_POSITION);
-            // goFrontPosition();
-            preventsTheBladeFromGettingStuckUnderTable();
-        }
+void changeThePositionGoingToStage(){
+    if(analogRead(DETECTOR_LEFT_A3)<600){
+        //turnRightPosition(TURN_RIGHT_POSITION_90);
+        turnRightPositionSlowly(TURN_RIGHT_POSITION_90_SLOWLY);
+        delay(200);
+        forChangeThePositionToMoveAlongWall();
+        delay(100);
+        //delay(2000);
+        turnRightPosition(TURN_RIGHT_POSITION_90);
+    }else{
+        // turnLeftPosition(TURN_LEFT_POSITION_90);
+        turnLeftPositionSlowly(TURN_LEFT_POSITION_90_SLOWLY);
+        delay(200);
+        forChangeThePositionToMoveAlongWall();
+        delay(100);
+        //delay(2000);
+        turnLeftPosition(TURN_LEFT_POSITION_90);
     }
-    // while(analogRead(DETECTOR_BACK_A2)-analogRead(DETECTOR_BACK_A3)>2 && analogRead(DETECTOR_BACK_A2)>analogRead(DETECTOR_BACK_A3)){
-    //     turnLeftPosition(TURN_SLOW_POSITION);
-    // }
-    //goBack(GO_BAKC_SPEED)
-    //后退，用边界来对正
-    BackToTouchTheWall();
-    delay(1500);
-    //对正后前进一段
-    goForwardAfterAlignedTheWall();
-    //改变上台的位置
-    changeThePositionGoingToStage();
-    //delay(1500);
-    //stop();
-    // while(1){
-    //    baseline(); 
-    // }
-    //
-    //delay(10000);
 }
-
-/**
- * 后退函数，为了后退抵在边界墙上对齐用
- */
-void BackToTouchTheWall(){
-    roboclaw.BackwardM1(ADDRESS,20);
-    roboclaw.BackwardM2(ADDRESS,20);
-}
-
 
 //void detectEnemy(){//旧
 /**
@@ -522,7 +810,7 @@ void BackToTouchTheWall(){
  * 会先判断侧边距离数据是否发生大的变化，若发生，则向那个方向转向
  * 之后会更新两侧的距离常数（不是一直的常数）
  */
-void DetectTheTwoSidesOfTheRightSideForEnemies(){
+void detectTheTwoSidesOfTheRightSideForEnemies(){
     //if()
     //last_detect_sum = analogRead(DETECTOR_LEFT_A0)+analogRead(DETECTOR_RIGHT_A1);
     // Serial.print("A0 cha:");
@@ -544,12 +832,39 @@ void DetectTheTwoSidesOfTheRightSideForEnemies(){
  * 对齐函数，在每一次对齐后都会判断小车位置
  */
 //void alignmentMoreStringent(){//旧
-void AlignWithWalls(){
+void alignWithWalls(){
     if(analogRead(DETECTOR_BACK_LEFT_A1)+analogRead(DETECTOR_BACK_RIGHT_A0)>=1700){
         turnLeftPosition(2*TURN_SLOW_POSITION);
     }else if(analogRead(DETECTOR_BACK_LEFT_A1)-analogRead(DETECTOR_BACK_RIGHT_A0)>OFFSET_THRESHOLD_ADJUST_SLOW){
         turnLeftPosition(TURN_SLOW_POSITION);
-    }else if(analogRead(DETECTOR_BACK_RIGHT_A0)-analogRead(DETECTOR_BACK_LEFT_A1)-5>OFFSET_THRESHOLD_ADJUST_SLOW){
+    }else if(analogRead(DETECTOR_BACK_RIGHT_A0)-analogRead(DETECTOR_BACK_LEFT_A1)>OFFSET_THRESHOLD_ADJUST_SLOW){
+        turnRightPosition(TURN_SLOW_POSITION);
+    }else{
+        uploadDetect();
+        MoveALittleForward();
+    }
+    judgeWhetherOnStageOrUnderTheStage();
+}
+
+/**
+ * 另一种形式的对齐函数，原理和原对齐函数一致，但是需要经过7次取值，用平均值来计算
+ */
+void alignWithWallsUsingAverge(){
+    int last_detect_alignment[7][2];
+    for(int i=0;i<7;++i){
+        last_detect_alignment[i][0] = analogRead(DETECTOR_BACK_LEFT_A1);
+    }
+    for(int i=0;i<7;++i){
+        last_detect_alignment[i][1] = analogRead(DETECTOR_BACK_RIGHT_A0);
+    }
+    int last_detect_alignment_averge[2];
+    last_detect_alignment_averge[0] = (last_detect_alignment[0][0]+last_detect_alignment[1][0]+last_detect_alignment[2][0]+last_detect_alignment[3][0]+last_detect_alignment[4][0]+last_detect_alignment[5][0]+last_detect_alignment[6][0])/7;
+    last_detect_alignment_averge[1] = (last_detect_alignment[0][1]+last_detect_alignment[1][1]+last_detect_alignment[2][1]+last_detect_alignment[3][1]+last_detect_alignment[4][1]+last_detect_alignment[5][1]+last_detect_alignment[6][1])/7;
+    if(last_detect_alignment_averge[0]+last_detect_alignment_averge[1]>=1700){
+        turnLeftPosition(2*TURN_SLOW_POSITION);
+    }else if(last_detect_alignment_averge[0]-last_detect_alignment_averge[1]>OFFSET_THRESHOLD_ADJUST_SLOW){
+        turnLeftPosition(TURN_SLOW_POSITION);
+    }else if(last_detect_alignment_averge[1]-last_detect_alignment_averge[0]>OFFSET_THRESHOLD_ADJUST_SLOW){
         turnRightPosition(TURN_SLOW_POSITION);
     }else{
         uploadDetect();
@@ -780,200 +1095,23 @@ void PrepareforAttack(){//122333
         
     }
 }
-
-//攻击函数
-void attack(){
-    gofront(GO_SPEED_ATTACK);
-}
-
-//停止
-void stop(){
-    roboclaw.ForwardM1(ADDRESS, 0);
-    //roboclaw.ForwardM1(address,speed);
-    roboclaw.ForwardM2(ADDRESS, 0);
-}
-
-//停止后保持不动
-//void stop_stuck(){//旧
-void stopStuck(){
-    //for(;roboclaw.ReadEncM1(ADDRESS)>3 || roboclaw.ReadEncM2(ADDRESS)>3;){
-        roboclaw.ResetEncoders(ADDRESS);
-        //stop();
-        roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, 0, ACCEL2, 8000, DECCEL2, 0, 1);
-    //}
-    
-}
-
-
-//直行,0-127
-void gofront(int speed){
-    roboclaw.ForwardM1(ADDRESS, speed);
-    roboclaw.ForwardM2(ADDRESS, speed-1);
-}
-//向左转,0-127
-void goleft(int speed,int level){
-    roboclaw.ForwardM1(ADDRESS, speed-level);
-    roboclaw.ForwardM2(ADDRESS, speed+level);
-}
-//向右转,0-127
-void goright(int speed,int level){
-    roboclaw.ForwardM1(ADDRESS, speed+level);
-    roboclaw.ForwardM2(ADDRESS, speed-level);
-}
-
-//M1电机前进位置函数
-//不建议使用，因为编码器的负值无法比较大小
-void M1PositionForward(int position){
-    //static int M1PositionTemp = 0;
-    //if(roboclaw.ReadEncM1(ADDRESS)==-position){
-    roboclaw.SetEncM1(ADDRESS,0);
-    //}
-    //roboclaw.ReadEncM1(ADDRESS)
-    roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, position, 0);
-    for(;;){
-        if(roboclaw.ReadEncM1(ADDRESS)<(position+ERROR_POSITION)&&roboclaw.ReadEncM1(ADDRESS)>(position-ERROR_POSITION)){
-            return;
-        }
-    }
-}
-
-//M1电机后退位置函数
-//不建议使用，因为编码器的负值无法比较大小
-void M1PositionBackward(int position){
-    //roboclaw.SetEncM1(ADDRESS,0);
-    
-    roboclaw.SetEncM1(ADDRESS,0);
-    //}
-    //roboclaw.ReadEncM1(ADDRESS)
-    roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, -position, 1);
-    for(;;){
-        if(roboclaw.ReadEncM1(ADDRESS)<(-position+ERROR_POSITION)&&roboclaw.ReadEncM1(ADDRESS)>(-position-ERROR_POSITION)){
-            return;
-        }
-    }
-}
-
-//M2电机后退位置函数
-//不建议使用，因为编码器的负值无法比较大小
-void M2PositionBackward(int position){
-    //static int M1PositionTemp = 0;
-    //if(roboclaw.ReadEncM1(ADDRESS)==-position){
-    roboclaw.SetEncM2(ADDRESS,0);
-    //}
-    //roboclaw.ReadEncM1(ADDRESS)
-    roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, -position, 0);
-    for(;;){
-        if(roboclaw.ReadEncM2(ADDRESS)<(-position+ERROR_POSITION)&&roboclaw.ReadEncM2(ADDRESS)>(-position-ERROR_POSITION)){
-            return;
-        }
-    }
-}
-
-//M2电机前进位置函数
-//不建议使用，因为编码器的负值无法比较大小
-void M2PositionForward(int position){
-    //roboclaw.SetEncM1(ADDRESS,0);
-    
-    roboclaw.SetEncM2(ADDRESS,0);
-    //}
-    //roboclaw.ReadEncM1(ADDRESS)
-    roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, position, 1);
-    for(;;){
-        if(roboclaw.ReadEncM2(ADDRESS)<(position+ERROR_POSITION)&&roboclaw.ReadEncM2(ADDRESS)>(position-ERROR_POSITION)){
-            return;
-        }
-    }
-}
-
-//向右转位置函数
-void turnRightPosition(int single){
-    //M1PositionBackward(single);
-    //M2PositionForward(single);
-    roboclaw.ResetEncoders(ADDRESS);
-    //roboclaw.SetEncM1(ADDRESS,0);
-    //}
-    //roboclaw.ReadEncM1(ADDRESS)
-    // roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, single, 1);
-    // // for(;;){
-    // //     if(roboclaw.ReadEncM1(ADDRESS)<(position+4)&&roboclaw.ReadEncM1(ADDRESS)>(position-4)){
-    // //         return;
-    // //     }
-    // // }
-
-    // //roboclaw.SetEncM2(ADDRESS,0);
-    // //}
-    // //roboclaw.ReadEncM1(ADDRESS)
-    // roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, single, 1);
-    roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, single, ACCEL2, 8000, DECCEL2, -single, 1);
-    for(;;){
-        if(roboclaw.ReadEncM1(ADDRESS)>=single-ERROR_POSITION){
-            stop();
-            //stop_stuck();
-            return;
-        }
-    }
-}
-
-//向左转位置函数
-void turnLeftPosition(int single){
-    //static int M1PositionTemp = 0;
-    //if(roboclaw.ReadEncM1(ADDRESS)==-position){
-    //roboclaw.SetEncM2(ADDRESS,0);
-    roboclaw.ResetEncoders(ADDRESS);
-    //}
-    //roboclaw.ReadEncM1(ADDRESS)
-    // roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, -single, 0);
-    // // for(;;){
-    // //     if(roboclaw.ReadEncM2(ADDRESS)<(-position+4)&&roboclaw.ReadEncM2(ADDRESS)>(-position-4)){
-    // //         return;
-    // //     }
-    // // }
-
-    // //static int M1PositionTemp = 0;
-    // //if(roboclaw.ReadEncM1(ADDRESS)==-position){
-    // //roboclaw.SetEncM1(ADDRESS,0);
-    // //}
-    // //roboclaw.ReadEncM1(ADDRESS)
-    // roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, -single, 0);
-    roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, -single, ACCEL2, 8000, DECCEL2, single, 1);
-    for(;;){
-        if(roboclaw.ReadEncM2(ADDRESS)>=single-ERROR_POSITION){
-            stop();
-            return;
-        }
-    }
-}
-
-//微小前进位置函数
-//void goFrontPosition(){
-void MoveALittleForward(){
-    roboclaw.ResetEncoders(ADDRESS);
-    roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, GO_SLOW_POSITION, ACCEL2, 8000, DECCEL2, GO_SLOW_POSITION, 1);
-    for(;roboclaw.ReadEncM1(ADDRESS)<GO_SLOW_POSITION-ERROR_POSITION;){}
-    delay(200);
-}
-
 //动作组以上--------------------------------------------------------------------------------------------------
 //动作组以上--------------------------------------------------------------------------------------------------
 //动作组以上--------------------------------------------------------------------------------------------------
 //动作组以上--------------------------------------------------------------------------------------------------
-
-
 
 //搜索敌人总函数
 void searchForEnemy(){
     if(detect_if_detected==DETECT_IF_DETECTED_NO){
-        DetectTheTwoSidesOfTheRightSideForEnemies();//down
+        detectTheTwoSidesOfTheRightSideForEnemies();//down
     // //alignmentOnlyOnce();//down
-        AlignWithWalls();
+        alignWithWalls();
     }
     SideFrontToDetectIfThereAreEnemies();
     detectEnemyFront();
     //uploadDetect();
     //goFrontPosition();//down
 }
-
-
 
 //原始函数：
 void setup(){
@@ -1034,11 +1172,16 @@ void test(){
 }
 
 void loop(){
-    forChangeThePositionToMoveAlongWall(2,0);
-    // est();
-    // preventsTheBladeFromGettingStuckUnderTable();
-    // stop();
+    // roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 2000, DECCEL, 4800, 1);
+    
+    //gofront(20);
+    // turnLeftPosition(TURN_LEFT_POSITION_90);
+    // //forChangeThePositionToMoveAlongWall(2,0);
+    // // est();
+    // // preventsTheBladeFromGettingStuckUnderTable();
+    // // stop();
     // searchForEnemy();
-    //delay(10000);
+    //turnRightPositionSlowly(TURN_RIGHT_POSITION_90_SLOWLY+43);
+    // delay(10000);
 }
 
