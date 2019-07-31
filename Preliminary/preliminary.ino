@@ -7,13 +7,16 @@
  * 等待更新用122333标记
  * 2019年7月31日：当两个后侧传感器走到台子的边缘时，两个传感器的数值为360-370左右，而且因为结-
  * 构的原因，左边的传感器平均比右边的少一些，可以在读数后面加上2来平衡。(2好像有点大，可以试试1)-
- * 两个后侧传感器在台下正中时，读数为235-245，同样加上2，和边界紧挨的时候-
- * 读数为178左右-
+ * 两个后侧传感器在台下正中时，读数为235-245，同样加上2，和边界紧挨的时候读数为178左右-
  * 两个后侧传感器在刀刃距离边缘3-5cm时读书为890左右-
  * 两个后侧传感器的红外折射盲区依然存在-
  * 在台子下两个后侧传感器可以正常工作
  * 2019年7月31日：经过测试，还是将两个后侧传感器分开了一定角度，这样才好增大两者的读数差异，减小-
- * 电压波动等的影响
+ * 电压波动等的影响更新后数据：当两个后侧传感器走到台子的边缘时，两个传感器的数值为360左右，
+ * 两个后侧传感器在台下正中时，读数为242左右，发现一个严重的问题，当两个传感器夹角过大时会频繁的检测到no singal-
+ * 很危险
+ * 2019年7月31日：经过改进，使得后侧两个传感器的夹角不会特别大，现在可以正常工作了。-
+ * 更新记录：两个后侧传感器在边缘之上时数值为370左右，台下中点250左右，差值可以限定在3左右
  */
 
 /**
@@ -124,6 +127,8 @@
 #include <SoftwareSerial.h>
 #include <RoboClaw.h>
 
+#define LEFT_REAR_SENSOR_COMPENSATION_VALUE 3
+#define RIGHT_REAR_SENSOR_COMPENSATION_VALUE 0
 //左转90°
 #define TURNLEFT90 530//旧
 #define TURN_LEFT_POSITION_90 530
@@ -357,19 +362,40 @@ void changeThePositionGoingToStage(){
  * 为了之后尽量沿直线走，先原地调整
  */
 void inOrderToGoAlongStraightFirstSteeralignment(){
-    int last_detect_temp1[3];
-    int last_detect_temp2[3];
+    int last_detect_temp1[7];
+    int last_detect_temp2[7];
     int last_detect_temp_averge1;
     int last_detect_temp_averge2;
-    while (1){
-        last_detect_temp1[0] = analogRead(DETECTOR_BACK_LEFT_A1)+1;
-        last_detect_temp2[0] = analogRead(DETECTOR_BACK_RIGHT_A0);
-        last_detect_temp1[1] = analogRead(DETECTOR_BACK_LEFT_A1)+1;
-        last_detect_temp2[1] = analogRead(DETECTOR_BACK_RIGHT_A0);
-        last_detect_temp1[2] = analogRead(DETECTOR_BACK_LEFT_A1)+1;
-        last_detect_temp2[2] = analogRead(DETECTOR_BACK_RIGHT_A0);
-        last_detect_temp_averge1 = (last_detect_temp1[1]+last_detect_temp1[2]+last_detect_temp1[0])/3;
-        last_detect_temp_averge2 = (last_detect_temp2[1]+last_detect_temp2[2]+last_detect_temp2[0])/3;
+    last_detect_temp1[0] = analogRead(DETECTOR_BACK_LEFT_A1)+3;
+    last_detect_temp2[0] = analogRead(DETECTOR_BACK_RIGHT_A0);
+    last_detect_temp1[1] = analogRead(DETECTOR_BACK_LEFT_A1)+3;
+    last_detect_temp2[1] = analogRead(DETECTOR_BACK_RIGHT_A0);
+    last_detect_temp1[2] = analogRead(DETECTOR_BACK_LEFT_A1)+3;
+    last_detect_temp2[2] = analogRead(DETECTOR_BACK_RIGHT_A0);
+    last_detect_temp1[3] = analogRead(DETECTOR_BACK_LEFT_A1)+3;
+    last_detect_temp2[3] = analogRead(DETECTOR_BACK_RIGHT_A0);
+    last_detect_temp1[4] = analogRead(DETECTOR_BACK_LEFT_A1)+3;
+    last_detect_temp2[4] = analogRead(DETECTOR_BACK_RIGHT_A0);
+    last_detect_temp1[5] = analogRead(DETECTOR_BACK_LEFT_A1)+3;
+    last_detect_temp2[5] = analogRead(DETECTOR_BACK_RIGHT_A0);
+    last_detect_temp1[6] = analogRead(DETECTOR_BACK_LEFT_A1)+3;
+    last_detect_temp2[6] = analogRead(DETECTOR_BACK_RIGHT_A0);
+    last_detect_temp_averge1 = (last_detect_temp1[1]+last_detect_temp1[2]+last_detect_temp1[0]+last_detect_temp1[3]+last_detect_temp1[4]+last_detect_temp1[5]+last_detect_temp1[6])/7;
+    last_detect_temp_averge2 = (last_detect_temp2[1]+last_detect_temp2[2]+last_detect_temp2[0]+last_detect_temp2[3]+last_detect_temp2[4]+last_detect_temp2[5]+last_detect_temp2[6])/7;
+    
+    // int last_detect_temp1[3];
+    // int last_detect_temp2[3];
+    // int last_detect_temp_averge1;
+    // int last_detect_temp_averge2;
+    // while (1){
+    //     last_detect_temp1[0] = analogRead(DETECTOR_BACK_LEFT_A1)+1;
+    //     last_detect_temp2[0] = analogRead(DETECTOR_BACK_RIGHT_A0);
+    //     last_detect_temp1[1] = analogRead(DETECTOR_BACK_LEFT_A1)+1;
+    //     last_detect_temp2[1] = analogRead(DETECTOR_BACK_RIGHT_A0);
+    //     last_detect_temp1[2] = analogRead(DETECTOR_BACK_LEFT_A1)+1;
+    //     last_detect_temp2[2] = analogRead(DETECTOR_BACK_RIGHT_A0);
+    //     last_detect_temp_averge1 = (last_detect_temp1[1]+last_detect_temp1[2]+last_detect_temp1[0])/3;
+    //     last_detect_temp_averge2 = (last_detect_temp2[1]+last_detect_temp2[2]+last_detect_temp2[0])/3;
         // if(last_detect_temp1-last_detect_temp2>(OFFSET_THRESHOLD_ADJUST_SLOW-9)){
         //     turnLeftPosition(TURN_SLOW_POSITION);
         // }else if(last_detect_temp2-last_detect_temp1>(OFFSET_THRESHOLD_ADJUST_SLOW-9)){
@@ -973,29 +999,43 @@ void setup(){
 
 //两者平时大概在-500到+500左右，受到推力后大概在2000+
 void test(){
-    int last_detect_temp1[3];
-    int last_detect_temp2[3];
+    int last_detect_temp1[7];
+    int last_detect_temp2[7];
     int last_detect_temp_averge1;
     int last_detect_temp_averge2;
-    last_detect_temp1[0] = analogRead(DETECTOR_BACK_LEFT_A1)+1;
-        last_detect_temp2[0] = analogRead(DETECTOR_BACK_RIGHT_A0);
-        last_detect_temp1[1] = analogRead(DETECTOR_BACK_LEFT_A1)+1;
-        last_detect_temp2[1] = analogRead(DETECTOR_BACK_RIGHT_A0);
-        last_detect_temp1[2] = analogRead(DETECTOR_BACK_LEFT_A1)+1;
-        last_detect_temp2[2] = analogRead(DETECTOR_BACK_RIGHT_A0);
-        last_detect_temp_averge1 = (last_detect_temp1[1]+last_detect_temp1[2]+last_detect_temp1[0])/3;
-        last_detect_temp_averge2 = (last_detect_temp2[1]+last_detect_temp2[2]+last_detect_temp2[0])/3;
+    last_detect_temp1[0] = analogRead(DETECTOR_BACK_LEFT_A1)+3;
+    last_detect_temp2[0] = analogRead(DETECTOR_BACK_RIGHT_A0);
+    last_detect_temp1[1] = analogRead(DETECTOR_BACK_LEFT_A1)+3;
+    last_detect_temp2[1] = analogRead(DETECTOR_BACK_RIGHT_A0);
+    last_detect_temp1[2] = analogRead(DETECTOR_BACK_LEFT_A1)+3;
+    last_detect_temp2[2] = analogRead(DETECTOR_BACK_RIGHT_A0);
+    last_detect_temp1[3] = analogRead(DETECTOR_BACK_LEFT_A1)+3;
+    last_detect_temp2[3] = analogRead(DETECTOR_BACK_RIGHT_A0);
+    last_detect_temp1[4] = analogRead(DETECTOR_BACK_LEFT_A1)+3;
+    last_detect_temp2[4] = analogRead(DETECTOR_BACK_RIGHT_A0);
+    last_detect_temp1[5] = analogRead(DETECTOR_BACK_LEFT_A1)+3;
+    last_detect_temp2[5] = analogRead(DETECTOR_BACK_RIGHT_A0);
+    last_detect_temp1[6] = analogRead(DETECTOR_BACK_LEFT_A1)+3;
+    last_detect_temp2[6] = analogRead(DETECTOR_BACK_RIGHT_A0);
+    last_detect_temp_averge1 = (last_detect_temp1[1]+last_detect_temp1[2]+last_detect_temp1[0]+last_detect_temp1[3]+last_detect_temp1[4]+last_detect_temp1[5]+last_detect_temp1[6])/7;
+    last_detect_temp_averge2 = (last_detect_temp2[1]+last_detect_temp2[2]+last_detect_temp2[0]+last_detect_temp2[3]+last_detect_temp2[4]+last_detect_temp2[5]+last_detect_temp2[6])/7;
     Serial.print(last_detect_temp_averge1);
     Serial.print("    ");
     Serial.print(last_detect_temp_averge2);
     Serial.print("    ");
     Serial.println(last_detect_temp_averge1-last_detect_temp_averge2);
     delay(1000);
+    // Serial.print(analogRead(DETECTOR_BACK_LEFT_A1));
+    // Serial.print("    ");
+    // Serial.print(analogRead(DETECTOR_BACK_RIGHT_A0));
+    // Serial.print("    ");
+    // Serial.println(analogRead(DETECTOR_BACK_LEFT_A1)-analogRead(DETECTOR_BACK_RIGHT_A0));
+    // delay(1000);
 }
 
 void loop(){
-    //forChangeThePositionToMoveAlongWall(2,0);
-    test();
+    forChangeThePositionToMoveAlongWall(2,0);
+    // est();
     // preventsTheBladeFromGettingStuckUnderTable();
     // stop();
     // searchForEnemy();
