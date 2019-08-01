@@ -25,7 +25,7 @@
 //经测试，900左右END值是一圈
 #define oneround 900
 //新建一个模拟串口
-SoftwareSerial serial = SoftwareSerial(10,11);
+SoftwareSerial serial = SoftwareSerial(10,11);//S2,S1
 
 //设置超时值
 #define timeout 10000
