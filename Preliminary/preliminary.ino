@@ -11,15 +11,22 @@
  * 两个后侧传感器在刀刃距离边缘3-5cm时读书为890左右-
  * 两个后侧传感器的红外折射盲区依然存在-
  * 在台子下两个后侧传感器可以正常工作
+ * 
  * 2019年7月31日：经过测试，还是将两个后侧传感器分开了一定角度，这样才好增大两者的读数差异，减小-
  * 电压波动等的影响更新后数据：当两个后侧传感器走到台子的边缘时，两个传感器的数值为360左右，
  * 两个后侧传感器在台下正中时，读数为242左右，发现一个严重的问题，当两个传感器夹角过大时会频繁的检测到no singal-
  * 很危险
+ * 
  * 2019年7月31日：经过改进，使得后侧两个传感器的夹角不会特别大，现在可以正常工作了。-
  * 更新记录：两个后侧传感器在边缘之上时数值为370左右，台下中点250左右，差值可以限定在3左右
+ * 
  * 2019年7月31日：向右缓慢旋转90°编码器值约在390左右,台子一半的编码器值为2800左右
+ * 
  * 2019年7月31日：对于小板，可以通过实例化不同的电机对象来控制不同的电机，已经过实验，但是-
  * 如何用硬件串口来控制电机驱动板依然未知(已完成)，中传感器的数值已完成
+ * 
+ * 2019年8月1日：新建了后退上台和原地转身函数，未测试
+ * 新建了上台电机的电机驱动对象，但是已经注释掉，需要解锁
  */
 
 /**
@@ -193,6 +200,7 @@
 #include <SoftwareSerial.h>
 #include <RoboClaw.h>
 
+//因为两个后侧传感器的硬件位置有偏差，所以可以在这里手动补偿一些值
 #define LEFT_REAR_SENSOR_COMPENSATION_VALUE 3
 #define RIGHT_REAR_SENSOR_COMPENSATION_VALUE 0
 
@@ -310,7 +318,7 @@
 #define OFFSET_THRESHOLD_ADJUST_SLOW 10
 
 //定义传输值no_signal值，当值大于等于它时，认为此值无效
-#define NO_SIGNAL_VALUE 870
+#define NO_SIGNAL_VALUE 880
 
 //传感器检测到物体
 #define DETECT_YES 0
@@ -361,8 +369,14 @@
 //180°旋转,需要更新
 #define TURN_LEFT_180 122333
 
+//180°旋转，需要更新
+#define TURN_RIGHT_180 122333
+
 //在台下为了改变位置移动时要用的速度
 #define ON_STAGE_SPEED 15
+
+//上台时上台电机的速度
+#define FOR_GOING_TO_STAGE_SPEED 35
 
 
 /**
@@ -402,8 +416,10 @@ int temp_analogRead_A0 = 0;
 //新建一个模拟串口,S1=P11,S2=P10，如果要用新的板子可能会不同
 SoftwareSerial serial = SoftwareSerial(MOTOR_DRIVER_S2,MOTOR_DRIVER_S1);//122333
 
+
 //利用刚才新建的串口和通信超时值来新建一个对象
 RoboClaw roboclaw = RoboClaw(&serial,TIME_OUT);
+// RboClaw roboclaw_small = RoboClaw(&122333,TIME_OUT);
 
 
 //动作组以下-----------------------------------------------------------------------------------------------
@@ -711,6 +727,7 @@ void DecidedTheCarHadFallenOff(){
     goForwardAfterAlignedTheWall();
     //改变上台的位置
     changeThePositionGoingToStage();//122333
+    stepBackAndGetOnStage();
     //delay(1500);
     //stop();
     // while(1){
@@ -718,6 +735,25 @@ void DecidedTheCarHadFallenOff(){
     // }
     //
     //delay(10000);
+}
+
+void stepBackAndGetOnStage(){
+    //接用此函数
+    BackToTouchTheWall();
+    startTheOnStageMotor();
+}
+
+void startTheOnStageMotor(){
+    roboclaw_small.BackwardM1(ADDRESS,FOR_GOING_TO_STAGE_SPEED);
+    roboclaw_small.BackwardM2(ADDRESS,FOR_GOING_TO_STAGE_SPEED);
+    delay(1000);
+    roboclaw_small.BackwardM1(ADDRESS,0);
+    roboclaw_small.BackwardM2(ADDRESS,0);
+    if(analogRead(DETECTOR_LEFT_A3)<600){
+        turnRightPosition(TURN_RIGHT_180);
+    }else{
+        turnLeftPosition(TURN_LEFT_180);
+    }
 }
 
 /**
@@ -1067,6 +1103,7 @@ void detectEnemyFront(){//122333
 
 //准备攻击()
 void PrepareforAttack(){//122333
+    //两者平时大概在-500到+500左右，受到推力后大概在2000+
     int16_t pwm1;
     int16_t pwm2;
     stopStuck();
@@ -1089,7 +1126,7 @@ void PrepareforAttack(){//122333
             storage_front_end_sensors[i][2] = digitalRead(GRAYSCALE_SENSOR_LEFT);
             }
             attack();
-        }while(storage_front_end_sensors==storage_front_end_sensors_temp);
+        }while(storage_front_end_sensors==storage_front_end_sensors_temp);//122333
         detectsWhetherTheEdgeIsReachedWhenPushingEnemy();  
         //delay(4000);
         //stop();
@@ -1101,43 +1138,6 @@ void PrepareforAttack(){//122333
 //动作组以上--------------------------------------------------------------------------------------------------
 //动作组以上--------------------------------------------------------------------------------------------------
 //动作组以上--------------------------------------------------------------------------------------------------
-
-//搜索敌人总函数
-void searchForEnemy(){
-    if(detect_if_detected==DETECT_IF_DETECTED_NO){
-        detectTheTwoSidesOfTheRightSideForEnemies();//down
-    // //alignmentOnlyOnce();//down
-        alignWithWalls();
-    }
-    SideFrontToDetectIfThereAreEnemies();
-    detectEnemyFront();
-    //uploadDetect();
-    //goFrontPosition();//down
-}
-
-//原始函数：
-void setup(){
-    //定义模拟串口
-    roboclaw.begin(38400);
-    Serial.begin(9600);
-    //设置传感器引脚
-    // pinMode(DETECTOR1,INPUT);
-    // pinMode(DETECTOR2,INPUT);
-    // pinMode(DETECTOR3,INPUT);
-    // pinMode(DETECTOR4,INPUT);
-    // pinMode(DETECTOR5,INPUT);
-    // pinMode(DETECTOR6,INPUT);
-    // pinMode(DETECTOR7,INPUT);
-    // delay(300
-    //stop();
-    delay(2000);
-    //首先更新一下场上的距离常数，再行动
-    uploadDetect();
-    // last_detect_left = 400;
-    // last_detect_right = 400;
-}
-
-//两者平时大概在-500到+500左右，受到推力后大概在2000+
 void test(){
     int last_detect_temp1[7];
     int last_detect_temp2[7];
@@ -1172,6 +1172,43 @@ void test(){
     // Serial.println(analogRead(DETECTOR_BACK_LEFT_A1)-analogRead(DETECTOR_BACK_RIGHT_A0));
     // delay(1000);
 }
+
+//搜索敌人总函数
+void searchForEnemy(){
+    if(detect_if_detected==DETECT_IF_DETECTED_NO){
+        detectTheTwoSidesOfTheRightSideForEnemies();//down
+    // //alignmentOnlyOnce();//down
+        alignWithWalls();
+    }
+    SideFrontToDetectIfThereAreEnemies();
+    detectEnemyFront();
+    //uploadDetect();
+    //goFrontPosition();//down
+}
+
+//原始函数：
+void setup(){
+    //定义模拟串口
+    roboclaw.begin(38400);
+    //roboclaw_small.begin(19200);
+    Serial.begin(9600);
+    //设置传感器引脚
+    // pinMode(DETECTOR1,INPUT);
+    // pinMode(DETECTOR2,INPUT);
+    // pinMode(DETECTOR3,INPUT);
+    // pinMode(DETECTOR4,INPUT);
+    // pinMode(DETECTOR5,INPUT);
+    // pinMode(DETECTOR6,INPUT);
+    // pinMode(DETECTOR7,INPUT);
+    // delay(300
+    //stop();
+    delay(2000);
+    //首先更新一下场上的距离常数，再行动
+    uploadDetect();
+    // last_detect_left = 400;
+    // last_detect_right = 400;
+}
+
 
 void loop(){
     // roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 2000, DECCEL, 4800, 1);
