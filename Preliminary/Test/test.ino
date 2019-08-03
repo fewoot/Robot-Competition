@@ -38,21 +38,21 @@ void loop(){
     // roboclaw.ForwardM2(address,0);
     // // Serial.println("hello,world");
     // // delay(1000);
-    // // baseline();
+    baseline();
     // roboclaw2.ForwardM1(address,20);
 }
 
-// void baseline(){
-//     pinMode(13,OUTPUT);
-//     digitalWrite(13,HIGH);
-//     delay(1000);
-//     digitalWrite(13,LOW);
-//     delay(100);
-//     digitalWrite(13,HIGH);
-//     delay(100);
-//     digitalWrite(13,LOW);
-//     delay(100);
-// }
+void baseline(){
+    pinMode(13,OUTPUT);
+    digitalWrite(13,HIGH);
+    delay(1000);
+    digitalWrite(13,LOW);
+    delay(100);
+    digitalWrite(13,HIGH);
+    delay(100);
+    digitalWrite(13,LOW);
+    delay(100);
+}
 //初始基准线函数，13号灯双闪
 // void baseline(){
 //     pinMode(13,OUTPUT);
