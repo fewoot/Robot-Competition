@@ -193,6 +193,18 @@
 // #define MINI_CHANGE 150
 // //定义异常增长值，本是为了防止传感器返回异常大的值后回落使得小车误以为监测到敌人，已经被取代
 // #define ABNORMAL_INCREASE 300
+// //右转——大
+// #define TURNRIGHT_BIG 175//旧
+// #define TURN_RIGHT_BIG 175
+// //右转——小
+// #define TURNRIGHT_SMALL 160//旧
+// #define TURN_RIGHT_SMALL 160
+// //左转——大
+// #define TURNLEFT_BIG 160//旧
+// #define TURN_LEFT_BIG 160
+// //左转——小
+// #define TURNLEFT_SMALL 140//旧
+// #define TURN_LEFT_SMALL 140
 
 /**
  * 所需的库
@@ -209,26 +221,10 @@
 #define TURN_LEFT_POSITION_90 530
 #define TURN_LEFT_POSITION_90_SLOWLY 433
 
-//左转——大
-#define TURNLEFT_BIG 160//旧
-#define TURN_LEFT_BIG 160
-
-//左转——小
-#define TURNLEFT_SMALL 140//旧
-#define TURN_LEFT_SMALL 140
-
 //右转—90°
 #define TURNRIGHT90 530//旧
 #define TURN_RIGHT_POSITION_90 530
 #define TURN_RIGHT_POSITION_90_SLOWLY 433
-
-//右转——大
-#define TURNRIGHT_BIG 175//旧
-#define TURN_RIGHT_BIG 175
-
-//右转——小
-#define TURNRIGHT_SMALL 160//旧
-#define TURN_RIGHT_SMALL 160
 
 //位置误差,用于在左右固定转向时在误差范围内取消轮胎锁定，使其不会回摆
 #define ERROR_POSITION 7
@@ -294,11 +290,11 @@
 
 //边缘传感器1
 #define GRAYSCALE_SENSOR_PIN2 122333//旧
-#define GRAYSCALE_SENSOR_LEFT 122333
+#define GRAYSCALE_SENSOR_LEFT 37
 
 //边缘传感器
 #define GRAYSCALE_SENSOR_PIN1 122333//旧
-#define GRAYSCALE_SENSOT_RIGHT 122333
+#define GRAYSCALE_SENSOT_RIGHT 36
 
 //进攻时的速度
 #define GO_SPEED_ATTACK 15
@@ -1212,21 +1208,23 @@ void setup(){
 
 
 void loop(){
-    Serial.print(analogRead(A2));
-    Serial.print("     ");
-    Serial.print(analogRead(A3));
-    Serial.print("     ");
-    Serial.print(analogRead(A4));
-    Serial.print("     ");
-    Serial.print(analogRead(A5));
-    Serial.print("     ");
-    Serial.println(analogRead(A6));
-    // Serial.print("     ");
     // Serial.print(analogRead(A2));
     // Serial.print("     ");
-    // Serial.print(analogRead(A2));
+    // Serial.print(analogRead(A3));
     // Serial.print("     ");
-    delay(1000);
+    // Serial.print(analogRead(A4));
+    // Serial.print("     ");
+    // Serial.print(analogRead(A5));
+    // Serial.print("     ");
+    // Serial.println(analogRead(A6));
+    // Serial.print(digitalRead(GRAYSCALE_SENSOR_LEFT));
+    // Serial.println(digitalRead(GRAYSCALE_SENSOT_RIGHT));
+    // // Serial.print("     ");
+    // // Serial.print(analogRead(A2));
+    // // Serial.print("     ");
+    // // Serial.print(analogRead(A2));
+    // // Serial.print("     ");
+    // delay(1000);
     // roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 2000, DECCEL, 4800, 1);
     
     //gofront(20);
