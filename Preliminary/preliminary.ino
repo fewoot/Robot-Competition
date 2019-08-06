@@ -203,10 +203,27 @@
 // #define TURN_RIGHT_SMALL 160
 // //左转——大
 // #define TURNLEFT_BIG 160//旧
-// #define TURN_LEFT_BIG 160
-// //左转——小
-// #define TURNLEFT_SMALL 140//旧
-// #define TURN_LEFT_SMALL 140
+// // #define TURN_LEFT_BIG 160
+// // //左转——小
+// // #define TURNLEFT_SMALL 140//旧
+// // #define TURN_LEFT_SMALL 140
+// //#define TURNLEFT90 530//旧
+// #define TURNRIGHT90 530//旧
+// #define ONE_ROUND 900//旧
+// #define DRIVER_S1 11//旧
+// #define DRIVER_S2 10//旧
+// #define DETECTOR_BACK_A2 A2//旧
+// // #define OffSET_THRESHOLD 10//旧
+// // #define TURN_RIGHT_SIDE //旧
+// #define DETECTOR_LEFT_A0 A0//旧
+// //#define GRAYSCALE_SENSOR_PIN2 //旧
+// //#define MIN_DETECT_CHANGE 177//旧
+// #define DETECTOR_RIGHT_A1 A1//旧
+// // #define TURN_LEFT_SIDE //旧
+// #define DETECTOR_BACK_A3 A3//旧
+
+
+//#define GRAYSCALE_SENSOR_PIN1 //旧
 
 /**
  * 所需的库
@@ -219,12 +236,12 @@
 #define RIGHT_REAR_SENSOR_COMPENSATION_VALUE 0
 
 //左转90°
-#define TURNLEFT90 530//旧
+
 #define TURN_LEFT_POSITION_90 820
 #define TURN_LEFT_POSITION_90_SLOWLY 465
 
 //右转—90°
-#define TURNRIGHT90 530//旧
+
 #define TURN_RIGHT_POSITION_90 800
 #define TURN_RIGHT_POSITION_90_SLOWLY 455
 
@@ -232,16 +249,16 @@
 #define ERROR_POSITION 10
 
 //经测试，900左右END值是一圈
-#define ONE_ROUND 900//旧
+
 #define ONE_ROUND_POSITION 900
 
 //定义电机驱动模块引脚
 //电机和主板模拟引脚1
-#define DRIVER_S1 11//旧
+
 #define MOTOR_DRIVER_S1 11
 
 //电机和主板模拟引脚2
-#define DRIVER_S2 10//旧
+
 #define MOTOR_DRIVER_S2 10
 
 //设置电机板命令存储位置
@@ -259,43 +276,43 @@
 #define DECCEL2 655360
 
 //后侧左边传感器,已更改
-#define DETECTOR_BACK_A2 A2//旧
+
 #define DETECTOR_BACK_LEFT A7
 
 //后侧右边传感器
-#define DETECTOR_BACK_A3 A3//旧
+
 #define DETECTOR_BACK_RIGHT A8
 
 //左侧传感器
-#define DETECTOR_LEFT_A0 A0//旧
+
 #define DETECTOR_LEFT A1
 
 //右侧传感器
-#define DETECTOR_RIGHT_A1 A1//旧
+
 #define DETECTOR_RIGHT A0
 
 //除4个距离传感器外其他传感器，等待更改
 //左前方传感器
-#define DETECTOR_LEFT_FRONT A5
+#define DETECTOR_LEFT_FRONT A6
 
 //更靠近前方的左前方传感器
-#define DETECTOR_LEFT_FRONT_MORE A4
+#define DETECTOR_LEFT_FRONT_MORE A5
 
 //正前方传感器
-#define DETECTOR_FRONT A3
+#define DETECTOR_FRONT A4
 
 //右前方传感器
-#define DETECTOR_RIGHT_FRONT A1
+#define DETECTOR_RIGHT_FRONT A2
 
 //更靠近前方的右前方传感器
-#define DETECTOR_RIGHT_FRONT_MORE A2
+#define DETECTOR_RIGHT_FRONT_MORE A3
 
 //边缘传感器1
-//#define GRAYSCALE_SENSOR_PIN2 //旧
+
 #define GRAYSCALE_SENSOR_LEFT 36
 
 //边缘传感器
-//#define GRAYSCALE_SENSOR_PIN1 //旧
+
 #define GRAYSCALE_SENSOT_RIGHT 37
 
 //进攻时的速度
@@ -308,11 +325,11 @@
 #define GO_SLOW_POSITION 25
 
 //最小检测变化，用于两侧90°转向时判断是否有物体,如果变化大于这个值，则判定有敌人
-//#define MIN_DETECT_CHANGE 177//旧
+
 #define MIN_DETECT_TO_90_ENEMY_JUDGE 177
 
 //对正时两个探测器数值差异范围，超过这个值则会调整
-// #define OffSET_THRESHOLD 10//旧
+
 #define OFFSET_THRESHOLD_ADJUST_SLOW 10
 
 //定义传输值no_signal值，当值大于等于它时，认为此值无效
@@ -330,14 +347,14 @@
 #define DETECT_LAST_FRONT 3
 
 //左前转向位置，等待更新
-// #define TURN_LEFT_SIDE //旧
+
 #define TURN_LEFT_FRONT 460
-#define TURN_LEFT_FRONT_MORE 300
+#define TURN_LEFT_FRONT_MORE 250
 
 //右前转向，等待更新
-// #define TURN_RIGHT_SIDE //旧
+
 #define TURN_RIGHT_FRONT 450
-#define TURN_RIGHT_FRONT_MORE 300
+#define TURN_RIGHT_FRONT_MORE 250
 
 //左前补角转向,用于物体逃脱后补偿转向，等待更新
 // #define TURN_LEFT_SIDE_COMPLEMENTARY //旧
@@ -354,7 +371,7 @@
 #define COMPLEMENTARY_TIME_NO 0
 
 //补偿计时多久后判定丢失目标
-#define COMPLEMENTARY_TIME_DELAY 400
+#define COMPLEMENTARY_TIME_DELAY 500
 
 //判断前方是否已经检测到物体
 #define DETECT_IF_DETECTED_YES 1
@@ -376,7 +393,11 @@
 //上台时上台电机的速度
 #define FOR_GOING_TO_STAGE_SPEED 40
 
-#define FRONT_RING_SENSOR_TRIGGER_VALUE 147
+//前方测敌传感器的70cm数值
+#define FRONT_RING_SENSOR_TRIGGER_VALUE 150
+
+//转动补偿
+#define FRONT_TURN_COMPLEMENTARY 370
 
 /**
  * 变量值
@@ -550,7 +571,12 @@ void turnRightPosition(int single){
     // //roboclaw.ReadEncM1(ADDRESS)
     // roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, single, 1);
     roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, single, ACCEL2, 8000, DECCEL2, -single, 1);
-    delay(single/3);
+    // delay(150);
+    if(single>450){
+        delay(single/3);
+    }else{
+        delay(150);
+    }
     stop();
     // for(;;){
     //     if(roboclaw.ReadEncM1(ADDRESS)>=single-ERROR_POSITION){
@@ -627,9 +653,13 @@ void turnLeftPosition(int single){
     //     //Serial.println(roboclaw.ReadEncM2(ADDRESS));
     // }while(roboclaw.ReadEncM2(ADDRESS)!=0);
     // stop();
-    delay(single/3);
+    if(single>450){
+        delay(single/3);
+    }else{
+        delay(150);
+    }
     stop();
-    return;
+    // return;
 }
 
 //减速版向左转位置函数
@@ -1032,6 +1062,20 @@ void SideFrontToDetectIfThereAreEnemies(){
         times_of_turns++;
         //delay(100);
         //detectEnemyFrontAlert();
+    }else if(analogRead(DETECTOR_LEFT_FRONT_MORE)>=FRONT_RING_SENSOR_TRIGGER_VALUE){
+        turnLeftPosition(TURN_LEFT_FRONT_MORE);
+        last_detect_side = DETECT_LAST_LEFT;
+        complementary_time_judge = COMPLEMENTARY_TIME_NO;
+        detect_if_detected = DETECT_IF_DETECTED_YES;
+        timing = ENABLE_TO_TIMING;
+        times_of_turns++;
+    }else if(analogRead(DETECTOR_RIGHT_FRONT_MORE)>=FRONT_RING_SENSOR_TRIGGER_VALUE){
+        turnRightPosition(TURN_RIGHT_FRONT_MORE);
+        last_detect_side = DETECT_LAST_RIGHT;
+        complementary_time_judge = COMPLEMENTARY_TIME_NO;
+        detect_if_detected = DETECT_IF_DETECTED_YES;
+        timing = ENABLE_TO_TIMING;
+        times_of_turns++;
     }
     // return;
 }
@@ -1117,14 +1161,14 @@ void detectEnemyFront(){
                 //     return;
                 //     break;
                 case DETECT_LAST_LEFT:
-                    // turnLeftPosition(TURN_LEFT_SIDE_COMPLEMENTARY);
+                    turnLeftPosition(FRONT_TURN_COMPLEMENTARY);
                     last_detect_side = DETECT_LAST_FRONT;
                     uploadDetect();
                     times_of_turns = 0;
                     return;
                     //break;
                 case DETECT_LAST_RIGHT:
-                    // turnRightPosition(TURN_RIGHT_SIDE_COMPLEMENTARY);
+                    turnRightPosition(FRONT_TURN_COMPLEMENTARY);
                     last_detect_side = DETECT_LAST_FRONT;
                     uploadDetect();
                     times_of_turns = 0;
@@ -1134,8 +1178,7 @@ void detectEnemyFront(){
                 //times_of_turns = 0;
             }
         }
-    }
-        //}
+    }    //}
 }
 
 //准备攻击()
@@ -1143,30 +1186,38 @@ void PrepareforAttack(){//122333
     //两者平时大概在-500到+500左右，受到推力后大概在2000+
     // int16_t pwm1;
     // int16_t pwm2;
-    // gofront(GO_SPEED_ATTACK);
-    stopStuck();
+    // gofront(GO_SPEED_ATTACK-5);
+    // MoveALittleForward();
+    // roboclaw.ResetEncoders(ADDRESS);
+    // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, 3*GO_SLOW_POSITION, ACCEL2, 8000, DECCEL2, 3*GO_SLOW_POSITION, 1);
+    // // for(;roboclaw.ReadEncM1(ADDRESS)<GO_SLOW_POSITION-ERROR_POSITION;){}
+    // delay(150);
+    // stopStuck();
     // roboclaw.ReadPWMs(ADDRESS,pwm1,pwm2);
-    if(roboclaw.ReadEncM1(ADDRESS)!=0 && roboclaw.ReadEncM2(ADDRESS)!=0){
+    if(analogRead(DETECTOR_FRONT)>=500){
         //do{
-        int storage_front_end_sensors[7][2];
-        int storage_front_end_sensors_temp[7][2] = 
-        {
-            {0,0},
-            {0,0},
-            {0,0},
-            {0,0},
-            {0,0},
-            {0,0},
-            {0,0}
-        };
+        int storage_front_end_sensors1[7];
+        int storage_front_end_sensors2[7];
+        // int storage_front_end_sensors_temp[7][2] = 
+        // {
+        //     {1,1},
+        //     {1,1},
+        //     {1,1},
+        //     {1,1},
+        //     {1,1},
+        //     {1,1},
+        //     {1,1}
+        // };
+        int storage_front_end_sensors1_temp[7] = {1,1,1,1,1,1,1};
+        int storage_front_end_sensors2_temp[7] = {1,1,1,1,1,1,1};
         do{//122333可能可以改一下顺序
             attack();
             for(int i=0;i<7;++i){
-            storage_front_end_sensors[i][0] = digitalRead(GRAYSCALE_SENSOT_RIGHT);
-            storage_front_end_sensors[i][1] = digitalRead(GRAYSCALE_SENSOR_LEFT);
+            storage_front_end_sensors1[i] = digitalRead(GRAYSCALE_SENSOT_RIGHT);
+            storage_front_end_sensors2[i] = digitalRead(GRAYSCALE_SENSOR_LEFT);
             }
             
-        }while(storage_front_end_sensors==storage_front_end_sensors_temp);//122333
+        }while(storage_front_end_sensors1!=storage_front_end_sensors1_temp || storage_front_end_sensors2!=storage_front_end_sensors2_temp);//122333
         detectsWhetherTheEdgeIsReachedWhenPushingEnemy();  
         //delay(4000);
         //stop();
@@ -1247,87 +1298,42 @@ void setup(){
     uploadDetect();
     // last_detect_left = 400;
     // last_detect_right = 400;
+    // stopStuck();
 }
 
 
 void loop(){
-    // stepBackAndGetOnStage();
-    // delay(20000);
-    // MoveALittleForward();
+    // Serial.print("left:");
+    //     Serial.print(analogRead(DETECTOR_LEFT));
+    //     Serial.print("....right:");
+    //     Serial.print(analogRead(DETECTOR_RIGHT));
+    //     Serial.print("....A2-A3:");
+    //     Serial.println(analogRead(DETECTOR_LEFT)+analogRead(DETECTOR_RIGHT));
+    //     delay(1000);
+    // alignWithWalls();
+    // turnLeftPosition(TURN_SLOW_POSITION);
     // searchForEnemy();
-    PrepareforAttack();
-
-    // attack();
-    // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, 1800, ACCEL2, 8000, DECCEL2, 1800, 0);
-    // stop();
-    // for(int i=0;i<50;i++){
-    //     Serial.println(roboclaw.ReadEncM2(ADDRESS));
-    //     // delay(1000);
-    // }
-    // delay(60000);
-    // Serial.println(roboclaw.ReadEncM2(ADDRESS));
-    // stop();
-    // if(roboclaw.ReadEncM2(ADDRESS)>=(200-ERROR_POSITION)){
-    //     Serial.println("yes");
-    // }else{
-    //     Serial.println("no");
-    // }
+    // SideFrontToDetectIfThereAreEnemies();
+    // turnLeftPosition(TURN_LEFT_FRONT_MORE);
     // delay(1000);
-    // turnLeftPosition(TURN_LEFT_180);
-    // turnLeftPosition(300);
-    // delay(5000);
-    // turnLeftPosition(450);
-    // delay(7000);
-    // turnLeftPosition(250);
-    // delay(5000);
-    // turnLeftPosition(1160);
-    // delay(5000);
-    // turnLeftPosition(1180);
-    // delay(5000);
-    // turnLeftPosition(1200);
-    // delay(5000);
-    // turnLeftPosition(1200);
+    // turnRightPosition(TURN_RIGHT_FRONT_MORE);
     // delay(10000);
-    // turnRightPosition(1160);
-    // delay(5000);
-    // turnRightPosition(1180);
-    // delay(5000);
-    // turnRightPosition(1200);
-    // delay(5000);
-    // turnRightPosition(1220);
-    // delay(5000);
-    // turnRightPosition(450);
-    // preventsTheBladeFromGettingStuckUnderTable();
-    // forChangeThePositionToMoveAlongWall();
-    // AftertheEnemyDownAndReturnToTheSideOfTheField();
-    // stepBackAndGetOnStage();
-    // startTheOnStageMotor();
-    // stepBackAndGetOnStage();
-    // delay(20000);
-    // Serial.println(roboclaw.ReadEncM2(ADDRESS));
-    // startTheOnStageMotor();
-    // stepBackAndGetOnStage();
-    // delay(20000);
-    // turnLeftPosition(TURN_LEFT_POSITION_90);
-    // delay(10000);
-    // roboclaw_stage.BackwardM1(ADDRESS,FOR_GOING_TO_STAGE_SPEED);
-    // delay(1450);
-    // roboclaw_stage.BackwardM1(ADDRESS,0);
-    // delay(10000);
-    // int16_t pwm1;
-    // int16_t pwm2;
-    // // gofront(GO_SPEED_ATTACK);
-    // // stopStuck();
-    // roboclaw.ReadPWMs(ADDRESS,pwm1,pwm2);
-    // Serial.print(pwm1);
-    // Serial.print("       ");
-    // Serial.println(pwm2);
-    // Serial.print(roboclaw.ReadEncM1(ADDRESS));
-    // Serial.print("       ");
-    // Serial.println(roboclaw.ReadEncM2(ADDRESS));
-    // Serial.print(digitalRead(GRAYSCALE_SENSOT_RIGHT));
-    // Serial.print("      ");
-    // Serial.println(digitalRead(GRAYSCALE_SENSOR_LEFT));
+    // delay(1000);
+    detectEnemyFront();
+    // test2();
 }
 
-
+void test2(){
+    Serial.print(analogRead(DETECTOR_LEFT_FRONT));
+    Serial.print("      ");
+    Serial.print(analogRead(DETECTOR_LEFT_FRONT_MORE));
+    Serial.print("      ");
+    // Serial.println(analogRead(DETECTOR_LEFT)+analogRead(DETECTOR_RIGHT));
+    Serial.print(analogRead(DETECTOR_FRONT));
+    Serial.print("      ");
+    Serial.print(analogRead(DETECTOR_RIGHT_FRONT_MORE));
+    Serial.print("      ");
+    Serial.println(analogRead(DETECTOR_RIGHT_FRONT));
+    // Serial.print("      ");
+    delay(1000);
+}
