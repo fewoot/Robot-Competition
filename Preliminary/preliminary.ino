@@ -316,7 +316,7 @@
 #define GRAYSCALE_SENSOT_RIGHT 37
 
 //进攻时的速度
-#define GO_SPEED_ATTACK 15
+#define GO_SPEED_ATTACK 20
 
 //微小角度转向
 #define TURN_SLOW_POSITION 25
@@ -465,7 +465,9 @@ RoboClaw roboclaw_stage = RoboClaw(&Serial3,TIME_OUT);
 
 //攻击函数
 void attack(){
-    gofront(GO_SPEED_ATTACK);
+    
+    roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 1000, DECCEL1, 999999, ACCEL2, 1000, DECCEL2, 999999, 1);
+    //gofront(GO_SPEED_ATTACK);
 }
 
 //停止
@@ -1329,14 +1331,15 @@ void PrepareforAttack(){
 
 
         // do{
+        roboclaw.ResetEncoders(ADDRESS);
         while(grayScaleSensorDetect()==STILL_ON_STAGE){
-            if(analogRead(DETECTOR_LEFT_FRONT_MORE)-analogRead(DETECTOR_RIGHT_FRONT_MORE)>180){
-                goleft(GO_SPEED_ATTACK,7);
-            }else if(analogRead(DETECTOR_RIGHT_FRONT_MORE)-analogRead(DETECTOR_LEFT_FRONT_MORE)>180){
-                goright(GO_SPEED_ATTACK,7);
-            }else{
+            // if(analogRead(DETECTOR_LEFT_FRONT_MORE)-analogRead(DETECTOR_RIGHT_FRONT_MORE)>180){
+            //     goleft(GO_SPEED_ATTACK,7);
+            // }else if(analogRead(DETECTOR_RIGHT_FRONT_MORE)-analogRead(DETECTOR_LEFT_FRONT_MORE)>180){
+            //     goright(GO_SPEED_ATTACK,7);
+            // }else{
                 attack(); 
-            }
+            // }
         }
         // }while(grayScaleSensorDetect()==STILL_ON_STAGE);
 
@@ -1453,13 +1456,19 @@ void setup(){
     // last_detect_left = 400;
     // last_detect_right = 400;
     // stopStuck();
+    
 }
 
 
 void loop(){
-    detectTheTwoSidesOfTheRightSideForEnemies();//down
-    // //alignmentOnlyOnce();//down
-    alignWithWalls();
+    // attack();
+    // delay(2000);
+    // stop();
+    // delay(200000);
+    searchForEnemy();
+    // detectTheTwoSidesOfTheRightSideForEnemies();//down
+    // // //alignmentOnlyOnce();//down
+    // alignWithWalls();
     // SideFrontToDetectIfThereAreEnemies();
     // detectEnemyFront();
     // alignWithWalls();
