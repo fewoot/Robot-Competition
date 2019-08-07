@@ -348,12 +348,12 @@
 
 //左前转向位置，等待更新
 
-#define TURN_LEFT_FRONT 460
+#define TURN_LEFT_FRONT 570
 #define TURN_LEFT_FRONT_MORE 250
 
 //右前转向，等待更新
 
-#define TURN_RIGHT_FRONT 450
+#define TURN_RIGHT_FRONT 560
 #define TURN_RIGHT_FRONT_MORE 250
 
 //左前补角转向,用于物体逃脱后补偿转向，等待更新
@@ -371,7 +371,7 @@
 #define COMPLEMENTARY_TIME_NO 0
 
 //补偿计时多久后判定丢失目标
-#define COMPLEMENTARY_TIME_DELAY 500
+#define COMPLEMENTARY_TIME_DELAY 1000
 
 //判断前方是否已经检测到物体
 #define DETECT_IF_DETECTED_YES 1
@@ -1108,7 +1108,7 @@ void AftertheEnemyDownAndReturnToTheSideOfTheField(){
  * 刷新上一次物体方向
  * 进入前方探测器警戒模式
  */
-//void detectEnemySide(){//旧//122333
+//void detectEnemySide(){//旧
 void SideFrontToDetectIfThereAreEnemies(){
     if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_FRONT)==DETECT_YES){
         if(enemy_on_front_go_front_only_once==CAN_GO_FRONT_TO_ENEMY){
@@ -1125,6 +1125,7 @@ void SideFrontToDetectIfThereAreEnemies(){
         //return;
     }else if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT)==DETECT_YES){
         turnLeftPosition(TURN_LEFT_FRONT);
+        delay(300);
         last_detect_side = DETECT_LAST_LEFT;
         complementary_time_judge = COMPLEMENTARY_TIME_NO;
         detect_if_detected = DETECT_IF_DETECTED_YES;
@@ -1135,6 +1136,7 @@ void SideFrontToDetectIfThereAreEnemies(){
         //detectEnemyFrontAlert();
     }else if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT)==DETECT_YES){
         turnRightPosition(TURN_RIGHT_FRONT);
+        delay(300);
         last_detect_side = DETECT_LAST_RIGHT;
         complementary_time_judge = COMPLEMENTARY_TIME_NO;
         detect_if_detected = DETECT_IF_DETECTED_YES;
@@ -1231,7 +1233,7 @@ void detectsWhetherTheEdgeIsReachedWhenPushingEnemy(){
 }
 
 
-//前探测器探测函数//122333
+//前探测器探测函数
 void detectEnemyFront(){
     // if(digitalRead(DETECTOR_FRONT)==DETECT_YES){
     //     do{
@@ -1295,7 +1297,7 @@ void detectEnemyFront(){
 }
 
 //准备攻击()
-void PrepareforAttack(){//122333
+void PrepareforAttack(){
     //两者平时大概在-500到+500左右，受到推力后大概在2000+
     // int16_t pwm1;
     // int16_t pwm2;
@@ -1340,13 +1342,13 @@ void PrepareforAttack(){//122333
 
 
         // }
-        // do{//122333可能可以改一下顺序
+        // do{//
         //     attack();
         //     for(int i=0;i<7;++i){
         //     storage_front_end_sensors1[i] = digitalRead(GRAYSCALE_SENSOT_RIGHT);
         //     storage_front_end_sensors2[i] = digitalRead(GRAYSCALE_SENSOR_LEFT);
         //     }
-        // }while(storage_front_end_sensors1!=storage_front_end_sensors1_temp && storage_front_end_sensors2!=storage_front_end_sensors2_temp);//122333
+        // }while(storage_front_end_sensors1!=storage_front_end_sensors1_temp && storage_front_end_sensors2!=storage_front_end_sensors2_temp);//
         enemy_on_front_go_front_only_once = CAN_GO_FRONT_TO_ENEMY;
         stopStuck();
         detectsWhetherTheEdgeIsReachedWhenPushingEnemy();  
@@ -1455,9 +1457,14 @@ void setup(){
 
 
 void loop(){
+    detectTheTwoSidesOfTheRightSideForEnemies();//down
+    // //alignmentOnlyOnce();//down
+    alignWithWalls();
+    // SideFrontToDetectIfThereAreEnemies();
+    // detectEnemyFront();
     // alignWithWalls();
-    detectsWhetherTheEdgeIsReachedWhenPushingEnemy();
-    delay(20000);
+    // detectsWhetherTheEdgeIsReachedWhenPushingEnemy();
+    // delay(20000);
     // Serial.println(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_FRONT));
     // SideFrontToDetectIfThereAreEnemies();
     // if(millis()>50000){
@@ -1510,7 +1517,7 @@ void loop(){
     //     // };
     //     int storage_front_end_sensors1_temp[7] = {1,1,1,1,1,1,1};
     //     int storage_front_end_sensors2_temp[7] = {1,1,1,1,1,1,1};
-    //     do{//122333可能可以改一下顺序
+    //     do{//
     //         //attack();
     //         for(int i=0;i<7;++i){
     //         storage_front_end_sensors1[i] = digitalRead(GRAYSCALE_SENSOT_RIGHT);
@@ -1526,7 +1533,7 @@ void loop(){
     //             Serial.println(storage_front_end_sensors2_temp[i]);
     //         }
     //         delay(4000);
-    //     }while(storage_front_end_sensors1!=storage_front_end_sensors1_temp && storage_front_end_sensors2!=storage_front_end_sensors2_temp);//122333
+    //     }while(storage_front_end_sensors1!=storage_front_end_sensors1_temp && storage_front_end_sensors2!=storage_front_end_sensors2_temp);//
     //     Serial.println("ohhhhhhhh");
     //     delay(1000);
     // Serial.println(grayScaleSensorDetect());
@@ -1540,4 +1547,17 @@ void loop(){
     // delay(1000);
     // Serial.println(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT_MORE));
     // delay(1000);
+    // turnLeftPosition(TURN_LEFT_FRONT+100);
+    // delay(4000);
+    // turnLeftPosition(TURN_LEFT_FRONT+150);
+    // delay(4000);
+    // turnLeftPosition(TURN_LEFT_FRONT+200);
+    // delay(10000);
+    // turnRightPosition(TURN_RIGHT_FRONT+100);
+    // delay(4000);
+    // turnRightPosition(TURN_RIGHT_FRONT+150);
+    // delay(4000);
+    // turnRightPosition(TURN_RIGHT_FRONT+200);
+    // delay(20000);
+    
 }
