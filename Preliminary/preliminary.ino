@@ -989,11 +989,13 @@ void detectTheTwoSidesOfTheRightSideForEnemies(){
  */
 //void alignmentMoreStringent(){//旧
 void alignWithWalls(){
-    if(analogRead(DETECTOR_BACK_LEFT)+analogRead(DETECTOR_BACK_RIGHT)>=1700){
+    int last_detect_back_left = analogRead(DETECTOR_BACK_LEFT);
+    int last_detect_back_right = analogRead(DETECTOR_BACK_RIGHT);
+    if(last_detect_back_left+last_detect_back_right>=1700){
         turnLeftPosition(2*TURN_SLOW_POSITION);
-    }else if(analogRead(DETECTOR_BACK_LEFT)-analogRead(DETECTOR_BACK_RIGHT)>OFFSET_THRESHOLD_ADJUST_SLOW){
+    }else if(last_detect_back_left-last_detect_back_right>OFFSET_THRESHOLD_ADJUST_SLOW){
         turnLeftPosition(TURN_SLOW_POSITION);
-    }else if(analogRead(DETECTOR_BACK_RIGHT)-analogRead(DETECTOR_BACK_LEFT)>OFFSET_THRESHOLD_ADJUST_SLOW){
+    }else if(last_detect_back_right-last_detect_back_left>OFFSET_THRESHOLD_ADJUST_SLOW){
         turnRightPosition(TURN_SLOW_POSITION);
     }else{
         uploadDetect();
@@ -1049,6 +1051,11 @@ void uploadDetect(){
 //后退函数，将敌人推下去后返回防守位置
 //void goBack(){//旧
 void AftertheEnemyDownAndReturnToTheSideOfTheField(){
+    // if(analogRead(DETECTOR_LEFT)<){
+    //     turnLeftPosition(4*TURN_SLOW_POSITION);
+    // }else if(analogRead(DETECTOR_RIGHT)<){
+    //     turnRightPosition(4*TURN_SLOW_POSITION);
+    // }
     roboclaw.ResetEncoders(ADDRESS);
     // roboclaw.BackwardM1(ADDRESS,speed);
     // roboclaw.BackwardM2(ADDRESS,speed-1);
@@ -1103,7 +1110,7 @@ void AftertheEnemyDownAndReturnToTheSideOfTheField(){
  */
 //void detectEnemySide(){//旧//122333
 void SideFrontToDetectIfThereAreEnemies(){
-    if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_FRONT)==DETECT_YES){//122333指向地面，待测
+    if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_FRONT)==DETECT_YES){
         if(enemy_on_front_go_front_only_once==CAN_GO_FRONT_TO_ENEMY){
             enemy_on_front_go_front_only_once = CAN_NOT_GO_FRONT_TO_ENEMY;
             roboclaw.ResetEncoders(ADDRESS);
@@ -1177,18 +1184,23 @@ void detectsWhetherTheEdgeIsReachedWhenPushingEnemy(){
     do{
         if(digitalRead(GRAYSCALE_SENSOT_RIGHT)==DETECT_YES){
             roboclaw.ResetEncoders(ADDRESS);
-            // roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, -TURN_SLOW_POSITION, 1);
-            roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, TURN_SLOW_POSITION, 1);
-            delay(100);
+            roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, -(2*TURN_SLOW_POSITION), 1);
+            roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, -TURN_SLOW_POSITION+11, 1);
+            delay(150);
             //stop();
         }else if(digitalRead(GRAYSCALE_SENSOR_LEFT)==DETECT_YES){
             roboclaw.ResetEncoders(ADDRESS);
-            // roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, -TURN_SLOW_POSITION, 1);
-            roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, TURN_SLOW_POSITION, 1);
-            delay(100);
+            roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, -(2*TURN_SLOW_POSITION), 1);
+            roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, -TURN_SLOW_POSITION+11, 1);
+            delay(150);
             //stop();
+        }else if(digitalRead(GRAYSCALE_SENSOT_RIGHT)+digitalRead(GRAYSCALE_SENSOR_LEFT)==2){
+            roboclaw.ResetEncoders(ADDRESS);
+            roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, -TURN_SLOW_POSITION, 1);
+            roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, -TURN_SLOW_POSITION, 1);
+            delay(150);
         }
-        if(digitalRead(GRAYSCALE_SENSOT_RIGHT)==digitalRead(GRAYSCALE_SENSOR_LEFT)){
+        if(digitalRead(GRAYSCALE_SENSOT_RIGHT)+digitalRead(GRAYSCALE_SENSOR_LEFT)==0){
             // alignWithWalls()
 
             // if(analogRead(DETECTOR_BACK_LEFT)-analogRead(DETECTOR_BACK_RIGHT)>OFFSET_THRESHOLD_ADJUST_SLOW){
@@ -1196,6 +1208,17 @@ void detectsWhetherTheEdgeIsReachedWhenPushingEnemy(){
             // }else if(analogRead(DETECTOR_BACK_RIGHT)-analogRead(DETECTOR_BACK_LEFT)>OFFSET_THRESHOLD_ADJUST_SLOW){
             //     turnRightPosition(TURN_SLOW_POSITION);
             // }else{
+            for(int i=0;i<7;){
+                int last_detect_back_left = analogRead(DETECTOR_BACK_LEFT);
+                int last_detect_back_right = analogRead(DETECTOR_BACK_RIGHT);
+                if(last_detect_back_left-last_detect_back_right>OFFSET_THRESHOLD_ADJUST_SLOW-4){
+                    turnLeftPosition(TURN_SLOW_POSITION);
+                }else if(last_detect_back_right-last_detect_back_left>OFFSET_THRESHOLD_ADJUST_SLOW-4){
+                    turnRightPosition(TURN_SLOW_POSITION);
+                }else{
+                    ++i;
+                }
+            }
             AftertheEnemyDownAndReturnToTheSideOfTheField();
             //stop();
             return;
@@ -1432,6 +1455,9 @@ void setup(){
 
 
 void loop(){
+    // alignWithWalls();
+    detectsWhetherTheEdgeIsReachedWhenPushingEnemy();
+    delay(20000);
     // Serial.println(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_FRONT));
     // SideFrontToDetectIfThereAreEnemies();
     // if(millis()>50000){
