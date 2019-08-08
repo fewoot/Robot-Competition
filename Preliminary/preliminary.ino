@@ -468,7 +468,7 @@ RoboClaw roboclaw_stage = RoboClaw(&Serial3,TIME_OUT);
 //¹¥»÷º¯Êý
 void attack(){
     
-    roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 1000, DECCEL1, 999999, ACCEL2, 1000, DECCEL2, 999999, 1);
+    roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 1200, DECCEL1, 999999, ACCEL2, 1200, DECCEL2, 999999, 1);
     //gofront(GO_SPEED_ATTACK);
 }
 
@@ -1463,11 +1463,13 @@ void setup(){
 
 
 void loop(){
-    // attack();
+    // turnLeftPosition(TURN_LEFT_POSITION_90);
+    // delay(20000);
+    attack();
     // delay(2000);
     // stop();
     // delay(200000);
-    searchForEnemy();
+    // searchForEnemy();
     // detectTheTwoSidesOfTheRightSideForEnemies();//down
     // // //alignmentOnlyOnce();//down
     // alignWithWalls();
