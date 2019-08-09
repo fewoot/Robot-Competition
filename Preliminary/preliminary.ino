@@ -1337,13 +1337,15 @@ void PrepareforAttack(){
         // do{
         roboclaw.ResetEncoders(ADDRESS);
         while(grayScaleSensorDetect()==STILL_ON_STAGE){
-            // if(analogRead(DETECTOR_LEFT_FRONT_MORE)-analogRead(DETECTOR_RIGHT_FRONT_MORE)>180){
-            //     goleft(GO_SPEED_ATTACK,7);
-            // }else if(analogRead(DETECTOR_RIGHT_FRONT_MORE)-analogRead(DETECTOR_LEFT_FRONT_MORE)>180){
-            //     goright(GO_SPEED_ATTACK,7);
-            // }else{
+            if(analogRead(DETECTOR_LEFT_FRONT_MORE)-analogRead(DETECTOR_RIGHT_FRONT_MORE)>180){
+                // goleft(GO_SPEED_ATTACK,7);
+                roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 1700, DECCEL1, 999999, ACCEL2, 2000, DECCEL2, 999999, 1);
+            }else if(analogRead(DETECTOR_RIGHT_FRONT_MORE)-analogRead(DETECTOR_LEFT_FRONT_MORE)>180){
+                roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2000, DECCEL1, 999999, ACCEL2, 1700, DECCEL2, 999999, 1);
+                // goright(GO_SPEED_ATTACK,7);
+            }else{
                 attack(); 
-            // }
+            }
         }
         // }while(grayScaleSensorDetect()==STILL_ON_STAGE);
 
@@ -1493,11 +1495,11 @@ void loop(){
     // determineIfItIsUnderTheStage();
     // turnLeftPosition(TURN_LEFT_POSITION_90);
     // delay(20000);
-    attack();
+    // attack();
     // delay(2000);
     // stop();
     // delay(200000);
-    // searchForEnemy();
+    searchForEnemy();
     // detectTheTwoSidesOfTheRightSideForEnemies();//down
     // // //alignmentOnlyOnce();//down
     // alignWithWalls();
