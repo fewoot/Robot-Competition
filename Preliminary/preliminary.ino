@@ -407,10 +407,14 @@
 //不可以向前窜一下
 #define CAN_NOT_GO_FRONT_TO_ENEMY 1
 
-
+//定义在台上
 #define STILL_ON_STAGE 1
+
+//定义在台下
 #define CLOSE_TO_EDGE 0
 
+//定义防止被铲起时后侧探测器会检测到的值
+#define PREVENT_REAR_BACK_VALUE 122333
 
 /**
  * 变量值
@@ -1336,7 +1340,7 @@ void PrepareforAttack(){
 
         // do{
         roboclaw.ResetEncoders(ADDRESS);
-        while(grayScaleSensorDetect()==STILL_ON_STAGE){
+        while(1){//122333
             if(analogRead(DETECTOR_LEFT_FRONT_MORE)-analogRead(DETECTOR_RIGHT_FRONT_MORE)>180){
                 // goleft(GO_SPEED_ATTACK,7);
                 roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 1700, DECCEL1, 999999, ACCEL2, 2000, DECCEL2, 999999, 1);
@@ -1345,6 +1349,14 @@ void PrepareforAttack(){
                 // goright(GO_SPEED_ATTACK,7);
             }else{
                 attack(); 
+            }
+            //122333
+            if(grayScaleSensorDetect()==CLOSE_TO_EDGE){
+                if(analogRead(DETECTOR_BACK_LEFT)<PREVENT_REAR_BACK_VALUE || analogRead(DETECTOR_BACK_RIGHT)<PREVENT_REAR_BACK_VALUE){
+                    preventRearBackMove();
+                    continue;
+                }
+                break;
             }
         }
         // }while(grayScaleSensorDetect()==STILL_ON_STAGE);
@@ -1366,6 +1378,13 @@ void PrepareforAttack(){
         //}while(1);
         
     }
+}
+
+//被铲起后后退保护程序
+void preventRearBackMove(){
+    roboclaw.ResetEncoders(ADDRESS);
+    roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, -900, ACCEL2, 8000, DECCEL2, -900, 1);
+    delay(300);
 }
 //动作组以上--------------------------------------------------------------------------------------------------
 //动作组以上--------------------------------------------------------------------------------------------------
