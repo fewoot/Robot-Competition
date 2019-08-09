@@ -468,7 +468,7 @@ RoboClaw roboclaw_stage = RoboClaw(&Serial3,TIME_OUT);
 //攻击函数
 void attack(){
     
-    roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 1200, DECCEL1, 999999, ACCEL2, 1200, DECCEL2, 999999, 1);
+    roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 1700, DECCEL1, 999999, ACCEL2, 1700, DECCEL2, 999999, 1);
     //gofront(GO_SPEED_ATTACK);
 }
 
@@ -842,7 +842,7 @@ void DecidedTheCarHadFallenOff(){
     //    baseline(); 
     // }
     //
-    //delay(10000);
+    delay(10000);
 }
 
 /**
@@ -882,7 +882,7 @@ void startTheOnStageMotor(){
  */
 void judgeWhetherOnStageOrUnderTheStage(){
     if(temp_analogRead_A0+temp_analogRead_A1<580 || analogRead(DETECTOR_BACK_LEFT)<330){//
-        delay(700);
+        delay(1000);
         if(temp_analogRead_A0+temp_analogRead_A1<580 || analogRead(DETECTOR_BACK_LEFT)<330){
             DecidedTheCarHadFallenOff();
         }
@@ -977,6 +977,7 @@ void detectTheTwoSidesOfTheRightSideForEnemies(){
     // Serial.print(last_detect_left-analogRead(DETECTOR_LEFT_A0));
     // Serial.print(".....A1 cha:");
     // Serial.println(last_detect_right-analogRead(DETECTOR_RIGHT_A1));
+    judgeWhetherOnStageOrUnderTheStage();
     if(last_detect_left-analogRead(DETECTOR_LEFT)>=MIN_DETECT_TO_90_ENEMY_JUDGE && analogRead(DETECTOR_LEFT)+analogRead(DETECTOR_RIGHT)<1100){
         turnLeftPosition(TURN_LEFT_POSITION_90);
         uploadDetect();
@@ -1005,7 +1006,7 @@ void alignWithWalls(){
         uploadDetect();
         MoveALittleForward();
     }
-    judgeWhetherOnStageOrUnderTheStage();
+    // judgeWhetherOnStageOrUnderTheStage();
 }
 
 /**
@@ -1114,6 +1115,7 @@ void AftertheEnemyDownAndReturnToTheSideOfTheField(){
  */
 //void detectEnemySide(){//旧
 void SideFrontToDetectIfThereAreEnemies(){
+    determineIfItIsUnderTheStage();
     if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_FRONT)==DETECT_YES){
         if(enemy_on_front_go_front_only_once==CAN_GO_FRONT_TO_ENEMY){
             enemy_on_front_go_front_only_once = CAN_NOT_GO_FRONT_TO_ENEMY;
@@ -1313,7 +1315,7 @@ void PrepareforAttack(){
     // delay(150);
     // stopStuck();
     // roboclaw.ReadPWMs(ADDRESS,pwm1,pwm2);
-    if(analogRead(DETECTOR_FRONT)>=500){
+    if(analogRead(DETECTOR_FRONT)>=470){
         // //do{
         // int storage_front_end_sensors1[7];
         // int storage_front_end_sensors2[7];
@@ -1436,6 +1438,30 @@ void searchForEnemy(){
     //goFrontPosition();//down
 }
 
+void determineIfItIsUnderTheStage(){
+    int temp_times = 0;
+    if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_FRONT)==DETECT_YES){
+        temp_times++;
+    }
+    if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT)==DETECT_YES){
+        temp_times++;
+    }
+    if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT_MORE)==DETECT_YES){
+        temp_times++;
+    }
+    if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT)==DETECT_YES){
+        temp_times++;
+    }
+    if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT_MORE)==DETECT_YES){
+        temp_times++;
+    }
+    if(temp_times>=3){
+        DecidedTheCarHadFallenOff();
+    }
+    // Serial.println(temp_times);
+    // delay(1000);
+}
+
 //原始函数：
 void setup(){
     //定义模拟串口
@@ -1463,6 +1489,8 @@ void setup(){
 
 
 void loop(){
+    // changeThePositionGoingToStage();
+    // determineIfItIsUnderTheStage();
     // turnLeftPosition(TURN_LEFT_POSITION_90);
     // delay(20000);
     attack();
