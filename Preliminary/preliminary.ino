@@ -1348,9 +1348,10 @@ void PrepareforAttack(){
                 roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2000, DECCEL1, 999999, ACCEL2, 1700, DECCEL2, 999999, 1);
                 // goright(GO_SPEED_ATTACK,7);
             }else{
-                attack(); 
+                attack();
             }
             //122333
+            
             if(grayScaleSensorDetect()==CLOSE_TO_EDGE){
                 if(analogRead(DETECTOR_BACK_LEFT)<PREVENT_REAR_BACK_VALUE || analogRead(DETECTOR_BACK_RIGHT)<PREVENT_REAR_BACK_VALUE){
                     preventRearBackMove();
