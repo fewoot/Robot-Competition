@@ -35,7 +35,7 @@ void setup(){
 
 void loop(){
 
-
+    // roboclaw2.ForwardM1(address, 30);
     // roboclaw2.SpeedAccelDeccelPositionM1M2(address, accel, 800, deccel, 900, accel, 800, deccel, 900, 1);
     // Serial.print(roboclaw2.ReadEncM1(address));
     // Serial.println(roboclaw2.ReadEncM2(address));

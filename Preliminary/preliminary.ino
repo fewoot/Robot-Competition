@@ -31,6 +31,9 @@
  * 2019年8月4日：经过检测，出现了一个问题，电机的编码器出现问题，无法正常读取数值，很气，已经用延时来修复
  * 
  * 2019年8月7日：今天和两个小车进行了对撞，其中有一个推不过，总线也有烧焦的痕迹，明早继续实验
+ * 
+ * 2019年8月23日：今天回来了，车已经做好80%了，但是有一点超重，明天可以再改进一下，传感器，电机已经检查完毕-
+ * 可以读取编码值。还没有进行推力实验，今天早点回去吧，
  */
 
 /**
@@ -224,6 +227,16 @@
 // // #define TURN_LEFT_SIDE //旧
 // #define DETECTOR_BACK_A3 A3//旧
 
+//左前补角转向,用于物体逃脱后补偿转向，等待更新
+// #define TURN_LEFT_SIDE_COMPLEMENTARY //旧
+// #define TURN_LEFT_FRONT_COMPLEMENTARY 
+// #define TURN_LEFT_FRONT_MORE_COMPLEMENTARY 
+
+//右前补角转向，用于物体逃脱后补偿转向，等待更新
+// #define TURN_RIGHT_SIDE_COMPLEMENTARY //旧
+// #define TURN_RIGHT_FRONT_COMPLEMENTARY 
+// #define TURN_RIGHT_FRONT_MORE_COMPLEMENTARY 
+
 
 //#define GRAYSCALE_SENSOR_PIN1 //旧
 
@@ -233,38 +246,86 @@
 #include <SoftwareSerial.h>
 #include <RoboClaw.h>
 
-//因为两个后侧传感器的硬件位置有偏差，所以可以在这里手动补偿一些值
-#define LEFT_REAR_SENSOR_COMPENSATION_VALUE 3
-#define RIGHT_REAR_SENSOR_COMPENSATION_VALUE 0
+//后侧左边传感器,已更改
+#define DETECTOR_BACK_LEFT A7
+
+//后侧右边传感器
+#define DETECTOR_BACK_RIGHT A8
+
+//左侧传感器
+#define DETECTOR_LEFT A0
+
+//右侧传感器
+#define DETECTOR_RIGHT A1
+
+//左前方传感器
+#define DETECTOR_LEFT_FRONT A2
+
+//更靠近前方的左前方传感器
+#define DETECTOR_LEFT_FRONT_MORE A5
+
+//正前方传感器
+#define DETECTOR_FRONT A4
+
+//右前方传感器
+#define DETECTOR_RIGHT_FRONT A6
+
+//更靠近前方的右前方传感器
+#define DETECTOR_RIGHT_FRONT_MORE A3
+
+//边缘传感器1
+#define GRAYSCALE_SENSOR_LEFT 37
+
+//边缘传感器
+#define GRAYSCALE_SENSOT_RIGHT 36
+
+//电机和主板模拟引脚1
+#define MOTOR_DRIVER_S1 11
+
+//电机和主板模拟引脚2
+#define MOTOR_DRIVER_S2 10
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//180°旋转,需要更新
+#define TURN_LEFT_180 1200
+
+//180°旋转，需要更新
+#define TURN_RIGHT_180 1200
 
 //左转90°
-
 #define TURN_LEFT_POSITION_90 820
 #define TURN_LEFT_POSITION_90_SLOWLY 465
 
 //右转—90°
-
 #define TURN_RIGHT_POSITION_90 800
 #define TURN_RIGHT_POSITION_90_SLOWLY 455
+
+//左前转向位置，等待更新
+#define TURN_LEFT_FRONT 570
+#define TURN_LEFT_FRONT_MORE 250
+
+//右前转向，等待更新
+#define TURN_RIGHT_FRONT 560
+#define TURN_RIGHT_FRONT_MORE 250
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//定义防止被铲起时后侧探测器会检测到的值
+#define PREVENT_REAR_BACK_VALUE 122333
+
+//因为两个后侧传感器的硬件位置有偏差，所以可以在这里手动补偿一些值
+#define LEFT_REAR_SENSOR_COMPENSATION_VALUE 3
+#define RIGHT_REAR_SENSOR_COMPENSATION_VALUE 0
 
 //位置误差,用于在左右固定转向时在误差范围内取消轮胎锁定，使其不会回摆
 #define ERROR_POSITION 10
 
 //经测试，900左右END值是一圈
-
 #define ONE_ROUND_POSITION 900
-
-//定义电机驱动模块引脚
-//电机和主板模拟引脚1
-
-#define MOTOR_DRIVER_S1 11
-
-//电机和主板模拟引脚2
-
-#define MOTOR_DRIVER_S2 10
 
 //设置电机板命令存储位置
 #define ADDRESS 0x80
+
+//上台电机板命令存储位置
+#define ADDRESS_STAGE 0x81
 
 //设置电机和主板连接超时值
 #define TIME_OUT 10000
@@ -277,46 +338,6 @@
 #define DECCEL1 655360
 #define DECCEL2 655360
 
-//后侧左边传感器,已更改
-
-#define DETECTOR_BACK_LEFT A7
-
-//后侧右边传感器
-
-#define DETECTOR_BACK_RIGHT A8
-
-//左侧传感器
-
-#define DETECTOR_LEFT A1//122333
-
-//右侧传感器
-
-#define DETECTOR_RIGHT A0//122333
-
-//除4个距离传感器外其他传感器，等待更改//122333
-//左前方传感器
-#define DETECTOR_LEFT_FRONT A6
-
-//更靠近前方的左前方传感器
-#define DETECTOR_LEFT_FRONT_MORE A5
-
-//正前方传感器
-#define DETECTOR_FRONT A4
-
-//右前方传感器
-#define DETECTOR_RIGHT_FRONT A2
-
-//更靠近前方的右前方传感器
-#define DETECTOR_RIGHT_FRONT_MORE A3
-
-//边缘传感器1
-
-#define GRAYSCALE_SENSOR_LEFT 36
-
-//边缘传感器
-
-#define GRAYSCALE_SENSOT_RIGHT 37
-
 //进攻时的速度
 #define GO_SPEED_ATTACK 20
 
@@ -327,11 +348,9 @@
 #define GO_SLOW_POSITION 25
 
 //最小检测变化，用于两侧90°转向时判断是否有物体,如果变化大于这个值，则判定有敌人
-
 #define MIN_DETECT_TO_90_ENEMY_JUDGE 177
 
 //对正时两个探测器数值差异范围，超过这个值则会调整
-
 #define OFFSET_THRESHOLD_ADJUST_SLOW 8
 
 //定义传输值no_signal值，当值大于等于它时，认为此值无效
@@ -348,26 +367,6 @@
 #define DETECT_LAST_RIGHT 2
 #define DETECT_LAST_FRONT 3
 
-//左前转向位置，等待更新
-
-#define TURN_LEFT_FRONT 570
-#define TURN_LEFT_FRONT_MORE 250
-
-//右前转向，等待更新
-
-#define TURN_RIGHT_FRONT 560
-#define TURN_RIGHT_FRONT_MORE 250
-
-//左前补角转向,用于物体逃脱后补偿转向，等待更新
-// #define TURN_LEFT_SIDE_COMPLEMENTARY //旧
-// #define TURN_LEFT_FRONT_COMPLEMENTARY 
-// #define TURN_LEFT_FRONT_MORE_COMPLEMENTARY 
-
-//右前补角转向，用于物体逃脱后补偿转向，等待更新
-// #define TURN_RIGHT_SIDE_COMPLEMENTARY //旧
-// #define TURN_RIGHT_FRONT_COMPLEMENTARY 
-// #define TURN_RIGHT_FRONT_MORE_COMPLEMENTARY 
-
 //补偿计时是否已经开始，实际上是在侧面检测到敌人后丢失后开始计时，以便继续追踪
 #define COMPLEMENTARY_TIME_YES 1
 #define COMPLEMENTARY_TIME_NO 0
@@ -382,12 +381,6 @@
 //可以开始进入警戒状态，在检测前方时，会伴随检测这个值，目的是为了避免前方传感器无用检测，节省时间
 #define ENABLE_TO_TIMING 1
 #define NOT_ENABLE_TO_TIMING 0
-
-//180°旋转,需要更新
-#define TURN_LEFT_180 1200
-
-//180°旋转，需要更新
-#define TURN_RIGHT_180 1200
 
 //在台下为了改变位置移动时要用的速度
 #define ON_STAGE_SPEED 15
@@ -413,17 +406,15 @@
 //定义在台下
 #define CLOSE_TO_EDGE 0
 
-//定义防止被铲起时后侧探测器会检测到的值
-#define PREVENT_REAR_BACK_VALUE 122333
-
 //上台电机速度
 #define STAGE_SPEED 800
 
 //上台电机转一圈位置
-#define STAGE_MOTOR_ONE_ROUND 600
+#define STAGE_MOTOR_ONE_ROUND 556
 
 //上台时的延时
 #define STAGE_DELAY 150
+
 
 /**
  * 变量值
@@ -462,10 +453,6 @@ int enemy_on_front_go_front_only_once = CAN_GO_FRONT_TO_ENEMY;
 /**
  * 实例化对象和一些准备设置
  */
-//新建一个模拟串口,S1=P11,S2=P10，如果要用新的板子可能会不同
-//SoftwareSerial serial = SoftwareSerial(MOTOR_DRIVER_S2,MOTOR_DRIVER_S1);//
-
-
 //利用刚才新建的串口和通信超时值来新建一个对象
 RoboClaw roboclaw = RoboClaw(&Serial1,TIME_OUT);
 RoboClaw roboclaw_stage = RoboClaw(&Serial3,TIME_OUT);
@@ -828,6 +815,7 @@ void DecidedTheCarHadFallenOff(){
     // goFrontPosition();
     // goFrontPosition();
     //转向，使车轮转向边界
+    //122333，有可能会误触发，需要让他可以退出这个函数
     while(analogRead(DETECTOR_BACK_LEFT)-analogRead(DETECTOR_BACK_RIGHT)>20 || analogRead(DETECTOR_BACK_LEFT)+analogRead(DETECTOR_BACK_RIGHT)>550){
         turnLeftPosition(3*TURN_SLOW_POSITION);
         //防止刀刃卡住
@@ -1405,32 +1393,46 @@ void preventRearBackMove(){
 //动作组以上--------------------------------------------------------------------------------------------------
 //动作组以上--------------------------------------------------------------------------------------------------
 void test(){
-    int last_detect_temp1[7];
-    int last_detect_temp2[7];
-    int last_detect_temp_averge1;
-    int last_detect_temp_averge2;
-    last_detect_temp1[0] = analogRead(DETECTOR_BACK_LEFT)+3;
-    last_detect_temp2[0] = analogRead(DETECTOR_BACK_RIGHT);
-    last_detect_temp1[1] = analogRead(DETECTOR_BACK_LEFT)+3;
-    last_detect_temp2[1] = analogRead(DETECTOR_BACK_RIGHT);
-    last_detect_temp1[2] = analogRead(DETECTOR_BACK_LEFT)+3;
-    last_detect_temp2[2] = analogRead(DETECTOR_BACK_RIGHT);
-    last_detect_temp1[3] = analogRead(DETECTOR_BACK_LEFT)+3;
-    last_detect_temp2[3] = analogRead(DETECTOR_BACK_RIGHT);
-    last_detect_temp1[4] = analogRead(DETECTOR_BACK_LEFT)+3;
-    last_detect_temp2[4] = analogRead(DETECTOR_BACK_RIGHT);
-    last_detect_temp1[5] = analogRead(DETECTOR_BACK_LEFT)+3;
-    last_detect_temp2[5] = analogRead(DETECTOR_BACK_RIGHT);
-    last_detect_temp1[6] = analogRead(DETECTOR_BACK_LEFT)+3;
-    last_detect_temp2[6] = analogRead(DETECTOR_BACK_RIGHT);
-    last_detect_temp_averge1 = (last_detect_temp1[1]+last_detect_temp1[2]+last_detect_temp1[0]+last_detect_temp1[3]+last_detect_temp1[4]+last_detect_temp1[5]+last_detect_temp1[6])/7;
-    last_detect_temp_averge2 = (last_detect_temp2[1]+last_detect_temp2[2]+last_detect_temp2[0]+last_detect_temp2[3]+last_detect_temp2[4]+last_detect_temp2[5]+last_detect_temp2[6])/7;
-    Serial.print(last_detect_temp_averge1);
-    Serial.print("    ");
-    Serial.print(last_detect_temp_averge2);
-    Serial.print("    ");
-    Serial.println(last_detect_temp_averge1-last_detect_temp_averge2);
-    delay(1000);
+    // roboclaw_stage.ForwardM1(ADDRESS_STAGE, 0);
+    // roboclaw_stage.ForwardM2(ADDRESS_STAGE, 0);
+    // roboclaw_stage.SpeedAccelDeccelPositionM1M2(ADDRESS_STAGE, ACCEL1, 200, DECCEL1, -557, ACCEL2, 200, DECCEL2, 557, 1);
+    // roboclaw.ForwardM1(ADDRESS, 30);
+    // Serial.println(roboclaw.ReadEncM1(ADDRESS));
+    // int last_detect_temp1[7];
+    // int last_detect_temp2[7];
+    // int last_detect_temp_averge1;
+    // int last_detect_temp_averge2;
+    // last_detect_temp1[0] = analogRead(DETECTOR_BACK_LEFT)+3;
+    // last_detect_temp2[0] = analogRead(DETECTOR_BACK_RIGHT);
+    // last_detect_temp1[1] = analogRead(DETECTOR_BACK_LEFT)+3;
+    // last_detect_temp2[1] = analogRead(DETECTOR_BACK_RIGHT);
+    // last_detect_temp1[2] = analogRead(DETECTOR_BACK_LEFT)+3;
+    // last_detect_temp2[2] = analogRead(DETECTOR_BACK_RIGHT);
+    // last_detect_temp1[3] = analogRead(DETECTOR_BACK_LEFT)+3;
+    // last_detect_temp2[3] = analogRead(DETECTOR_BACK_RIGHT);
+    // last_detect_temp1[4] = analogRead(DETECTOR_BACK_LEFT)+3;
+    // last_detect_temp2[4] = analogRead(DETECTOR_BACK_RIGHT);
+    // last_detect_temp1[5] = analogRead(DETECTOR_BACK_LEFT)+3;
+    // last_detect_temp2[5] = analogRead(DETECTOR_BACK_RIGHT);
+    // last_detect_temp1[6] = analogRead(DETECTOR_BACK_LEFT)+3;
+    // last_detect_temp2[6] = analogRead(DETECTOR_BACK_RIGHT);
+    // last_detect_temp_averge1 = (last_detect_temp1[1]+last_detect_temp1[2]+last_detect_temp1[0]+last_detect_temp1[3]+last_detect_temp1[4]+last_detect_temp1[5]+last_detect_temp1[6])/7;
+    // last_detect_temp_averge2 = (last_detect_temp2[1]+last_detect_temp2[2]+last_detect_temp2[0]+last_detect_temp2[3]+last_detect_temp2[4]+last_detect_temp2[5]+last_detect_temp2[6])/7;
+    // Serial.print(last_detect_temp_averge1);
+    // Serial.print("    ");
+    // Serial.print(last_detect_temp_averge2);
+    // Serial.print("    ");
+    // Serial.println(last_detect_temp_averge1-last_detect_temp_averge2);
+    // delay(1000);
+    // Serial.print(analogRead(DETECTOR_BACK_LEFT));
+    // Serial.print("     ");
+    // Serial.print(analogRead(DETECTOR_LEFT));
+    // Serial.print("     ");
+    // Serial.print(analogRead(DETECTOR_RIGHT));
+    // Serial.print("     ");
+    // Serial.print(analogRead(DETECTOR_BACK_RIGHT));
+    // Serial.println("     ");
+    // delay(1000);
     // Serial.print(analogRead(DETECTOR_BACK_LEFT));
     // Serial.print("    ");
     // Serial.print(analogRead(DETECTOR_BACK_RIGHT));
@@ -1454,7 +1456,8 @@ void test2(){
     Serial.print("      ");
     Serial.print(analogRead(DETECTOR_RIGHT_FRONT_MORE));
     Serial.print("      ");
-    Serial.println(analogRead(DETECTOR_RIGHT_FRONT));
+    Serial.print(analogRead(DETECTOR_RIGHT_FRONT));
+    Serial.println(" ");
     // Serial.print("      ");
     delay(1000);
     
@@ -1524,121 +1527,15 @@ void setup(){
 
 
 void loop(){
-    // changeThePositionGoingToStage();
-    // determineIfItIsUnderTheStage();
-    // turnLeftPosition(TURN_LEFT_POSITION_90);
-    // delay(20000);
-    // attack();
-    // delay(2000);
-    // stop();
-    // delay(200000);
-    searchForEnemy();
-    // detectTheTwoSidesOfTheRightSideForEnemies();//down
-    // // //alignmentOnlyOnce();//down
-    // alignWithWalls();
-    // SideFrontToDetectIfThereAreEnemies();
-    // detectEnemyFront();
-    // alignWithWalls();
-    // detectsWhetherTheEdgeIsReachedWhenPushingEnemy();
-    // delay(20000);
-    // Serial.println(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_FRONT));
-    // SideFrontToDetectIfThereAreEnemies();
-    // if(millis()>50000){
-    //     do{
-    //         stop();
-    //     }while(1);
-    // }
-    // turnLeftPosition(TURN_LEFT_POSITION_90);
-    // delay(20000);
-    // turnLeftPositionSlowly(TURN_LEFT_POSITION_90_SLOWLY);
-    // changeThePositionGoingToStage();
-    // delay(20000);
-    // detectEnemyFront();
-    // if(detect_if_detected==DETECT_IF_DETECTED_NO){
-    //     detectTheTwoSidesOfTheRightSideForEnemies();//down
-    // // //alignmentOnlyOnce();//down
-    //     alignWithWalls();
-    // }
-    // Serial.println(grayScaleSensorDetect());
-    // Serial.print("left:");
-    //     Serial.print(analogRead(DETECTOR_LEFT_FRONT_MORE));
-    //     Serial.print("....right:");
-    //     Serial.println(analogRead(DETECTOR_RIGHT_FRONT_MORE));
-    //     // Serial.print("....A2-A3:");
-    //     // Serial.println(analogRead(DETECTOR_LEFT)+analogRead(DETECTOR_RIGHT));
-    //     delay(1000);
-    // alignWithWalls();
-    // turnLeftPosition(TURN_SLOW_POSITION);
-    // searchForEnemy();
-    // SideFrontToDetectIfThereAreEnemies();
-    // turnLeftPosition(TURN_LEFT_FRONT_MORE);
-    // delay(1000);
-    // turnRightPosition(TURN_RIGHT_FRONT_MORE);
-    // delay(10000);
-    // delay(1000);
-    // detectEnemyFront();
+    test();
     // test2();
-    // PrepareforAttack();
-    //  int storage_front_end_sensors1[7];
-    //     int storage_front_end_sensors2[7];
-    //     // int storage_front_end_sensors_temp[7][2] = 
-    //     // {
-    //     //     {1,1},
-    //     //     {1,1},
-    //     //     {1,1},
-    //     //     {1,1},
-    //     //     {1,1},
-    //     //     {1,1},
-    //     //     {1,1}
-    //     // };
-    //     int storage_front_end_sensors1_temp[7] = {1,1,1,1,1,1,1};
-    //     int storage_front_end_sensors2_temp[7] = {1,1,1,1,1,1,1};
-    //     do{//
-    //         //attack();
-    //         for(int i=0;i<7;++i){
-    //         storage_front_end_sensors1[i] = digitalRead(GRAYSCALE_SENSOT_RIGHT);
-    //         storage_front_end_sensors2[i] = digitalRead(GRAYSCALE_SENSOR_LEFT);
-    //         }
-    //         for(int i=0;i<7;++i){
-    //             Serial.print(storage_front_end_sensors1[i]);
-    //             Serial.print("    ");
-    //             Serial.print(storage_front_end_sensors2[i]);
-    //             Serial.print("......");
-    //             Serial.print(storage_front_end_sensors1_temp[i]);
-    //             Serial.print("    ");
-    //             Serial.println(storage_front_end_sensors2_temp[i]);
-    //         }
-    //         delay(4000);
-    //     }while(storage_front_end_sensors1!=storage_front_end_sensors1_temp && storage_front_end_sensors2!=storage_front_end_sensors2_temp);//
-    //     Serial.println("ohhhhhhhh");
-    //     delay(1000);
-    // Serial.println(grayScaleSensorDetect());
-    // delay(2000);
-    // test2();
-    // SideFrontToDetectIfThereAreEnemies();
-    // detectEnemyFront();
-    // test2();
-    // SideFrontToDetectIfThereAreEnemies();
-    // Serial.println(analogRead(DETECTOR_RIGHT_FRONT));
+    // Serial.print(digitalRead(GRAYSCALE_SENSOR_LEFT));
+    // Serial.print("      ");
+    // Serial.println(digitalRead(GRAYSCALE_SENSOT_RIGHT));
     // delay(1000);
-    // Serial.println(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT_MORE));
-    // delay(1000);
-    // turnLeftPosition(TURN_LEFT_FRONT+100);
-    // delay(4000);
-    // turnLeftPosition(TURN_LEFT_FRONT+150);
-    // delay(4000);
-    // turnLeftPosition(TURN_LEFT_FRONT+200);
-    // delay(10000);
-    // turnRightPosition(TURN_RIGHT_FRONT+100);
-    // delay(4000);
-    // turnRightPosition(TURN_RIGHT_FRONT+150);
-    // delay(4000);
-    // turnRightPosition(TURN_RIGHT_FRONT+200);
-    // delay(20000);
-    
 }
 
-void letUsGo(){
+void letUsGo(){//122333
     // BackToTouchTheWall();
     // roboclaw.BackwardM1(ADDRESS,20);
     // roboclaw.BackwardM2(ADDRESS,20);
