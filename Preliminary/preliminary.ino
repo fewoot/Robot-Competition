@@ -400,29 +400,29 @@
 //不可以向前窜一下
 #define CAN_NOT_GO_FRONT_TO_ENEMY 1
 
-//定义在台上
+//定义在未在边缘
 #define STILL_ON_STAGE 1
 
-//定义在台下
+//定义在边缘
 #define CLOSE_TO_EDGE 0
 
 //上台电机速度
-#define STAGE_SPEED 800
+#define STAGE_SPEED 200
 
 //上台电机转一圈位置
 #define STAGE_MOTOR_ONE_ROUND 556
 
 //上台时的延时
-#define STAGE_DELAY 150
+#define STAGE_DELAY 1050
 
 
 /**
  * 变量值
  */
-//初始化是否可以进入警戒状态，即是否需要监视前方传感器
+//初始化是否可以进入警戒状态，即是否需要监视前方传感器,避免进入丢失函数，占用资源
 int timing = NOT_ENABLE_TO_TIMING;
 
-//初始化上一次物体位置变量
+//初始化上一次物体位置变量，为了之后补偿转向
 int last_detect_side = DETECT_LAST_FRONT;
 
 //初始化是否已经开始计时变量
@@ -590,7 +590,7 @@ void turnRightPosition(int single){
     // roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, single, 1);
     roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, single, ACCEL2, 8000, DECCEL2, -single, 1);
     // delay(150);
-    if(single>450){
+    if(single>450){//122333
         delay(single/3);
     }else{
         delay(150);
@@ -671,7 +671,7 @@ void turnLeftPosition(int single){
     //     //Serial.println(roboclaw.ReadEncM2(ADDRESS));
     // }while(roboclaw.ReadEncM2(ADDRESS)!=0);
     // stop();
-    if(single>450){
+    if(single>450){//122333
         delay(single/3);
     }else{
         delay(150);
@@ -843,7 +843,7 @@ void DecidedTheCarHadFallenOff(){
     //    baseline(); 
     // }
     //
-    delay(10000);
+    // delay(10000);
 }
 
 /**
@@ -873,7 +873,7 @@ void startTheOnStageMotor(){
     // roboclaw_stage.BackwardM1(ADDRESS,0);
     // delay(45);
     // roboclaw_stage.BackwardM2(ADDRESS,0);
-    roboclaw_stage.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, STAGE_SPEED, DECCEL1, STAGE_MOTOR_ONE_ROUND, ACCEL2, STAGE_SPEED, DECCEL2, STAGE_MOTOR_ONE_ROUND, 1);
+    roboclaw_stage.SpeedAccelDeccelPositionM1M2(ADDRESS_STAGE), ACCEL1, STAGE_SPEED, DECCEL1, STAGE_MOTOR_ONE_ROUND, ACCEL2, STAGE_SPEED, DECCEL2, STAGE_MOTOR_ONE_ROUND, 1);
     delay(STAGE_DELAY);
     if(analogRead(DETECTOR_LEFT)<600){
         turnRightPosition(TURN_RIGHT_180);
@@ -1111,6 +1111,30 @@ void AftertheEnemyDownAndReturnToTheSideOfTheField(){
     // }
 }
 
+//判断是否在台下，是另一种判断，防止误将边界当成敌人
+void determineIfItIsUnderTheStage(){
+    int temp_times = 0;
+    if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_FRONT)==DETECT_YES){
+        temp_times++;
+    }
+    if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT)==DETECT_YES){
+        temp_times++;
+    }
+    if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT_MORE)==DETECT_YES){
+        temp_times++;
+    }
+    if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT)==DETECT_YES){
+        temp_times++;
+    }
+    if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT_MORE)==DETECT_YES){
+        temp_times++;
+    }
+    if(temp_times>=3){
+        DecidedTheCarHadFallenOff();
+    }
+    // Serial.println(temp_times);
+    // delay(1000);
+}
 
 /**
  * 侧前方检测敌方函数
@@ -1119,7 +1143,7 @@ void AftertheEnemyDownAndReturnToTheSideOfTheField(){
  * 进入前方探测器警戒模式
  */
 //void detectEnemySide(){//旧
-void SideFrontToDetectIfThereAreEnemies(){
+void sideFrontToDetectIfThereAreEnemies(){
     determineIfItIsUnderTheStage();
     if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_FRONT)==DETECT_YES){
         if(enemy_on_front_go_front_only_once==CAN_GO_FRONT_TO_ENEMY){
@@ -1144,7 +1168,7 @@ void SideFrontToDetectIfThereAreEnemies(){
         times_of_turns++;
         enemy_on_front_go_front_only_once = CAN_GO_FRONT_TO_ENEMY;
         //delay(100);
-        //detectEnemyFrontAlert();
+        //lostEnemyAlert();
     }else if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT)==DETECT_YES){
         turnRightPosition(TURN_RIGHT_FRONT);
         delay(300);
@@ -1155,7 +1179,7 @@ void SideFrontToDetectIfThereAreEnemies(){
         times_of_turns++;
         enemy_on_front_go_front_only_once = CAN_GO_FRONT_TO_ENEMY;
         //delay(100);
-        //detectEnemyFrontAlert();
+        //lostEnemyAlert();
     }else if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT_MORE)==DETECT_YES){
         turnLeftPosition(TURN_LEFT_FRONT_MORE);
         last_detect_side = DETECT_LAST_LEFT;
@@ -1245,7 +1269,7 @@ void detectsWhetherTheEdgeIsReachedWhenPushingEnemy(){
 
 
 //前探测器探测函数
-void detectEnemyFront(){
+void lostEnemy(){
     // if(digitalRead(DETECTOR_FRONT)==DETECT_YES){
     //     do{
     //         stop();
@@ -1320,7 +1344,7 @@ void PrepareforAttack(){
     // delay(150);
     // stopStuck();
     // roboclaw.ReadPWMs(ADDRESS,pwm1,pwm2);
-    if(analogRead(DETECTOR_FRONT)>=470){
+    if(analogRead(DETECTOR_FRONT)>=470){//122333
         // //do{
         // int storage_front_end_sensors1[7];
         // int storage_front_end_sensors2[7];
@@ -1388,6 +1412,20 @@ void preventRearBackMove(){
     roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, -900, ACCEL2, 8000, DECCEL2, -900, 1);
     delay(300);
 }
+
+
+void letUsGo(){//122333
+    // BackToTouchTheWall();
+    // roboclaw.BackwardM1(ADDRESS,20);
+    // roboclaw.BackwardM2(ADDRESS,20);
+    // delay(1500);
+    // stop();
+    while(analogRead(DETECTOR_LEFT)>200){
+
+    }
+    stepBackAndGetOnStage();
+}
+
 //动作组以上--------------------------------------------------------------------------------------------------
 //动作组以上--------------------------------------------------------------------------------------------------
 //动作组以上--------------------------------------------------------------------------------------------------
@@ -1470,35 +1508,12 @@ void searchForEnemy(){
     // //alignmentOnlyOnce();//down
         alignWithWalls();
     }
-    SideFrontToDetectIfThereAreEnemies();
-    detectEnemyFront();
+    sideFrontToDetectIfThereAreEnemies();
+    lostEnemy();
     //uploadDetect();
     //goFrontPosition();//down
 }
 
-void determineIfItIsUnderTheStage(){
-    int temp_times = 0;
-    if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_FRONT)==DETECT_YES){
-        temp_times++;
-    }
-    if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT)==DETECT_YES){
-        temp_times++;
-    }
-    if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT_MORE)==DETECT_YES){
-        temp_times++;
-    }
-    if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT)==DETECT_YES){
-        temp_times++;
-    }
-    if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT_MORE)==DETECT_YES){
-        temp_times++;
-    }
-    if(temp_times>=3){
-        DecidedTheCarHadFallenOff();
-    }
-    // Serial.println(temp_times);
-    // delay(1000);
-}
 
 //原始函数：
 void setup(){
@@ -1527,22 +1542,11 @@ void setup(){
 
 
 void loop(){
-    test();
+    searchForEnemy();
+    // test();
     // test2();
     // Serial.print(digitalRead(GRAYSCALE_SENSOR_LEFT));
     // Serial.print("      ");
     // Serial.println(digitalRead(GRAYSCALE_SENSOT_RIGHT));
     // delay(1000);
-}
-
-void letUsGo(){//122333
-    // BackToTouchTheWall();
-    // roboclaw.BackwardM1(ADDRESS,20);
-    // roboclaw.BackwardM2(ADDRESS,20);
-    // delay(1500);
-    // stop();
-    while(analogRead(DETECTOR_LEFT)>200){
-
-    }
-    stepBackAndGetOnStage();
 }
