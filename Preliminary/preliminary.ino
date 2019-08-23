@@ -287,13 +287,13 @@
 
 //左侧传感器
 
-#define DETECTOR_LEFT A1
+#define DETECTOR_LEFT A1//122333
 
 //右侧传感器
 
-#define DETECTOR_RIGHT A0
+#define DETECTOR_RIGHT A0//122333
 
-//除4个距离传感器外其他传感器，等待更改
+//除4个距离传感器外其他传感器，等待更改//122333
 //左前方传感器
 #define DETECTOR_LEFT_FRONT A6
 
@@ -415,6 +415,15 @@
 
 //定义防止被铲起时后侧探测器会检测到的值
 #define PREVENT_REAR_BACK_VALUE 122333
+
+//上台电机速度
+#define STAGE_SPEED 800
+
+//上台电机转一圈位置
+#define STAGE_MOTOR_ONE_ROUND 600
+
+//上台时的延时
+#define STAGE_DELAY 150
 
 /**
  * 变量值
@@ -854,9 +863,11 @@ void DecidedTheCarHadFallenOff(){
  */
 void stepBackAndGetOnStage(){
     //接用此函数
-    BackToTouchTheWall();
+    // BackToTouchTheWall();
+    roboclaw.BackwardM1(ADDRESS,20);
+    roboclaw.BackwardM2(ADDRESS,20);
     delay(1000);
-    //startTheOnStageMotor();//122333等待卡槽
+    startTheOnStageMotor();//122333等待卡槽
 }
 
 /**
@@ -868,12 +879,14 @@ void startTheOnStageMotor(){
     // delay(1450);
     // roboclaw_stage.BackwardM1(ADDRESS,0);
     // roboclaw_stage.BackwardM2(ADDRESS,0);
-    roboclaw_stage.BackwardM1(ADDRESS,FOR_GOING_TO_STAGE_SPEED);
-    roboclaw_stage.ForwardM2(ADDRESS,FOR_GOING_TO_STAGE_SPEED);
-    delay(1580);
-    roboclaw_stage.BackwardM1(ADDRESS,0);
-    delay(45);
-    roboclaw_stage.BackwardM2(ADDRESS,0);
+    // roboclaw_stage.BackwardM1(ADDRESS,FOR_GOING_TO_STAGE_SPEED);
+    // roboclaw_stage.ForwardM2(ADDRESS,FOR_GOING_TO_STAGE_SPEED);
+    // delay(1580);
+    // roboclaw_stage.BackwardM1(ADDRESS,0);
+    // delay(45);
+    // roboclaw_stage.BackwardM2(ADDRESS,0);
+    roboclaw_stage.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, STAGE_SPEED, DECCEL1, STAGE_MOTOR_ONE_ROUND, ACCEL2, STAGE_SPEED, DECCEL2, STAGE_MOTOR_ONE_ROUND, 1);
+    delay(STAGE_DELAY);
     if(analogRead(DETECTOR_LEFT)<600){
         turnRightPosition(TURN_RIGHT_180);
     }else{
@@ -1506,7 +1519,7 @@ void setup(){
     // last_detect_left = 400;
     // last_detect_right = 400;
     // stopStuck();
-    
+    //letUsGo();//122333
 }
 
 
@@ -1623,4 +1636,16 @@ void loop(){
     // turnRightPosition(TURN_RIGHT_FRONT+200);
     // delay(20000);
     
+}
+
+void letUsGo(){
+    // BackToTouchTheWall();
+    // roboclaw.BackwardM1(ADDRESS,20);
+    // roboclaw.BackwardM2(ADDRESS,20);
+    // delay(1500);
+    // stop();
+    while(analogRead(DETECTOR_LEFT)>200){
+
+    }
+    stepBackAndGetOnStage();
 }
