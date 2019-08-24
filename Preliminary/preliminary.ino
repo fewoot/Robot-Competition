@@ -407,14 +407,16 @@
 #define CLOSE_TO_EDGE 0
 
 //上台电机速度
-#define STAGE_SPEED 200
+#define STAGE_SPEED 450
 
 //上台电机转一圈位置
 #define STAGE_MOTOR_ONE_ROUND 556
 
 //上台时的延时
-#define STAGE_DELAY 1050
+#define STAGE_DELAY 1200
 
+//进入台下动作的最大时间限制，为了让车子从误入台下中出来
+#define TIME_UNDER_STAGE_TO_RETURN 4000
 
 /**
  * 变量值
@@ -467,7 +469,7 @@ RoboClaw roboclaw_stage = RoboClaw(&Serial3,TIME_OUT);
 
 //攻击函数
 void attack(){
-    
+    // roboclaw.ResetEncoders(ADDRESS);
     roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 1700, DECCEL1, 999999, ACCEL2, 1700, DECCEL2, 999999, 1);
     //gofront(GO_SPEED_ATTACK);
 }
@@ -590,18 +592,23 @@ void turnRightPosition(int single){
     // roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, single, 1);
     roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, single, ACCEL2, 8000, DECCEL2, -single, 1);
     // delay(150);
-    if(single>450){//122333
-        delay(single/3);
-    }else{
-        delay(150);
+    // if(single>450){
+    //     delay(single/3);
+    // }else{
+    //     delay(150);
+    // }
+    // stop();
+    while (1){
+        /* code */
+        if(roboclaw.ReadEncM1(ADDRESS)>=single-ERROR_POSITION){
+            stop();
+            //stop_stuck();
+            return;
+        }
     }
-    stop();
+    
     // for(;;){
-    //     if(roboclaw.ReadEncM1(ADDRESS)>=single-ERROR_POSITION){
-    //         stop();
-    //         //stop_stuck();
-    //         return;
-    //     }
+        
     // }
 }
 
@@ -659,24 +666,29 @@ void turnLeftPosition(int single){
     // //roboclaw.ReadEncM1(ADDRESS)
     // roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, -single, 0);
     roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, -single, ACCEL2, 8000, DECCEL2, single, 1);
+    while (1){
+        /* code */
+        if(roboclaw.ReadEncM2(ADDRESS)>=single-ERROR_POSITION){
+        // delay(100);
+        stop();
+        return;
+        }
+    }
+    
     // for(;;){
-    //     if(roboclaw.ReadEncM2(ADDRESS)>=single-ERROR_POSITION){
-    //         delay(100);
-    //         stop();
-    //         return;
-    //     }
+        
     // }
     // Serial.println(roboclaw.ReadEncM2(ADDRESS));
     // do{
     //     //Serial.println(roboclaw.ReadEncM2(ADDRESS));
     // }while(roboclaw.ReadEncM2(ADDRESS)!=0);
     // stop();
-    if(single>450){//122333
-        delay(single/3);
-    }else{
-        delay(150);
-    }
-    stop();
+    // if(single>450){
+    //     delay(single/3);
+    // }else{
+    //     delay(150);
+    // }
+    // stop();
     // return;
 }
 
@@ -816,6 +828,7 @@ void DecidedTheCarHadFallenOff(){
     // goFrontPosition();
     //转向，使车轮转向边界
     //122333，有可能会误触发，需要让他可以退出这个函数
+    long time_of_under_stage_to_return = millis();
     while(analogRead(DETECTOR_BACK_LEFT)-analogRead(DETECTOR_BACK_RIGHT)>20 || analogRead(DETECTOR_BACK_LEFT)+analogRead(DETECTOR_BACK_RIGHT)>550){
         turnLeftPosition(3*TURN_SLOW_POSITION);
         //防止刀刃卡住
@@ -823,6 +836,9 @@ void DecidedTheCarHadFallenOff(){
             // turnLeftPosition(4*TURN_SLOW_POSITION);
             // goFrontPosition();
             preventsTheBladeFromGettingStuckUnderTable();
+        }
+        if(millis()-time_of_under_stage_to_return>TIME_UNDER_STAGE_TO_RETURN){
+            return;
         }
     }
     // while(analogRead(DETECTOR_BACK_A2)-analogRead(DETECTOR_BACK_A3)>2 && analogRead(DETECTOR_BACK_A2)>analogRead(DETECTOR_BACK_A3)){
@@ -852,10 +868,10 @@ void DecidedTheCarHadFallenOff(){
 void stepBackAndGetOnStage(){
     //接用此函数
     // BackToTouchTheWall();
-    roboclaw.BackwardM1(ADDRESS,20);
-    roboclaw.BackwardM2(ADDRESS,20);
+    roboclaw.BackwardM1(ADDRESS,17);
+    roboclaw.BackwardM2(ADDRESS,17);
     delay(1000);
-    startTheOnStageMotor();//122333等待卡槽
+    startTheOnStageMotor();
 }
 
 /**
@@ -873,13 +889,14 @@ void startTheOnStageMotor(){
     // roboclaw_stage.BackwardM1(ADDRESS,0);
     // delay(45);
     // roboclaw_stage.BackwardM2(ADDRESS,0);
-    roboclaw_stage.SpeedAccelDeccelPositionM1M2(ADDRESS_STAGE), ACCEL1, STAGE_SPEED, DECCEL1, STAGE_MOTOR_ONE_ROUND, ACCEL2, STAGE_SPEED, DECCEL2, STAGE_MOTOR_ONE_ROUND, 1);
+    roboclaw_stage.ResetEncoders(ADDRESS_STAGE);
+    roboclaw_stage.SpeedAccelDeccelPositionM1M2(ADDRESS_STAGE, ACCEL1, STAGE_SPEED, DECCEL1, -STAGE_MOTOR_ONE_ROUND, ACCEL2, STAGE_SPEED, DECCEL2, STAGE_MOTOR_ONE_ROUND, 1);
     delay(STAGE_DELAY);
-    if(analogRead(DETECTOR_LEFT)<600){
-        turnRightPosition(TURN_RIGHT_180);
-    }else{
-        turnLeftPosition(TURN_LEFT_180);
-    }
+    // if(analogRead(DETECTOR_LEFT)<600){
+    //     turnRightPosition(TURN_RIGHT_180);
+    // }else{
+    //     turnLeftPosition(TURN_LEFT_180);
+    // }
 }
 
 /**
@@ -1152,6 +1169,11 @@ void sideFrontToDetectIfThereAreEnemies(){
             roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, 4*GO_SLOW_POSITION, ACCEL2, 8000, DECCEL2, 4*GO_SLOW_POSITION, 1);
             // for(;roboclaw.ReadEncM1(ADDRESS)<GO_SLOW_POSITION-ERROR_POSITION;){}
             delay(150);
+            // stopStuck();
+            stop();
+            // roboclaw.ResetEncoders(ADDRESS);
+            roboclaw.SetEncM1(ADDRESS,100);
+            // roboclaw.SetEncM2(ADDRESS,100);
         }
         detect_if_detected = DETECT_IF_DETECTED_YES;
         timing = ENABLE_TO_TIMING;
@@ -1336,15 +1358,17 @@ void PrepareforAttack(){
     //两者平时大概在-500到+500左右，受到推力后大概在2000+
     // int16_t pwm1;
     // int16_t pwm2;
-    // gofront(GO_SPEED_ATTACK-5);
-    // MoveALittleForward();
-    // roboclaw.ResetEncoders(ADDRESS);
-    // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, 3*GO_SLOW_POSITION, ACCEL2, 8000, DECCEL2, 3*GO_SLOW_POSITION, 1);
+    // // gofront(GO_SPEED_ATTACK-5);
+    // // MoveALittleForward();
+    // // roboclaw.ResetEncoders(ADDRESS);
+    // // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, 3*GO_SLOW_POSITION, ACCEL2, 8000, DECCEL2, 3*GO_SLOW_POSITION, 1);
     // // for(;roboclaw.ReadEncM1(ADDRESS)<GO_SLOW_POSITION-ERROR_POSITION;){}
-    // delay(150);
+    // // delay(150);
     // stopStuck();
     // roboclaw.ReadPWMs(ADDRESS,pwm1,pwm2);
-    if(analogRead(DETECTOR_FRONT)>=470){//122333
+
+    if(roboclaw.ReadEncM1(ADDRESS)<50){
+    // if(analogRead(DETECTOR_FRONT)>=470){//
         // //do{
         // int storage_front_end_sensors1[7];
         // int storage_front_end_sensors2[7];
@@ -1366,11 +1390,11 @@ void PrepareforAttack(){
         // do{
         roboclaw.ResetEncoders(ADDRESS);
         while(1){//122333
-            if(analogRead(DETECTOR_LEFT_FRONT_MORE)-analogRead(DETECTOR_RIGHT_FRONT_MORE)>180){
+            if(analogRead(DETECTOR_LEFT_FRONT_MORE)-analogRead(DETECTOR_RIGHT_FRONT_MORE)>150){
                 // goleft(GO_SPEED_ATTACK,7);
-                roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 1700, DECCEL1, 999999, ACCEL2, 2000, DECCEL2, 999999, 1);
-            }else if(analogRead(DETECTOR_RIGHT_FRONT_MORE)-analogRead(DETECTOR_LEFT_FRONT_MORE)>180){
-                roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2000, DECCEL1, 999999, ACCEL2, 1700, DECCEL2, 999999, 1);
+                roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 1700, DECCEL1, 999999, ACCEL2, 2500, DECCEL2, 999999, 1);
+            }else if(analogRead(DETECTOR_RIGHT_FRONT_MORE)-analogRead(DETECTOR_LEFT_FRONT_MORE)>150){
+                roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2500, DECCEL1, 999999, ACCEL2, 1700, DECCEL2, 999999, 1);
                 // goright(GO_SPEED_ATTACK,7);
             }else{
                 attack();
@@ -1431,6 +1455,33 @@ void letUsGo(){//122333
 //动作组以上--------------------------------------------------------------------------------------------------
 //动作组以上--------------------------------------------------------------------------------------------------
 void test(){
+    if(analogRead(DETECTOR_LEFT_FRONT_MORE)-analogRead(DETECTOR_RIGHT_FRONT_MORE)>150){
+                // goleft(GO_SPEED_ATTACK,7);
+                roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 1700, DECCEL1, 999999, ACCEL2, 2500, DECCEL2, 999999, 1);
+            }else if(analogRead(DETECTOR_RIGHT_FRONT_MORE)-analogRead(DETECTOR_LEFT_FRONT_MORE)>150){
+                roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2500, DECCEL1, 999999, ACCEL2, 1700, DECCEL2, 999999, 1);
+                // goright(GO_SPEED_ATTACK,7);
+            }else{
+                attack();
+            }
+    // if(roboclaw.ReadEncM1(ADDRESS)<50){
+    //     gofront(20);
+    //     delay(100000);
+    // }
+    // // int pwm1;
+    // int pwm2;
+    // // gofront(GO_SPEED_ATTACK-5);
+    // // MoveALittleForward();
+    // // roboclaw.ResetEncoders(ADDRESS);
+    // // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, 3*GO_SLOW_POSITION, ACCEL2, 8000, DECCEL2, 3*GO_SLOW_POSITION, 1);
+    // // for(;roboclaw.ReadEncM1(ADDRESS)<GO_SLOW_POSITION-ERROR_POSITION;){}
+    // // delay(150);
+    // //stop();
+    // stopStuck();
+    // roboclaw.ReadPWMs(ADDRESS,pwm1,pwm2);
+    // Serial.print(pwm1);
+    // Serial.print("    ");
+    // Serial.println(pwm2);
     // roboclaw_stage.ForwardM1(ADDRESS_STAGE, 0);
     // roboclaw_stage.ForwardM2(ADDRESS_STAGE, 0);
     // roboclaw_stage.SpeedAccelDeccelPositionM1M2(ADDRESS_STAGE, ACCEL1, 200, DECCEL1, -557, ACCEL2, 200, DECCEL2, 557, 1);
@@ -1486,15 +1537,17 @@ void test2(){
     // Serial.println(analogRead(DETECTOR_BACK_RIGHT));
     // Serial.print("      ");
     // // Serial.println(analogRead(DETECTOR_LEFT)+analogRead(DETECTOR_RIGHT));
-    Serial.print(analogRead(DETECTOR_LEFT_FRONT));
-    Serial.print("      ");
+    // Serial.print(analogRead(DETECTOR_LEFT_FRONT));
+    // Serial.print("      ");
     Serial.print(analogRead(DETECTOR_LEFT_FRONT_MORE));
     Serial.print("      ");
-    Serial.print(analogRead(DETECTOR_FRONT));
-    Serial.print("      ");
+    // Serial.print(analogRead(DETECTOR_FRONT));
+    // Serial.print("      ");
     Serial.print(analogRead(DETECTOR_RIGHT_FRONT_MORE));
     Serial.print("      ");
-    Serial.print(analogRead(DETECTOR_RIGHT_FRONT));
+    Serial.print(analogRead(DETECTOR_LEFT_FRONT_MORE)-analogRead(DETECTOR_RIGHT_FRONT_MORE));
+    Serial.print("      ");
+    // Serial.print(analogRead(DETECTOR_RIGHT_FRONT));
     Serial.println(" ");
     // Serial.print("      ");
     delay(1000);
@@ -1521,15 +1574,6 @@ void setup(){
     roboclaw.begin(38400);
     roboclaw_stage.begin(19200);
     Serial.begin(9600);
-    //设置传感器引脚
-    // pinMode(DETECTOR1,INPUT);
-    // pinMode(DETECTOR2,INPUT);
-    // pinMode(DETECTOR3,INPUT);
-    // pinMode(DETECTOR4,INPUT);
-    // pinMode(DETECTOR5,INPUT);
-    // pinMode(DETECTOR6,INPUT);
-    // pinMode(DETECTOR7,INPUT);
-    // delay(300
     //stop();
     delay(2000);
     //首先更新一下场上的距离常数，再行动
@@ -1537,12 +1581,25 @@ void setup(){
     // last_detect_left = 400;
     // last_detect_right = 400;
     // stopStuck();
-    //letUsGo();//122333
+    //letUsGo();
+    // stopStuck();
+    
 }
 
 
 void loop(){
-    searchForEnemy();
+    // attack();
+    // stop();
+    // gofront(20);
+    // Serial.println(roboclaw.ReadEncM1(ADDRESS));
+    // test();
+    // attack();
+    // delay(100000);
+    // turnRightPosition(900);
+    // stepBackAndGetOnStage();
+    // stop();
+    // delay(1000000);
+    // searchForEnemy();
     // test();
     // test2();
     // Serial.print(digitalRead(GRAYSCALE_SENSOR_LEFT));
