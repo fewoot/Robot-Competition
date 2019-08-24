@@ -416,7 +416,7 @@
 #define STAGE_DELAY 1200
 
 //进入台下动作的最大时间限制，为了让车子从误入台下中出来
-#define TIME_UNDER_STAGE_TO_RETURN 4000
+#define TIME_UNDER_STAGE_TO_RETURN 4000//122333
 
 /**
  * 变量值
@@ -827,7 +827,7 @@ void DecidedTheCarHadFallenOff(){
     // goFrontPosition();
     // goFrontPosition();
     //转向，使车轮转向边界
-    //122333，有可能会误触发，需要让他可以退出这个函数
+    //122333
     long time_of_under_stage_to_return = millis();
     while(analogRead(DETECTOR_BACK_LEFT)-analogRead(DETECTOR_BACK_RIGHT)>20 || analogRead(DETECTOR_BACK_LEFT)+analogRead(DETECTOR_BACK_RIGHT)>550){
         turnLeftPosition(3*TURN_SLOW_POSITION);
@@ -1389,7 +1389,7 @@ void PrepareforAttack(){
 
         // do{
         roboclaw.ResetEncoders(ADDRESS);
-        while(1){//122333
+        while(1){//122333，未实验
             if(analogRead(DETECTOR_LEFT_FRONT_MORE)-analogRead(DETECTOR_RIGHT_FRONT_MORE)>150){
                 // goleft(GO_SPEED_ATTACK,7);
                 roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 1700, DECCEL1, 999999, ACCEL2, 2500, DECCEL2, 999999, 1);
@@ -1399,9 +1399,8 @@ void PrepareforAttack(){
             }else{
                 attack();
             }
-            //122333
             
-            if(grayScaleSensorDetect()==CLOSE_TO_EDGE){
+            if(grayScaleSensorDetect()==CLOSE_TO_EDGE){//122333
                 if(analogRead(DETECTOR_BACK_LEFT)<PREVENT_REAR_BACK_VALUE || analogRead(DETECTOR_BACK_RIGHT)<PREVENT_REAR_BACK_VALUE){
                     preventRearBackMove();
                     continue;
