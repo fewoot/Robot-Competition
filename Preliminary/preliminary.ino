@@ -243,6 +243,7 @@
 /**
  * 所需的库
  */
+#include <math.h>
 #include <SoftwareSerial.h>
 #include <RoboClaw.h>
 
@@ -1498,7 +1499,30 @@ void letUsGo(){//122333
 //动作组以上--------------------------------------------------------------------------------------------------
 //动作组以上--------------------------------------------------------------------------------------------------
 //动作组以上--------------------------------------------------------------------------------------------------
-void test(){
+void test(){//122333
+    long time_of_under_stage_to_return = millis();
+    // 
+    if(analogRead(DETECTOR_BACK_LEFT)>analogRead(DETECTOR_BACK_RIGHT)){
+        roboclaw.BackwardM1(ADDRESS,40);
+        roboclaw.ForwardM2(ADDRESS, 40);
+    }else{
+        roboclaw.BackwardM2(ADDRESS,40);
+        roboclaw.ForwardM1(ADDRESS, 40);
+    }
+    
+    // 
+    while(abs(analogRead(DETECTOR_BACK_LEFT)-analogRead(DETECTOR_BACK_RIGHT))>40 || analogRead(DETECTOR_BACK_LEFT)+analogRead(DETECTOR_BACK_RIGHT)>550){
+        // turnLeftPosition(3*TURN_SLOW_POSITION);
+        //防止刀刃卡住
+        if(analogRead(DETECTOR_LEFT)<180){
+            // turnLeftPosition(4*TURN_SLOW_POSITION);
+            // goFrontPosition();
+            preventsTheBladeFromGettingStuckUnderTable();
+        }
+        if(millis()-time_of_under_stage_to_return>3*TIME_UNDER_STAGE_TO_RETURN){
+            return;
+        }
+    }
     // turnLeftPosition(TURN_LEFT_POSITION_90);
     // delay(2000);
     // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, 900, ACCEL2, 8000, DECCEL2, 900, 1);
@@ -1506,9 +1530,9 @@ void test(){
     // delay(4000);
     // turnRightPositionSlowly(TURN_RIGHT_180);
     // delay(10000);
-    roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 3000, DECCEL, TURN_RIGHT_180, 1);
-        roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 3000, DECCEL, -TURN_RIGHT_180, 1);
-        delay(800);
+    // roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 3000, DECCEL, TURN_RIGHT_180, 1);
+    //     roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 3000, DECCEL, -TURN_RIGHT_180, 1);
+    //     delay(800);
 
         // roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 3000, DECCEL, -TURN_LEFT_180, 1);
         // roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 3000, DECCEL, TURN_LEFT_180, 1);
@@ -1517,6 +1541,7 @@ void test(){
 
 
 void test2(){
+    
     // long time_of_under_stage_to_return = millis();
     // while(analogRead(DETECTOR_BACK_LEFT)-analogRead(DETECTOR_BACK_RIGHT)>20 || analogRead(DETECTOR_BACK_LEFT)+analogRead(DETECTOR_BACK_RIGHT)>550){
     //     turnLeftPosition(3*TURN_SLOW_POSITION);
@@ -1530,29 +1555,30 @@ void test2(){
     //         return;
     //     }
     // }
-    turnLeftPosition(TURN_LEFT_180);
-    delay(3000);
-    turnRightPosition(TURN_RIGHT_180);
-    delay(3000);
-    turnLeftPosition(TURN_LEFT_POSITION_90);
-    delay(3000);
-    turnRightPosition(TURN_RIGHT_POSITION_90);
-    delay(3000);
-    turnLeftPosition(TURN_LEFT_FRONT);
-    delay(3000);
-    turnRightPosition(TURN_RIGHT_FRONT);
-    delay(3000);
-    turnLeftPosition(TURN_LEFT_FRONT_MORE);
-    delay(3000);
-    turnRightPosition(TURN_RIGHT_FRONT_MORE);
-    delay(100000);
+    // turnLeftPosition(TURN_LEFT_180);
+    // delay(3000);
+    // turnRightPosition(TURN_RIGHT_180);
+    // delay(3000);
+    // turnLeftPosition(TURN_LEFT_POSITION_90);
+    // delay(3000);
+    // turnRightPosition(TURN_RIGHT_POSITION_90);
+    // delay(3000);
+    // turnLeftPosition(TURN_LEFT_FRONT);
+    // delay(3000);
+    // turnRightPosition(TURN_RIGHT_FRONT);
+    // delay(3000);
+    // turnLeftPosition(TURN_LEFT_FRONT_MORE);
+    // delay(3000);
+    // turnRightPosition(TURN_RIGHT_FRONT_MORE);
+    // delay(100000);
     // Serial.print(analogRead(DETECTOR_BACK_LEFT));
     // Serial.print("      ");
-    // Serial.println(analogRead(DETECTOR_BACK_RIGHT));
+    // Serial.print(analogRead(DETECTOR_BACK_RIGHT));
     // Serial.print("      ");
-    // // Serial.println(analogRead(DETECTOR_LEFT)+analogRead(DETECTOR_RIGHT));
-    // Serial.print(analogRead(DETECTOR_LEFT_FRONT));
-    // Serial.print("      ");
+    // Serial.print(analogRead(DETECTOR_BACK_LEFT)-analogRead(DETECTOR_BACK_RIGHT));
+    // // Serial.print(analogRead(DETECTOR_LEFT_FRONT));
+    // Serial.println("      ");
+    // delay(1000);
     // Serial.print(analogRead(DETECTOR_LEFT_FRONT_MORE));
     // Serial.print("      ");
     // // Serial.print(analogRead(DETECTOR_FRONT));
@@ -1602,8 +1628,10 @@ void setup(){
 
 
 void loop(){
-    // test2();
+    test2();
     // test();
+    // stop();
+    // delay(100000);
     // gofront(10);
     // delay(10000);
 }
