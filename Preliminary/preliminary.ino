@@ -306,7 +306,7 @@
 
 //右前转向，等待更新
 #define TURN_RIGHT_FRONT 560
-#define TURN_RIGHT_FRONT_MORE 250
+#define TURN_RIGHT_FRONT_MORE 240
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //定义防止被铲起时后侧探测器会检测到的值
 #define PREVENT_REAR_BACK_VALUE 300
@@ -919,11 +919,17 @@ void startTheOnStageMotor(){
     roboclaw_stage.ResetEncoders(ADDRESS_STAGE);
     roboclaw_stage.SpeedAccelDeccelPositionM1M2(ADDRESS_STAGE, ACCEL1, STAGE_SPEED, DECCEL1, -STAGE_MOTOR_ONE_ROUND, ACCEL2, STAGE_SPEED, DECCEL2, STAGE_MOTOR_ONE_ROUND, 1);
     delay(STAGE_DELAY);
-    // if(analogRead(DETECTOR_LEFT)<600){
-    //     turnRightPosition(TURN_RIGHT_180);
-    // }else{
-    //     turnLeftPosition(TURN_LEFT_180);
-    // }
+    if(analogRead(DETECTOR_LEFT)<600){
+        roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 3000, DECCEL, TURN_RIGHT_180, 1);
+        roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 3000, DECCEL, -TURN_RIGHT_180, 1);
+        delay(800);
+        // turnRightPosition(TURN_RIGHT_180);
+    }else{
+        roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 3000, DECCEL, -TURN_LEFT_180, 1);
+        roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 3000, DECCEL, TURN_LEFT_180, 1);
+        delay(800);
+        // turnLeftPosition(TURN_LEFT_180);
+    }
 }
 
 /**
@@ -1496,7 +1502,17 @@ void test(){
     // turnLeftPosition(TURN_LEFT_POSITION_90);
     // delay(2000);
     // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, 900, ACCEL2, 8000, DECCEL2, 900, 1);
+    // turnLeftPositionSlowly(TURN_LEFT_180);
+    // delay(4000);
+    // turnRightPositionSlowly(TURN_RIGHT_180);
+    // delay(10000);
+    roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 3000, DECCEL, TURN_RIGHT_180, 1);
+        roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 3000, DECCEL, -TURN_RIGHT_180, 1);
+        delay(800);
 
+        // roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 3000, DECCEL, -TURN_LEFT_180, 1);
+        // roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 3000, DECCEL, TURN_LEFT_180, 1);
+        // delay(400);
 }
 
 
@@ -1514,22 +1530,22 @@ void test2(){
     //         return;
     //     }
     // }
-    // turnLeftPosition(TURN_LEFT_180);
-    // delay(3000);
-    // turnRightPosition(TURN_RIGHT_180);
-    // delay(3000);
-    // turnLeftPosition(TURN_LEFT_POSITION_90);
-    // delay(3000);
-    // turnRightPosition(TURN_RIGHT_POSITION_90);
-    // delay(3000);
-    // turnLeftPosition(TURN_LEFT_FRONT);
-    // delay(3000);
-    // turnRightPosition(TURN_RIGHT_FRONT);
-    // delay(3000);
-    // turnLeftPosition(TURN_LEFT_FRONT_MORE);
-    // delay(3000);
-    // turnRightPosition(TURN_RIGHT_FRONT_MORE);
-    // delay(100000);
+    turnLeftPosition(TURN_LEFT_180);
+    delay(3000);
+    turnRightPosition(TURN_RIGHT_180);
+    delay(3000);
+    turnLeftPosition(TURN_LEFT_POSITION_90);
+    delay(3000);
+    turnRightPosition(TURN_RIGHT_POSITION_90);
+    delay(3000);
+    turnLeftPosition(TURN_LEFT_FRONT);
+    delay(3000);
+    turnRightPosition(TURN_RIGHT_FRONT);
+    delay(3000);
+    turnLeftPosition(TURN_LEFT_FRONT_MORE);
+    delay(3000);
+    turnRightPosition(TURN_RIGHT_FRONT_MORE);
+    delay(100000);
     // Serial.print(analogRead(DETECTOR_BACK_LEFT));
     // Serial.print("      ");
     // Serial.println(analogRead(DETECTOR_BACK_RIGHT));
@@ -1581,43 +1597,13 @@ void setup(){
     // stopStuck();
     //letUsGo();
     // stopStuck();
-    roboclaw.ResetEncoders(ADDRESS);
+    // roboclaw.ResetEncoders(ADDRESS);
 }
 
 
 void loop(){
-    test();
-    
-    // roboclaw.ResetEncoders(ADDRESS);
-    // roboclaw.SpeedAccelDistanceM1M2(ADDRESS, ACCEL1, 2000, 900, 2000, 900, 1);
-    // gofront(20);
-    // turnLeftPosition(TURN_LEFT_POSITION_90);
-    // delay(2000);
-
-    // Serial.println(roboclaw.ReadEncM1(ADDRESS));
-    // while (1)
-    // {
-    //     /* code */
-    //     Serial.println(roboclaw.ReadEncM1(ADDRESS));
-    //     Serial.println(roboclaw.ReadEncM2(ADDRESS));
-    //     delay(1000);
-    // }
-    
-    
-    
-    
-    // test();
-    // attack();
-    // delay(100000);
-    // turnRightPosition(900);
-    // stepBackAndGetOnStage();
-    // stop();
-    // delay(1000000);
-    // searchForEnemy();
-    // test();
     // test2();
-    // Serial.print(digitalRead(GRAYSCALE_SENSOR_LEFT));
-    // Serial.print("      ");
-    // Serial.println(digitalRead(GRAYSCALE_SENSOT_RIGHT));
-    // delay(1000);
+    // test();
+    // gofront(10);
+    // delay(10000);
 }
