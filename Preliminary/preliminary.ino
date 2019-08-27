@@ -813,9 +813,31 @@ int grayScaleSensorDetect(){
 }
 
 /**
- * 转向辅助函数，用于防止刀刃插到台子上
+ * 右转向辅助函数，用于防止刀刃插到台子上
  */
-void preventsTheBladeFromGettingStuckUnderTable(){//
+void preventsTheBladeFromGettingStuckUnderTableRight(){//
+    // roboclaw.ForwardM1(ADDRESS, 30);
+    // roboclaw.ForwardM2(ADDRESS, 10);
+    roboclaw.ResetEncoders(ADDRESS);
+    roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, -400, 1);
+    roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, 400, 1);
+    // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, 400, ACCEL2, 8000, DECCEL2, -400, 1);
+    delay(200);
+    roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 2000, DECCEL, 0, 1);
+    roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 2000, DECCEL, 800, 1);
+    // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2000, DECCEL1, 800, ACCEL2, 2000, DECCEL2, 0, 1);
+    delay(300);
+    roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 5000, DECCEL, 800, 1);
+    roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 5000, DECCEL, 0, 1);
+    // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 5000, DECCEL1, 0, ACCEL2, 5000, DECCEL2, 800, 1);
+    delay(200);
+    //stop();
+}
+
+/**
+ * 左转向辅助函数，用于防止刀刃插到台子上
+ */
+void preventsTheBladeFromGettingStuckUnderTableLeft(){//
     // roboclaw.ForwardM1(ADDRESS, 30);
     // roboclaw.ForwardM2(ADDRESS, 10);
     roboclaw.ResetEncoders(ADDRESS);
@@ -857,13 +879,14 @@ void DecidedTheCarHadFallenOff(){
     //转向，使车轮转向边界
     //122333
     long time_of_under_stage_to_return = millis();
+    // int times_prevents
     while(analogRead(DETECTOR_BACK_LEFT)-analogRead(DETECTOR_BACK_RIGHT)>20 || analogRead(DETECTOR_BACK_LEFT)+analogRead(DETECTOR_BACK_RIGHT)>550){
         turnLeftPosition(3*TURN_SLOW_POSITION);
         //防止刀刃卡住
         if(analogRead(DETECTOR_LEFT)<180){
             // turnLeftPosition(4*TURN_SLOW_POSITION);
             // goFrontPosition();
-            preventsTheBladeFromGettingStuckUnderTable();
+            // preventsTheBladeFromGettingStuckUnderTable();
         }
         if(millis()-time_of_under_stage_to_return>TIME_UNDER_STAGE_TO_RETURN){
             return;
@@ -1502,23 +1525,36 @@ void letUsGo(){//122333
 void test(){//122333
     long time_of_under_stage_to_return = millis();
     // 
+    int times_prevent = 0;
     if(analogRead(DETECTOR_BACK_LEFT)>analogRead(DETECTOR_BACK_RIGHT)){
-        roboclaw.BackwardM1(ADDRESS,40);
-        roboclaw.ForwardM2(ADDRESS, 40);
+        roboclaw.BackwardM1(ADDRESS,15);
+        roboclaw.ForwardM2(ADDRESS, 15);
     }else{
-        roboclaw.BackwardM2(ADDRESS,40);
-        roboclaw.ForwardM1(ADDRESS, 40);
+        roboclaw.BackwardM2(ADDRESS,15);
+        roboclaw.ForwardM1(ADDRESS, 15);
     }
     
     // 
-    while(abs(analogRead(DETECTOR_BACK_LEFT)-analogRead(DETECTOR_BACK_RIGHT))>40 || analogRead(DETECTOR_BACK_LEFT)+analogRead(DETECTOR_BACK_RIGHT)>550){
+    // while(abs(analogRead(DETECTOR_BACK_LEFT)-analogRead(DETECTOR_BACK_RIGHT))>20){
+    
+    while(abs(analogRead(DETECTOR_BACK_LEFT)-analogRead(DETECTOR_BACK_RIGHT))>20 || analogRead(DETECTOR_BACK_LEFT)+analogRead(DETECTOR_BACK_RIGHT)>700){
         // turnLeftPosition(3*TURN_SLOW_POSITION);
         //防止刀刃卡住
-        if(analogRead(DETECTOR_LEFT)<180){
+        if(times_prevent==0){
+            if(analogRead(DETECTOR_LEFT)<210 || analogRead(DETECTOR_LEFT_FRONT)>580){
             // turnLeftPosition(4*TURN_SLOW_POSITION);
             // goFrontPosition();
-            preventsTheBladeFromGettingStuckUnderTable();
+                preventsTheBladeFromGettingStuckUnderTableLeft();
+                times_prevent = 1;
+            }
+
+            if(analogRead(DETECTOR_RIGHT)<210 || analogRead(DETECTOR_RIGHT_FRONT)>580){
+                preventsTheBladeFromGettingStuckUnderTableRight();
+                times_prevent = 1;
+            }
         }
+        
+
         if(millis()-time_of_under_stage_to_return>3*TIME_UNDER_STAGE_TO_RETURN){
             return;
         }
@@ -1571,14 +1607,18 @@ void test2(){
     // delay(3000);
     // turnRightPosition(TURN_RIGHT_FRONT_MORE);
     // delay(100000);
-    // Serial.print(analogRead(DETECTOR_BACK_LEFT));
-    // Serial.print("      ");
-    // Serial.print(analogRead(DETECTOR_BACK_RIGHT));
-    // Serial.print("      ");
-    // Serial.print(analogRead(DETECTOR_BACK_LEFT)-analogRead(DETECTOR_BACK_RIGHT));
-    // // Serial.print(analogRead(DETECTOR_LEFT_FRONT));
-    // Serial.println("      ");
-    // delay(1000);
+    Serial.print(analogRead(DETECTOR_LEFT));
+    Serial.print("      ");
+    Serial.print(analogRead(DETECTOR_RIGHT));
+    Serial.print("      ");
+    Serial.print(analogRead(DETECTOR_LEFT_FRONT));
+    // Serial.print(abs(analogRead(DETECTOR_BACK_LEFT)-analogRead(DETECTOR_BACK_RIGHT)));
+    // Serial.print(analogRead(DETECTOR_LEFT_FRONT));
+    Serial.print("      ");
+    Serial.print(analogRead(DETECTOR_RIGHT_FRONT));
+    // Serial.print(abs(analogRead(DETECTOR_BACK_LEFT)+analogRead(DETECTOR_BACK_RIGHT)));
+    Serial.println("      ");
+    delay(1000);
     // Serial.print(analogRead(DETECTOR_LEFT_FRONT_MORE));
     // Serial.print("      ");
     // // Serial.print(analogRead(DETECTOR_FRONT));
@@ -1628,10 +1668,10 @@ void setup(){
 
 
 void loop(){
-    test2();
-    // test();
-    // stop();
-    // delay(100000);
+    // test2();
+    test();
+    stop();
+    delay(100000);
     // gofront(10);
     // delay(10000);
 }
