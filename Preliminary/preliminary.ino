@@ -343,10 +343,10 @@
 #define GO_SPEED_ATTACK 20
 
 //微小角度转向
-#define TURN_SLOW_POSITION 25
+#define TURN_SLOW_POSITION 30
 
 //微小前进
-#define GO_SLOW_POSITION 25
+#define GO_SLOW_POSITION 30
 
 //最小检测变化，用于两侧90°转向时判断是否有物体,如果变化大于这个值，则判定有敌人
 #define MIN_DETECT_TO_90_ENEMY_JUDGE 177
@@ -355,7 +355,7 @@
 #define OFFSET_THRESHOLD_ADJUST_SLOW 8
 
 //定义传输值no_signal值，当值大于等于它时，认为此值无效
-#define NO_SIGNAL_VALUE 880
+#define NO_SIGNAL_VALUE 900
 
 //传感器检测到物体
 #define DETECT_YES 0
@@ -1102,13 +1102,15 @@ void detectTheTwoSidesOfTheRightSideForEnemies(){
     // Serial.print(".....A1 cha:");
     // Serial.println(last_detect_right-analogRead(DETECTOR_RIGHT_A1));
     judgeWhetherOnStageOrUnderTheStage();
-    if(last_detect_left-analogRead(DETECTOR_LEFT)>=MIN_DETECT_TO_90_ENEMY_JUDGE && analogRead(DETECTOR_LEFT)+analogRead(DETECTOR_RIGHT)<1100){
+    if(last_detect_left-analogRead(DETECTOR_LEFT)>=MIN_DETECT_TO_90_ENEMY_JUDGE && analogRead(DETECTOR_LEFT)+analogRead(DETECTOR_RIGHT)<1400){
         turnLeftPosition(TURN_LEFT_POSITION_90);
+        // Serial.println("left");
         uploadDetect();
         //alignment_only_once = 0;
-    }else if(last_detect_right-analogRead(DETECTOR_RIGHT)>=MIN_DETECT_TO_90_ENEMY_JUDGE && analogRead(DETECTOR_LEFT)+analogRead(DETECTOR_RIGHT)<1100){
+    }else if(last_detect_right-analogRead(DETECTOR_RIGHT)>=MIN_DETECT_TO_90_ENEMY_JUDGE && analogRead(DETECTOR_LEFT)+analogRead(DETECTOR_RIGHT)<1400){
         turnRightPosition(TURN_RIGHT_POSITION_90);
         uploadDetect();
+        // Serial.println("right");
         //alignment_only_once = 0;
     }
 }
@@ -1172,9 +1174,11 @@ void uploadDetect(){
     if(temp_analogRead_A1<NO_SIGNAL_VALUE){
         //uploadDetect();
         last_detect_right = temp_analogRead_A1;
+        // Serial.print(last_detect_right);
     }
     if(temp_analogRead_A0<NO_SIGNAL_VALUE){
         last_detect_left = temp_analogRead_A0;
+        // Serial.println(last_detect_left);
     }
     // last_detect_left = analogRead(DETECTOR_LEFT_A0);
     // last_detect_right = analogRead(DETECTOR_RIGHT_A1);
@@ -1607,12 +1611,12 @@ void letUsGo(){
 //动作组以上--------------------------------------------------------------------------------------------------
 void test(){
 
-    // Serial.print(analogRead(DETECTOR_LEFT));
-    // Serial.print("   ");
-    // Serial.print(analogRead(DETECTOR_BACK_RIGHT));
-    // Serial.print("   ");
-    Serial.println(analogRead(DETECTOR_BACK_LEFT)+analogRead(DETECTOR_BACK_RIGHT));
-    // delay(1000);
+    Serial.print(analogRead(DETECTOR_LEFT));
+    Serial.print("   ");
+    Serial.print(analogRead(DETECTOR_RIGHT));
+    Serial.println("   ");
+    // Serial.println(analogRead(DETECTOR_BACK_LEFT)+analogRead(DETECTOR_BACK_RIGHT));
+    delay(1000);
 //    while(1){
 //             if(grayScaleSensorDetect()==CLOSE_TO_EDGE){
 //                 stopStuck();
@@ -1655,9 +1659,10 @@ void test2(){
 //搜索敌人总函数
 void searchForEnemy(){
     if(detect_if_detected==DETECT_IF_DETECTED_NO){
-        // detectTheTwoSidesOfTheRightSideForEnemies();//down
-    // //alignmentOnlyOnce();//down
         alignWithWalls();
+        detectTheTwoSidesOfTheRightSideForEnemies();//down
+    // //alignmentOnlyOnce();//down
+        
     }
     // sideFrontToDetectIfThereAreEnemies();
     // lostEnemy();
