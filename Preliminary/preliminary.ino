@@ -298,7 +298,7 @@
 #define TURN_LEFT_POSITION_90_SLOWLY 440
 
 //右转—90°
-#define TURN_RIGHT_POSITION_90 820
+#define TURN_RIGHT_POSITION_90 820//122333
 #define TURN_RIGHT_POSITION_90_SLOWLY 440
 
 //左前转向位置，等待更新
@@ -390,7 +390,7 @@
 #define FOR_GOING_TO_STAGE_SPEED 40
 
 //前方测敌传感器的70cm数值
-#define FRONT_RING_SENSOR_TRIGGER_VALUE 150
+#define FRONT_RING_SENSOR_TRIGGER_VALUE 147
 
 //转动补偿
 #define FRONT_TURN_COMPLEMENTARY 370
@@ -418,6 +418,9 @@
 
 //进入台下动作的最大时间限制，为了让车子从误入台下中出来
 #define TIME_UNDER_STAGE_TO_RETURN 4000
+
+//前方传感器重复记录次数，滤波
+#define TIMES_FRONT_DETECTOR_FLITER 17
 
 /**
  * 变量值
@@ -452,6 +455,10 @@ int temp_analogRead_A0 = 0;
 
 //初始化是否需要向前方窜一下
 int enemy_on_front_go_front_only_once = CAN_GO_FRONT_TO_ENEMY;
+
+int judge_if_think_edge_is_enemy = 0;
+
+long time_if_think_edge_is_enemy = 0;
 
 /**
  * 实例化对象和一些准备设置
@@ -754,16 +761,22 @@ void turnLeftPositionSlowly(int single){
 int determineIfThereIsAnObjectInFrontOfTheSide(int which_one){
     int temp = 0;
     // int detect_value[7];
-    for(int i=0;i<7;++i){
+    for(int i=0;i<TIMES_FRONT_DETECTOR_FLITER;++i){
         // detect_value[i] = analogRead(which_one);
         if(analogRead(which_one)<FRONT_RING_SENSOR_TRIGGER_VALUE){
             temp = 1;
         }
+        // temp += analogRead(which_one);
     }
-    if(temp==1){
-        return DETECT_NO;
-    }else{
+    // Serial.print("temp_last:");
+    // Serial.println(temp);
+    // temp = temp/TIMES_FRONT_DETECTOR_FLITER;
+    // Serial.print("      ");
+    // Serial.print(temp);
+    if(temp==0){
         return DETECT_YES;
+    }else{
+        return DETECT_NO;
     }
 
 }
@@ -1128,8 +1141,8 @@ void detectTheTwoSidesOfTheRightSideForEnemies(){
  */
 //void alignmentMoreStringent(){//旧
 void alignWithWalls(){
-    int last_detect_back_left = analogRead(DETECTOR_BACK_LEFT);
-    int last_detect_back_right = analogRead(DETECTOR_BACK_RIGHT);
+    long last_detect_back_left = analogRead(DETECTOR_BACK_LEFT);
+    long last_detect_back_right = analogRead(DETECTOR_BACK_RIGHT);
     for(int i=0;i<9;++i){
         last_detect_back_left += analogRead(DETECTOR_BACK_LEFT);
         last_detect_back_right += analogRead(DETECTOR_BACK_RIGHT);
@@ -1276,7 +1289,15 @@ void determineIfItIsUnderTheStage(){
         temp_times++;
     }
     if(temp_times>=3){
-        DecidedTheCarHadFallenOff();
+        if(judge_if_think_edge_is_enemy==0){
+            time_if_think_edge_is_enemy = millis();
+            judge_if_think_edge_is_enemy = 1;
+        }
+
+        if(millis()-time_if_think_edge_is_enemy>1000){
+            judge_if_think_edge_is_enemy = 0;
+            DecidedTheCarHadFallenOff();
+        }
     }
     // Serial.println(temp_times);
     // delay(1000);
@@ -1313,7 +1334,7 @@ void sideFrontToDetectIfThereAreEnemies(){
         //return;
     }else if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT)==DETECT_YES){
         turnLeftPosition(TURN_LEFT_FRONT);
-        delay(300);
+        // delay(300);
         last_detect_side = DETECT_LAST_LEFT;
         complementary_time_judge = COMPLEMENTARY_TIME_NO;
         detect_if_detected = DETECT_IF_DETECTED_YES;
@@ -1324,7 +1345,7 @@ void sideFrontToDetectIfThereAreEnemies(){
         //lostEnemyAlert();
     }else if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT)==DETECT_YES){
         turnRightPosition(TURN_RIGHT_FRONT);
-        delay(300);
+        // delay(300);
         last_detect_side = DETECT_LAST_RIGHT;
         complementary_time_judge = COMPLEMENTARY_TIME_NO;
         detect_if_detected = DETECT_IF_DETECTED_YES;
@@ -1375,19 +1396,19 @@ void detectsWhetherTheEdgeIsReachedWhenPushingEnemy(){
         if(digitalRead(GRAYSCALE_SENSOT_RIGHT)==DETECT_YES){
             roboclaw.ResetEncoders(ADDRESS);
             roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, -(2*TURN_SLOW_POSITION), 1);
-            roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, -TURN_SLOW_POSITION+11, 1);
+            roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, -TURN_SLOW_POSITION+15, 1);
             delay(150);
             //stop();
         }else if(digitalRead(GRAYSCALE_SENSOR_LEFT)==DETECT_YES){
             roboclaw.ResetEncoders(ADDRESS);
             roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, -(2*TURN_SLOW_POSITION), 1);
-            roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, -TURN_SLOW_POSITION+11, 1);
+            roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, -TURN_SLOW_POSITION+15, 1);
             delay(150);
             //stop();
         }else if(digitalRead(GRAYSCALE_SENSOT_RIGHT)+digitalRead(GRAYSCALE_SENSOR_LEFT)==2){
             roboclaw.ResetEncoders(ADDRESS);
-            roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, -TURN_SLOW_POSITION, 1);
-            roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, -TURN_SLOW_POSITION, 1);
+            roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, -(2*TURN_SLOW_POSITION), 1);
+            roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, -(2*TURN_SLOW_POSITION), 1);
             delay(150);
         }
         if(digitalRead(GRAYSCALE_SENSOT_RIGHT)+digitalRead(GRAYSCALE_SENSOR_LEFT)==0){
@@ -1398,12 +1419,16 @@ void detectsWhetherTheEdgeIsReachedWhenPushingEnemy(){
             // }else if(analogRead(DETECTOR_BACK_RIGHT)-analogRead(DETECTOR_BACK_LEFT)>OFFSET_THRESHOLD_ADJUST_SLOW){
             //     turnRightPosition(TURN_SLOW_POSITION);
             // }else{
+
+
+
+
             for(int i=0;i<7;){
                 int last_detect_back_left = analogRead(DETECTOR_BACK_LEFT);
                 int last_detect_back_right = analogRead(DETECTOR_BACK_RIGHT);
-                if(last_detect_back_left-last_detect_back_right>OFFSET_THRESHOLD_ADJUST_SLOW-4){
+                if(last_detect_back_left-last_detect_back_right>OFFSET_THRESHOLD_ADJUST_SLOW){
                     turnLeftPosition(TURN_SLOW_POSITION);
-                }else if(last_detect_back_right-last_detect_back_left>OFFSET_THRESHOLD_ADJUST_SLOW-4){
+                }else if(last_detect_back_right-last_detect_back_left>OFFSET_THRESHOLD_ADJUST_SLOW){
                     turnRightPosition(TURN_SLOW_POSITION);
                 }else{
                     ++i;
@@ -1581,8 +1606,10 @@ void PrepareforAttack(){
         //     }
         // }while(storage_front_end_sensors1!=storage_front_end_sensors1_temp && storage_front_end_sensors2!=storage_front_end_sensors2_temp);//
         enemy_on_front_go_front_only_once = CAN_GO_FRONT_TO_ENEMY;
-        stopStuck();
-        detectsWhetherTheEdgeIsReachedWhenPushingEnemy();  
+        time_if_think_edge_is_enemy = 0;
+        // stopStuck();
+        detectsWhetherTheEdgeIsReachedWhenPushingEnemy(); 
+        uploadDetect(); 
         //delay(4000);
         //stop();
         //}while(1);
@@ -1627,18 +1654,50 @@ void letUsGo(){
 //动作组以上--------------------------------------------------------------------------------------------------
 //动作组以上--------------------------------------------------------------------------------------------------
 void test(){
-    int last_detect_back_left = analogRead(DETECTOR_BACK_LEFT);
-    int last_detect_back_right = analogRead(DETECTOR_BACK_RIGHT);
-    for(int i=0;i<9;++i){
-        last_detect_back_left += analogRead(DETECTOR_BACK_LEFT);
-        last_detect_back_right += analogRead(DETECTOR_BACK_RIGHT);
+    // determineIfItIsUnderTheStage();
+    int temp_times = 0;
+    if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_FRONT)==DETECT_YES){
+        temp_times++;
     }
-    last_detect_back_left = last_detect_back_left/10;
-    last_detect_back_right = last_detect_back_right/10;
-    Serial.print(last_detect_back_left);
-    Serial.print("    ");
-    Serial.println(last_detect_back_right);
-    delay(800);
+    if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT)==DETECT_YES){
+        temp_times++;
+    }
+    if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT_MORE)==DETECT_YES){
+        temp_times++;
+    }
+    if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT)==DETECT_YES){
+        temp_times++;
+    }
+    if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT_MORE)==DETECT_YES){
+        temp_times++;
+    }
+    Serial.println(temp_times);
+    // if(temp_times>=3){
+    //     // DecidedTheCarHadFallenOff();
+    // }
+    // Serial.println(analogRead(DETECTOR_FRONT));
+    // Serial.println(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_FRONT));
+    // delay(2000);
+    // int temp1 = millis();
+    // for(int i=0;i<1000;++i){
+    //     // detect_value[i] = analogRead(which_one);
+    //     if(analogRead(DETECTOR_FRONT)<FRONT_RING_SENSOR_TRIGGER_VALUE){
+    //         // temp = 1;
+    //     }
+    // }
+    // Serial.println(millis()-temp1);
+    // int last_detect_back_left = analogRead(DETECTOR_BACK_LEFT);
+    // int last_detect_back_right = analogRead(DETECTOR_BACK_RIGHT);
+    // for(int i=0;i<9;++i){
+    //     last_detect_back_left += analogRead(DETECTOR_BACK_LEFT);
+    //     last_detect_back_right += analogRead(DETECTOR_BACK_RIGHT);
+    // }
+    // last_detect_back_left = last_detect_back_left/10;
+    // last_detect_back_right = last_detect_back_right/10;
+    // Serial.print(last_detect_back_left);
+    // Serial.print("    ");
+    // Serial.println(last_detect_back_right);
+    // delay(800);
     // Serial.print(analogRead(DETECTOR_LEFT));
     // Serial.print("   ");
     // Serial.print(analogRead(DETECTOR_RIGHT));
@@ -1674,8 +1733,23 @@ void test(){
 
 
 void test2(){
-    Serial.println(analogRead(DETECTOR_LEFT)+analogRead(DETECTOR_RIGHT));
-    delay(800);
+    detectsWhetherTheEdgeIsReachedWhenPushingEnemy();  
+
+    // if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT)==DETECT_YES){
+    //     roboclaw.ForwardM1(ADDRESS, 10);
+    // }else{
+    //     roboclaw.BackwardM1(ADDRESS,10);
+    // }
+    
+
+    // determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT_MORE);
+    // determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_FRONT);
+    // determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT_MORE);
+    // determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT);
+    // Serial.println(" ");
+    // delay(4000);
+    // Serial.println(analogRead(DETECTOR_LEFT)+analogRead(DETECTOR_RIGHT));
+    // delay(800);
     // Serial.println("start");
     // long temp = millis();
     // // alignWithWalls();
@@ -1699,16 +1773,12 @@ void test2(){
 void searchForEnemy(){
     if(detect_if_detected==DETECT_IF_DETECTED_NO){
         alignWithWalls();
-        // detectTheTwoSidesOfTheRightSideForEnemies();
         for(int i=0;i<500;i++){
-            detectTheTwoSidesOfTheRightSideForEnemies();//down
+            detectTheTwoSidesOfTheRightSideForEnemies();
         }
-        
-    // //alignmentOnlyOnce();//down
-        
     }
-    // sideFrontToDetectIfThereAreEnemies();
-    // lostEnemy();
+    sideFrontToDetectIfThereAreEnemies();
+    lostEnemy();
     //uploadDetect();
     //goFrontPosition();//down
 }
@@ -1723,14 +1793,8 @@ void setup(){
     //stop();
     delay(2000);
     //首先更新一下场上的距离常数，再行动
-    // letUsGo();
+    letUsGo();
     uploadDetect();
-    // last_detect_left = 400;
-    // last_detect_right = 400;
-    // stopStuck();
-    //letUsGo();
-    // stopStuck();
-    // roboclaw.ResetEncoders(ADDRESS);
 }
 
 
