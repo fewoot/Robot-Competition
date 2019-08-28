@@ -295,10 +295,10 @@
 
 //左转90°
 #define TURN_LEFT_POSITION_90 820
-#define TURN_LEFT_POSITION_90_SLOWLY 455
+#define TURN_LEFT_POSITION_90_SLOWLY 440
 
 //右转—90°
-#define TURN_RIGHT_POSITION_90 800
+#define TURN_RIGHT_POSITION_90 820
 #define TURN_RIGHT_POSITION_90_SLOWLY 440
 
 //左前转向位置，等待更新
@@ -352,7 +352,7 @@
 #define MIN_DETECT_TO_90_ENEMY_JUDGE 177
 
 //对正时两个探测器数值差异范围，超过这个值则会调整
-#define OFFSET_THRESHOLD_ADJUST_SLOW 8
+#define OFFSET_THRESHOLD_ADJUST_SLOW 7
 
 //定义传输值no_signal值，当值大于等于它时，认为此值无效
 #define NO_SIGNAL_VALUE 900
@@ -607,14 +607,18 @@ void turnRightPosition(int single){
     //     delay(150);
     // }
     // stop();
-    while (1){
-        /* code */
-        if(roboclaw.ReadEncM1(ADDRESS)>=single-ERROR_POSITION){
-            stop();
-            //stop_stuck();
-            return;
-        }
+    // while (1){
+    //     /* code */
+    //     if(roboclaw.ReadEncM1(ADDRESS)>=single-ERROR_POSITION){
+    //         stop();
+    //         //stop_stuck();
+    //         return;
+    //     }
+    // }
+    while(roboclaw.ReadEncM1(ADDRESS)<(single-ERROR_POSITION)){
+
     }
+    stop();
     
     // for(;;){
         
@@ -683,15 +687,19 @@ void turnLeftPosition(int single){
     // roboclaw.ForwardM2(ADDRESS, 127);
     // roboclaw.BackwardM2(ADDRESS,127);
     // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, -single, ACCEL2, 8000, DECCEL2, single, 1);
-    while (1){
-        /* code */
-        // Serial.println(roboclaw.ReadEncM2(ADDRESS));
-        if(roboclaw.ReadEncM2(ADDRESS)>=single-ERROR_POSITION){
-        // delay(100);
-        stop();
-        return;
-        }
+    // while (1){
+    //     /* code */
+    //     // Serial.println(roboclaw.ReadEncM2(ADDRESS));
+    //     if(roboclaw.ReadEncM2(ADDRESS)>=single-ERROR_POSITION){
+    //     // delay(100);
+    //     stop();
+    //     return;
+    //     }
+    // }
+    while(roboclaw.ReadEncM2(ADDRESS)<(single-ERROR_POSITION)){
+
     }
+    stop();
     
     // for(;;){
         
@@ -1122,6 +1130,12 @@ void detectTheTwoSidesOfTheRightSideForEnemies(){
 void alignWithWalls(){
     int last_detect_back_left = analogRead(DETECTOR_BACK_LEFT);
     int last_detect_back_right = analogRead(DETECTOR_BACK_RIGHT);
+    for(int i=0;i<9;++i){
+        last_detect_back_left += analogRead(DETECTOR_BACK_LEFT);
+        last_detect_back_right += analogRead(DETECTOR_BACK_RIGHT);
+    }
+    last_detect_back_left = last_detect_back_left/10;
+    last_detect_back_right = last_detect_back_right/10;
     if(last_detect_back_left+last_detect_back_right>=1840){
         if(analogRead(DETECTOR_BACK_LEFT)+analogRead(DETECTOR_BACK_RIGHT)>=1840){
             if(analogRead(DETECTOR_BACK_LEFT)+analogRead(DETECTOR_BACK_RIGHT)>=1840){
@@ -1171,15 +1185,18 @@ void uploadDetect(){
     //delay(100); temp_analogRead_A1-last_detect_right<ABNORMAL_INCREASE && temp_analogRead_A0-last_detect_left<ABNORMAL_INCREASE
     temp_analogRead_A1 = analogRead(DETECTOR_RIGHT);
     temp_analogRead_A0 = analogRead(DETECTOR_LEFT);
-    if(temp_analogRead_A1<NO_SIGNAL_VALUE){
+    if(temp_analogRead_A0+temp_analogRead_A1>1170){
+        if(temp_analogRead_A1<NO_SIGNAL_VALUE){
         //uploadDetect();
-        last_detect_right = temp_analogRead_A1;
+            last_detect_right = temp_analogRead_A1;
         // Serial.print(last_detect_right);
+        }
+        if(temp_analogRead_A0<NO_SIGNAL_VALUE){
+            last_detect_left = temp_analogRead_A0;
+            // Serial.println(last_detect_left);
+        }
     }
-    if(temp_analogRead_A0<NO_SIGNAL_VALUE){
-        last_detect_left = temp_analogRead_A0;
-        // Serial.println(last_detect_left);
-    }
+    
     // last_detect_left = analogRead(DETECTOR_LEFT_A0);
     // last_detect_right = analogRead(DETECTOR_RIGHT_A1);
 }
@@ -1610,13 +1627,24 @@ void letUsGo(){
 //动作组以上--------------------------------------------------------------------------------------------------
 //动作组以上--------------------------------------------------------------------------------------------------
 void test(){
-
-    Serial.print(analogRead(DETECTOR_LEFT));
-    Serial.print("   ");
-    Serial.print(analogRead(DETECTOR_RIGHT));
-    Serial.println("   ");
-    // Serial.println(analogRead(DETECTOR_BACK_LEFT)+analogRead(DETECTOR_BACK_RIGHT));
-    delay(1000);
+    int last_detect_back_left = analogRead(DETECTOR_BACK_LEFT);
+    int last_detect_back_right = analogRead(DETECTOR_BACK_RIGHT);
+    for(int i=0;i<9;++i){
+        last_detect_back_left += analogRead(DETECTOR_BACK_LEFT);
+        last_detect_back_right += analogRead(DETECTOR_BACK_RIGHT);
+    }
+    last_detect_back_left = last_detect_back_left/10;
+    last_detect_back_right = last_detect_back_right/10;
+    Serial.print(last_detect_back_left);
+    Serial.print("    ");
+    Serial.println(last_detect_back_right);
+    delay(800);
+    // Serial.print(analogRead(DETECTOR_LEFT));
+    // Serial.print("   ");
+    // Serial.print(analogRead(DETECTOR_RIGHT));
+    // Serial.println("   ");
+    // // Serial.println(analogRead(DETECTOR_BACK_LEFT)+analogRead(DETECTOR_BACK_RIGHT));
+    // delay(1000);
 //    while(1){
 //             if(grayScaleSensorDetect()==CLOSE_TO_EDGE){
 //                 stopStuck();
@@ -1646,6 +1674,17 @@ void test(){
 
 
 void test2(){
+    Serial.println(analogRead(DETECTOR_LEFT)+analogRead(DETECTOR_RIGHT));
+    delay(800);
+    // Serial.println("start");
+    // long temp = millis();
+    // // alignWithWalls();
+    // // detectTheTwoSidesOfTheRightSideForEnemies();
+    // for(int i=0;i<1000;i++){
+    //         detectTheTwoSidesOfTheRightSideForEnemies();//down
+    // }
+    // Serial.println(millis()-temp);
+    // delay(100000);
 
     
 
@@ -1660,7 +1699,11 @@ void test2(){
 void searchForEnemy(){
     if(detect_if_detected==DETECT_IF_DETECTED_NO){
         alignWithWalls();
-        detectTheTwoSidesOfTheRightSideForEnemies();//down
+        // detectTheTwoSidesOfTheRightSideForEnemies();
+        for(int i=0;i<500;i++){
+            detectTheTwoSidesOfTheRightSideForEnemies();//down
+        }
+        
     // //alignmentOnlyOnce();//down
         
     }
@@ -1692,6 +1735,7 @@ void setup(){
 
 
 void loop(){
+    // test2();
     // test();
     // delay(800);
     searchForEnemy();
