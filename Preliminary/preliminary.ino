@@ -1025,6 +1025,7 @@ void startTheOnStageMotor(){
  */
 void judgeWhetherOnStageOrUnderTheStage(){
     if(temp_analogRead_A0+temp_analogRead_A1<580 || analogRead(DETECTOR_BACK_LEFT)<330){//
+        stop();
         delay(1000);
         if(temp_analogRead_A0+temp_analogRead_A1<580 || analogRead(DETECTOR_BACK_LEFT)<330){
             DecidedTheCarHadFallenOff();
@@ -1548,7 +1549,7 @@ void PrepareforAttack(){
         while(1){
             if(grayScaleSensorDetect()==CLOSE_TO_EDGE){
                 stop();
-                delay(700);
+                delay(1000);
                 if(analogRead(DETECTOR_BACK_LEFT)<PREVENT_REAR_BACK_VALUE || analogRead(DETECTOR_BACK_RIGHT)<PREVENT_REAR_BACK_VALUE){
                     preventRearBackMove();
                     continue;
