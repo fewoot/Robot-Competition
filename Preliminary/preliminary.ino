@@ -33,7 +33,10 @@
  * 2019年8月7日：今天和两个小车进行了对撞，其中有一个推不过，总线也有烧焦的痕迹，明早继续实验
  * 
  * 2019年8月23日：今天回来了，车已经做好80%了，但是有一点超重，明天可以再改进一下，传感器，电机已经检查完毕-
- * 可以读取编码值。还没有进行推力实验，今天早点回去吧，
+ * 可以读取编码值。还没有进行推力实验，今天早点回去吧
+ * 
+ * 2019年8月30日：车子已经全部完成了，所有动作都成功，但是还是有传感器的跳值问题，急需解决，经过实际测试，-
+ * 因为有些探测条件是共用的，所以有重叠，继续改进
  */
 
 /**
@@ -260,19 +263,19 @@
 #define DETECTOR_RIGHT A1
 
 //左前方传感器
-#define DETECTOR_LEFT_FRONT A2
+#define DETECTOR_LEFT_FRONT A5
 
 //更靠近前方的左前方传感器
-#define DETECTOR_LEFT_FRONT_MORE A5
+#define DETECTOR_LEFT_FRONT_MORE A3
 
 //正前方传感器
-#define DETECTOR_FRONT A4
+#define DETECTOR_FRONT A2
 
 //右前方传感器
 #define DETECTOR_RIGHT_FRONT A6
 
 //更靠近前方的右前方传感器
-#define DETECTOR_RIGHT_FRONT_MORE A3
+#define DETECTOR_RIGHT_FRONT_MORE A4
 
 //边缘传感器1
 #define GRAYSCALE_SENSOR_LEFT 37
@@ -392,7 +395,7 @@
 #define FOR_GOING_TO_STAGE_SPEED 40
 
 //前方测敌传感器的70cm数值
-#define FRONT_RING_SENSOR_TRIGGER_VALUE 160
+#define FRONT_RING_SENSOR_TRIGGER_VALUE 190
 
 //转动补偿
 #define FRONT_TURN_COMPLEMENTARY 370
@@ -403,7 +406,7 @@
 //不可以向前窜一下
 #define CAN_NOT_GO_FRONT_TO_ENEMY 1
 
-//定义在未在边缘
+//定义没在边缘
 #define STILL_ON_STAGE 1
 
 //定义在边缘
@@ -458,9 +461,11 @@ int temp_analogRead_A0 = 0;
 //初始化是否需要向前方窜一下
 int enemy_on_front_go_front_only_once = CAN_GO_FRONT_TO_ENEMY;
 
-int judge_if_think_edge_is_enemy = 0;
+//判断是否将敌人识别成边界，防止对撞中误判断为边界，让这个延时1s
+int judge_if_think_enemy_is_edge = 0;
 
-long time_if_think_edge_is_enemy = 0;
+//记录首次三个传感器都检测到时的时间
+long time_if_think_enemy_is_edge = 0;
 
 /**
  * 实例化对象和一些准备设置
@@ -583,6 +588,7 @@ void M2PositionForward(int position){
     }
 }
 
+//向右转90°特别版
 void turnRightPosition90(){
     //M1PositionBackward(single);
     //M2PositionForward(single);
@@ -716,6 +722,7 @@ void turnRightPositionSlowly(int single){
     
 }
 
+//向左90°特别版
 void turnLeftPositon90(){
     //static int M1PositionTemp = 0;
     //if(roboclaw.ReadEncM1(ADDRESS)==-position){
@@ -1416,13 +1423,13 @@ void determineIfItIsUnderTheStage(){
         temp_times++;
     }
     if(temp_times>=3){
-        if(judge_if_think_edge_is_enemy==0){
-            time_if_think_edge_is_enemy = millis();
-            judge_if_think_edge_is_enemy = 1;
+        if(judge_if_think_enemy_is_edge==0){
+            time_if_think_enemy_is_edge = millis();
+            judge_if_think_enemy_is_edge = 1;
         }
 
-        if(millis()-time_if_think_edge_is_enemy>1000){
-            judge_if_think_edge_is_enemy = 0;
+        if(millis()-time_if_think_enemy_is_edge>1000){
+            judge_if_think_enemy_is_edge = 0;
             DecidedTheCarHadFallenOff();
         }
     }
@@ -1438,7 +1445,7 @@ void determineIfItIsUnderTheStage(){
  */
 //void detectEnemySide(){//旧
 void sideFrontToDetectIfThereAreEnemies(){
-    determineIfItIsUnderTheStage();
+    // determineIfItIsUnderTheStage();
     if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_FRONT)==DETECT_YES){
         if(enemy_on_front_go_front_only_once==CAN_GO_FRONT_TO_ENEMY){
             enemy_on_front_go_front_only_once = CAN_NOT_GO_FRONT_TO_ENEMY;
@@ -1753,7 +1760,7 @@ void PrepareforAttack(){
         //     }
         // }while(storage_front_end_sensors1!=storage_front_end_sensors1_temp && storage_front_end_sensors2!=storage_front_end_sensors2_temp);//
         enemy_on_front_go_front_only_once = CAN_GO_FRONT_TO_ENEMY;
-        time_if_think_edge_is_enemy = 0;
+        time_if_think_enemy_is_edge = 0;
         // stopStuck();
         detectsWhetherTheEdgeIsReachedWhenPushingEnemy(); 
         uploadDetect(); 
@@ -1800,6 +1807,8 @@ void letUsGo(){
 //动作组以上--------------------------------------------------------------------------------------------------
 //动作组以上--------------------------------------------------------------------------------------------------
 //动作组以上--------------------------------------------------------------------------------------------------
+
+//测试程序
 void test(){
     //static int M1PositionTemp = 0;
     //if(roboclaw.ReadEncM1(ADDRESS)==-position){
@@ -1998,28 +2007,45 @@ void test(){
 //         }
 }
 
-
+//测试程序
 void test2(){
-    roboclaw.ResetEncoders(ADDRESS);
-    roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 3000, DECCEL, -690, 1);
-    roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 3000, DECCEL, 690, 1);
-    while(roboclaw.ReadEncM2(ADDRESS)<(TURN_LEFT_POSITION_90-ERROR_POSITION)){
+    long temp = 0;
+    for(int i=0;i<2000;++i){
+        temp += analogRead(DETECTOR_FRONT);
     }
-    stop();
-    delay(4000);
-    roboclaw.ResetEncoders(ADDRESS);
-    roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 3000, DECCEL, -700, 1);
-    roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 3000, DECCEL, 700, 1);
-    while(roboclaw.ReadEncM2(ADDRESS)<(TURN_LEFT_POSITION_90-ERROR_POSITION)){
-    }
-    stop();
-    delay(4000);
-    roboclaw.ResetEncoders(ADDRESS);
-    roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 3000, DECCEL, -710, 1);
-    roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 3000, DECCEL, 710, 1);
-    while(roboclaw.ReadEncM2(ADDRESS)<(TURN_LEFT_POSITION_90-ERROR_POSITION)){
-    }
-    stop();
+    temp = temp/2000;
+    Serial.println(temp);
+    // Serial.print(analogRead(A2));
+    // Serial.print("     ");
+    // Serial.print(analogRead(A3));
+    // Serial.print("     ");
+    // Serial.print(analogRead(A4));
+    // Serial.print("     ");
+    // Serial.print(analogRead(A5));
+    // Serial.print("     ");
+    // Serial.print(analogRead(A6));
+    // Serial.println("     ");
+    delay(1000);
+//     roboclaw.ResetEncoders(ADDRESS);
+//     roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 3000, DECCEL, -690, 1);
+//     roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 3000, DECCEL, 690, 1);
+//     while(roboclaw.ReadEncM2(ADDRESS)<(TURN_LEFT_POSITION_90-ERROR_POSITION)){
+//     }
+//     stop();
+//     delay(4000);
+//     roboclaw.ResetEncoders(ADDRESS);
+//     roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 3000, DECCEL, -700, 1);
+//     roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 3000, DECCEL, 700, 1);
+//     while(roboclaw.ReadEncM2(ADDRESS)<(TURN_LEFT_POSITION_90-ERROR_POSITION)){
+//     }
+//     stop();
+//     delay(4000);
+//     roboclaw.ResetEncoders(ADDRESS);
+//     roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 3000, DECCEL, -710, 1);
+//     roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 3000, DECCEL, 710, 1);
+//     while(roboclaw.ReadEncM2(ADDRESS)<(TURN_LEFT_POSITION_90-ERROR_POSITION)){
+//     }
+//     stop();
 }
 
 //搜索敌人总函数
@@ -2050,7 +2076,7 @@ void setup(){
     uploadDetect();
 }
 
-
+//主函数
 void loop(){
     // turnRightPosition90();
     // delay(5000);
