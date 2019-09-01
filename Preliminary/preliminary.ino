@@ -643,6 +643,23 @@ void turnRightPosition90(){
     // }
 }
 
+void turnRightPosition90ForUnderStage(){
+    //M1PositionBackward(single);
+    //M2PositionForward(single);
+    roboclaw.ResetEncoders(ADDRESS);
+    roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 3000, DECCEL, TURN_RIGHT_POSITION_90_NEW-120, 1);
+    roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 3000, DECCEL, (-TURN_RIGHT_POSITION_90_NEW)+120, 1);
+    
+    while(roboclaw.ReadEncM1(ADDRESS)<(TURN_RIGHT_POSITION_90_NEW-120-ERROR_POSITION)){
+
+    }
+    stop();
+    
+    // for(;;){
+        
+    // }
+}
+
 //向右转位置函数
 void turnRightPosition(int single){
     //M1PositionBackward(single);
@@ -715,6 +732,10 @@ void turnRightPositionSlowly(int single){
     // roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, single, 1);
     roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 1000, DECCEL, single, 1);
     roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 1000, DECCEL, -single, 1);
+    while(roboclaw.ReadEncM1(ADDRESS)<single-ERROR_POSITION){
+
+    }
+    stop();
     // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 1000, DECCEL1, single, ACCEL2, 1000, DECCEL2, -single, 1);
     // for(;;){
     //     if(roboclaw.ReadEncM1(ADDRESS)>=single-ERROR_POSITION){
@@ -785,6 +806,21 @@ void turnLeftPositon90(){
     // }
     // stop();
     // return;
+}
+
+void turnLeftPositon90ForUnderStage(){
+    //static int M1PositionTemp = 0;
+    //if(roboclaw.ReadEncM1(ADDRESS)==-position){
+    //roboclaw.SetEncM2(ADDRESS,0);
+    roboclaw.ResetEncoders(ADDRESS);
+    roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 3000, DECCEL, (-TURN_LEFT_POSITION_90_NEW)+120, 1);
+    roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 3000, DECCEL, TURN_LEFT_POSITION_90_NEW-120, 1);
+    while(roboclaw.ReadEncM2(ADDRESS)<(TURN_LEFT_POSITION_90_NEW-120-ERROR_POSITION)){
+
+    }
+    stop();
+    
+    
 }
 
 //向左转位置函数
@@ -871,6 +907,15 @@ void turnLeftPositionSlowly(int single){
     // roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, -single, 0);
     roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 1000, DECCEL, -single, 1);
     roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 1000, DECCEL, single, 1);
+
+
+    while(roboclaw.ReadEncM2(ADDRESS)<single-ERROR_POSITION){
+
+    }
+
+    // delay(1000);
+
+    stop();
     // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 1000, DECCEL1, -single, ACCEL2, 1000, DECCEL2, single, 1);
     // for(;;){
     //     if(roboclaw.ReadEncM2(ADDRESS)>=single-ERROR_POSITION){
@@ -1088,6 +1133,9 @@ void DecidedTheCarHadFallenOff(){
     goForwardAfterAlignedTheWall();
     //改变上台的位置
     changeThePositionGoingToStage();
+    if(analogRead(DETECTOR_BACK_LEFT)>400){
+        turnLeftPositionSlowly(TURN_LEFT_180);
+    }
     stepBackAndGetOnStage();
     //delay(1500);
     //stop();
@@ -1167,12 +1215,16 @@ void judgeWhetherOnStageOrUnderTheStage(){//
 /**
  * 为了改变上台位置，向前走
  */
-void forChangeThePositionToMoveAlongWall(){
+void forChangeThePositionToMoveAlongWall(int distance){
     //inOrderToGoAlongStraightFirstSteeralignment();
     //if(analogRead(DETECTOR_BACK_LEFT)>)
     roboclaw.ResetEncoders(ADDRESS);
-    roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 2000, DECCEL, 2800, 1);
-    roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 2000, DECCEL, 2800, 1);
+    roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 3500, DECCEL, distance, 1);
+    roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 3500, DECCEL, distance, 1);
+    while(roboclaw.ReadEncM2(ADDRESS)<(distance-ERROR_POSITION) || roboclaw.ReadEncM1(ADDRESS)<(distance-ERROR_POSITION)){
+
+    }
+    stop();
     // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2000, DECCEL1, 2800, ACCEL2, 2000, DECCEL2, 2800, 1);
 
     // //int last_deistance_from_wall;
@@ -1222,25 +1274,158 @@ void forChangeThePositionToMoveAlongWall(){
  * 对齐后改变上台位置
  */
 void changeThePositionGoingToStage(){
-    if(analogRead(DETECTOR_LEFT)<600){
+    if(analogRead(DETECTOR_LEFT)<284){
+        // switch (analogRead(DETECTOR_RIGHT)){
+        // case :
+        //     /* code */
+        //     break;
+        
+        // default:
+        //     break;
+        // }
+        // if(analogRead(DETECTOR_RIGHT))
         //turnRightPosition(TURN_RIGHT_POSITION_90);
         turnRightPositionSlowly(TURN_RIGHT_POSITION_90_SLOWLY);
-        delay(800);
-        forChangeThePositionToMoveAlongWall();
-        delay(2000);
+        // delay(800);
+        forChangeThePositionToMoveAlongWall(6260);
+        // delay(2000);
         //delay(2000);
-        turnRightPosition90();
-        // turnRightPosition(TURN_RIGHT_POSITION_90);
+        // turnRightPosition90();
+        // turnRightPosition(TURN_RIGHT_POSITION_90-70);
+        turnRightPosition90ForUnderStage();
+    }else if(analogRead(DETECTOR_LEFT)<425){
+        turnRightPositionSlowly(TURN_RIGHT_POSITION_90_SLOWLY);
+        // delay(800);
+        forChangeThePositionToMoveAlongWall(4494);
+        // delay(2000);
+        //delay(2000);
+        // turnRightPosition90();
+        // turnRightPosition(TURN_RIGHT_POSITION_90-70);
+        turnRightPosition90ForUnderStage();
+
+    }else if(analogRead(DETECTOR_LEFT)<620){
+        turnRightPositionSlowly(TURN_RIGHT_POSITION_90_SLOWLY);
+        // delay(800);
+        forChangeThePositionToMoveAlongWall(2783);
+        // delay(2000);
+        //delay(2000);
+        // turnRightPosition90();
+        // turnRightPosition(TURN_RIGHT_POSITION_90-70);
+        turnRightPosition90ForUnderStage();
+
     }else{
-        // turnLeftPosition(TURN_LEFT_POSITION_90);
-        turnLeftPositionSlowly(TURN_LEFT_POSITION_90_SLOWLY);
-        delay(800);
-        forChangeThePositionToMoveAlongWall();
-        delay(2000);
-        //delay(2000);
-        turnLeftPositon90();
-        // turnLeftPosition(TURN_LEFT_POSITION_90);
+        if(analogRead(DETECTOR_RIGHT)<284){
+            turnLeftPositionSlowly(TURN_LEFT_POSITION_90_SLOWLY);
+            // delay(800);
+            forChangeThePositionToMoveAlongWall(6260);
+            // delay(2000);
+            //delay(2000);
+            // turnLeftPositon90();
+            // turnRightPosition(TURN_RIGHT_POSITION_90);
+            // turnLeftPosition(TURN_LEFT_POSITION_90-70);
+            // turnRightPosition90ForUnderStage();
+            turnLeftPositon90ForUnderStage();
+
+        }else if(analogRead(DETECTOR_RIGHT)<425){
+            turnLeftPositionSlowly(TURN_LEFT_POSITION_90_SLOWLY);
+            // delay(800);
+            forChangeThePositionToMoveAlongWall(4494);
+            // delay(2000);
+            //delay(2000);
+            // turnLeftPositon90();
+            // turnRightPosition(TURN_RIGHT_POSITION_90);
+            // turnLeftPosition(TURN_LEFT_POSITION_90-70);
+            turnLeftPositon90ForUnderStage();
+
+        }else{
+            // turnRightPositionSlowly(TURN_RIGHT_POSITION_90_SLOWLY);
+            // delay(800);
+            // forChangeThePositionToMoveAlongWall(2783);
+            // delay(2000);
+            // //delay(2000);
+            // turnRightPosition90();
+            // turnLeftPosition(TURN_LEFT_POSITION_90);
+            turnLeftPositionSlowly(TURN_LEFT_POSITION_90_SLOWLY);
+            // delay(800);
+            forChangeThePositionToMoveAlongWall(2700);
+            turnLeftPositon90ForUnderStage();
+
+            // delay(2000);
+            //delay(2000);
+            // turnLeftPositon90();
+            // turnRightPosition(TURN_RIGHT_POSITION_90);
+            // turnLeftPosition(TURN_LEFT_POSITION_90-70);
+            // turnLeftPosition(TURN_LEFT_POSITION_90);
+        }
     }
+
+    // if(analogRead(DETECTOR_RIGHT)<284){
+    //         turnLeftPositionSlowly(TURN_RIGHT_POSITION_90_SLOWLY);
+    //         // delay(800);
+    //         forChangeThePositionToMoveAlongWall(6260);
+    //         // delay(2000);
+    //         //delay(2000);
+    //         turnLeftPositon90();
+    //         // turnRightPosition(TURN_RIGHT_POSITION_90);
+    //     }else if(analogRead(DETECTOR_RIGHT)<425){
+    //         turnLeftPositionSlowly(TURN_RIGHT_POSITION_90_SLOWLY);
+    //         // delay(800);
+    //         forChangeThePositionToMoveAlongWall(4494);
+    //         // delay(2000);
+    //         //delay(2000);
+    //         turnLeftPositon90();
+    //     }else if(analogRead(DETECTOR_RIGHT)<583){
+    //         // turnRightPositionSlowly(TURN_RIGHT_POSITION_90_SLOWLY);
+    //         // delay(800);
+    //         // forChangeThePositionToMoveAlongWall(2783);
+    //         // delay(2000);
+    //         // //delay(2000);
+    //         // turnRightPosition90();
+    //         // turnLeftPosition(TURN_LEFT_POSITION_90);
+    //         turnLeftPositionSlowly(TURN_LEFT_POSITION_90_SLOWLY);
+    //         // delay(800);
+    //         forChangeThePositionToMoveAlongWall(2700);
+    //         // delay(2000);
+    //         //delay(2000);
+    //         turnLeftPositon90();
+    //         // turnLeftPosition(TURN_LEFT_POSITION_90);
+        
+    // }else{
+    //     if(analogRead(DETECTOR_LEFT)<284){
+    //     // switch (analogRead(DETECTOR_RIGHT)){
+    //     // case :
+    //     //     /* code */
+    //     //     break;
+        
+    //     // default:
+    //     //     break;
+    //     // }
+    //     // if(analogRead(DETECTOR_RIGHT))
+    //     //turnRightPosition(TURN_RIGHT_POSITION_90);
+    //     turnRightPositionSlowly(TURN_RIGHT_POSITION_90_SLOWLY);
+    //     // delay(800);
+    //     forChangeThePositionToMoveAlongWall(6260);
+    //     // delay(2000);
+    //     //delay(2000);
+    //     turnRightPosition90();
+    //     // turnRightPosition(TURN_RIGHT_POSITION_90);
+    //     }else if(analogRead(DETECTOR_LEFT)<425){    
+    //     turnRightPositionSlowly(TURN_RIGHT_POSITION_90_SLOWLY);
+    //     // delay(800);
+    //     forChangeThePositionToMoveAlongWall(4494);
+    //     // delay(2000);
+    //     //delay(2000);
+    //     turnRightPosition90();
+    //     }else{
+    //     turnRightPositionSlowly(TURN_RIGHT_POSITION_90_SLOWLY);
+    //     // delay(800);
+    //     forChangeThePositionToMoveAlongWall(2783);
+    //     // delay(2000);
+    //     //delay(2000);
+    //     turnRightPosition90();
+    //     }
+        
+    // }
 }
 
 //void detectEnemy(){//旧
@@ -1257,13 +1442,13 @@ void detectTheTwoSidesOfTheRightSideForEnemies(){
     // Serial.print(".....A1 cha:");
     // Serial.println(last_detect_right-analogRead(DETECTOR_RIGHT_A1));
     judgeWhetherOnStageOrUnderTheStage();
-    if(last_detect_left-analogRead(DETECTOR_LEFT)>=MIN_DETECT_TO_90_ENEMY_JUDGE && analogRead(DETECTOR_LEFT)+analogRead(DETECTOR_RIGHT)<1277){
+    if(last_detect_left-analogRead(DETECTOR_LEFT)>=MIN_DETECT_TO_90_ENEMY_JUDGE && analogRead(DETECTOR_LEFT)+analogRead(DETECTOR_RIGHT)<1100){
         // turnLeftPosition(TURN_LEFT_POSITION_90);
         turnLeftPositon90();
         // Serial.println("left");
         uploadDetect();
         //alignment_only_once = 0;
-    }else if(last_detect_right-analogRead(DETECTOR_RIGHT)>=MIN_DETECT_TO_90_ENEMY_JUDGE && analogRead(DETECTOR_LEFT)+analogRead(DETECTOR_RIGHT)<1277){
+    }else if(last_detect_right-analogRead(DETECTOR_RIGHT)>=MIN_DETECT_TO_90_ENEMY_JUDGE && analogRead(DETECTOR_LEFT)+analogRead(DETECTOR_RIGHT)<1100){
         turnRightPosition90();
         // turnRightPosition(TURN_RIGHT_POSITION_90);
         uploadDetect();
@@ -1477,8 +1662,8 @@ void sideFrontToDetectIfThereAreEnemies(){
         if(enemy_on_front_go_front_only_once==CAN_GO_FRONT_TO_ENEMY){
             enemy_on_front_go_front_only_once = CAN_NOT_GO_FRONT_TO_ENEMY;
             roboclaw.ResetEncoders(ADDRESS);
-            roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, 7*GO_SLOW_POSITION, 1);
-            roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, 7*GO_SLOW_POSITION, 1);
+            roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 3000, DECCEL, 7*GO_SLOW_POSITION, 1);
+            roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 3000, DECCEL, 7*GO_SLOW_POSITION, 1);
             // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, , ACCEL2, 8000, DECCEL2, , 1);
             // for(;roboclaw.ReadEncM1(ADDRESS)<GO_SLOW_POSITION-ERROR_POSITION;){}
             delay(150);
@@ -1512,7 +1697,7 @@ void sideFrontToDetectIfThereAreEnemies(){
         complementary_time_judge = COMPLEMENTARY_TIME_NO;
         detect_if_detected = DETECT_IF_DETECTED_YES;
         timing = ENABLE_TO_TIMING;
-        value_of_turns += 570;
+        // value_of_turns += 570;
         enemy_on_front_go_front_only_once = CAN_GO_FRONT_TO_ENEMY;
         //delay(100);
         //lostEnemyAlert();
@@ -1523,7 +1708,7 @@ void sideFrontToDetectIfThereAreEnemies(){
         complementary_time_judge = COMPLEMENTARY_TIME_NO;
         detect_if_detected = DETECT_IF_DETECTED_YES;
         timing = ENABLE_TO_TIMING;
-        value_of_turns -= 570;
+        // value_of_turns -= 570;
         enemy_on_front_go_front_only_once = CAN_GO_FRONT_TO_ENEMY;
         //delay(100);
         //lostEnemyAlert();
@@ -1533,7 +1718,7 @@ void sideFrontToDetectIfThereAreEnemies(){
         complementary_time_judge = COMPLEMENTARY_TIME_NO;
         detect_if_detected = DETECT_IF_DETECTED_YES;
         timing = ENABLE_TO_TIMING;
-        value_of_turns += 250;
+        // value_of_turns += 250;
         enemy_on_front_go_front_only_once = CAN_GO_FRONT_TO_ENEMY;
     }else if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT_MORE)==DETECT_YES){
         turnRightPosition(TURN_RIGHT_FRONT_MORE);
@@ -1541,7 +1726,7 @@ void sideFrontToDetectIfThereAreEnemies(){
         complementary_time_judge = COMPLEMENTARY_TIME_NO;
         detect_if_detected = DETECT_IF_DETECTED_YES;
         timing = ENABLE_TO_TIMING;
-        value_of_turns -= 240;
+        // value_of_turns -= 240;
         enemy_on_front_go_front_only_once = CAN_GO_FRONT_TO_ENEMY;
     }
     // return;
@@ -1650,6 +1835,8 @@ void lostEnemy(){
             detect_if_detected = DETECT_IF_DETECTED_NO;
             timing = NOT_ENABLE_TO_TIMING;
             enemy_on_front_go_front_only_once = CAN_GO_FRONT_TO_ENEMY;
+            long last_detect_back_left = 0;
+            long last_detect_back_right = 0;
             //uploadDetect();
             //return;
             // if(value_of_turns%2==0){
@@ -1663,18 +1850,69 @@ void lostEnemy(){
                 //     return;
                 //     break;
                 case DETECT_LAST_LEFT:
-
+                    // roboclaw.ForwardM1(ADDRESS, 10);
+                    // long last_detect_back_left = analogRead(DETECTOR_BACK_LEFT);
+                    // long last_detect_back_right = analogRead(DETECTOR_BACK_RIGHT);
+                    do{
+                        /* code */
+                        last_detect_back_left = 0;
+                        last_detect_back_right = 0;
+                        for(int i=0;i<10;++i){
+                            last_detect_back_left += analogRead(DETECTOR_BACK_LEFT);
+                            last_detect_back_right += analogRead(DETECTOR_BACK_RIGHT);
+                        }
+                        last_detect_back_left = last_detect_back_left/10;
+                        last_detect_back_right = last_detect_back_right/10;
+                        roboclaw.BackwardM1(ADDRESS,23);
+                        roboclaw.ForwardM2(ADDRESS, 23);
+                    } while (last_detect_back_left-last_detect_back_right>15 || last_detect_back_left+last_detect_back_right>1800);
+                    
+                    
+                    // while (){
+                    //     /* code */
+                        
+                    // }
+                    stop();
+                    
+                    // roboclaw.BackwardM2(ADDRESS,10);
                     // turnLeftPosition(abs(value_of_turns%TURN_LEFT_POSITION_90));//122333
+                    
                     last_detect_side = DETECT_LAST_FRONT;
                     uploadDetect();
-                    value_of_turns = 0;
+                    // value_of_turns = 0;
                     return;
                     //break;
                 case DETECT_LAST_RIGHT:
+                    do
+                    {
+                        /* code */
+                        last_detect_back_left = 0;
+                        last_detect_back_right = 0;
+                        for(int i=0;i<10;++i){
+                            last_detect_back_left += analogRead(DETECTOR_BACK_LEFT);
+                            last_detect_back_right += analogRead(DETECTOR_BACK_RIGHT);
+                        }
+                        last_detect_back_left = last_detect_back_left/10;
+                        last_detect_back_right = last_detect_back_right/10;
+                        roboclaw.ForwardM1(ADDRESS, 23);
+                        // roboclaw.BackwardM1(address,speed);
+                        // roboclaw.ForwardM2(address, speed);
+                        roboclaw.BackwardM2(ADDRESS,23);
+                    } while (last_detect_back_right-last_detect_back_left>15 || last_detect_back_left+last_detect_back_right>1800);
+                
+                    // last_detect_back_left = analogRead(DETECTOR_BACK_LEFT);
+                    // last_detect_back_right = analogRead(DETECTOR_BACK_RIGHT);
+                    
+
+                    // while (){
+                    //     /* code */
+                        
+                    // }
+                    stop();
                     // turnRightPosition(TURN_RIGHT_POSITION_90-abs(value_of_turns%TURN_RIGHT_POSITION_90));//122333
                     last_detect_side = DETECT_LAST_FRONT;
                     uploadDetect();
-                    value_of_turns = 0;
+                    // value_of_turns = 0;
                     return;
                     //break;
                 }
@@ -1698,7 +1936,7 @@ void PrepareforAttack(){
     // stopStuck();
     // roboclaw.ReadPWMs(ADDRESS,pwm1,pwm2);
 
-    if(roboclaw.ReadEncM1(ADDRESS)<50){
+    if(roboclaw.ReadEncM1(ADDRESS)<37){
     // if(analogRead(DETECTOR_FRONT)>=470){//
         // //do{
         // int storage_front_end_sensors1[7];
@@ -1822,7 +2060,7 @@ void letUsGo(){
     // delay(1500);
     // stop();
     while(analogRead(DETECTOR_LEFT)>250){
-        delay(500);
+        // delay(100);
         // roboclaw.ForwardM1(ADDRESS, 10);
 // roboclaw.BackwardM1(address,speed);
     }
@@ -1852,34 +2090,33 @@ void bigDetectorTest(){
     last_detect_back_right = last_detect_back_right/10;
     last_temp_left = last_temp_left/10;
     last_temp_right = last_temp_right/10;
-    // Serial.println(last_temp_left+last_temp_right);
-
-    Serial.print("back left:");
-    Serial.print(last_detect_back_left);
-    Serial.print("     back right:");
-    Serial.print(last_detect_back_right);
-    Serial.print("     left:");
     Serial.print(last_temp_left);
-    Serial.print("     right:");
-    Serial.println(last_temp_right);
+    Serial.print("     ");
+    Serial.println(roboclaw.ReadEncM1(ADDRESS));
+    // 
+    // Serial.println(last_detect_back_right);
+    // Serial.println(last_detect_back_leftlast_detect_back_right);
+
+    // Serial.print("ba
+    
     delay(800);
 }
 //测试程序
 void test(){
-//     
-//             }
-//         }
+    changeThePositionGoingToStage();
+    // forChangeThePositionToMoveAlongWall(6300);
 }
 
 //测试程序
 void test2(){
-    
-//     stop();
+    turnLeftPositionSlowly(TURN_LEFT_POSITION_90_SLOWLY);
+    forChangeThePositionToMoveAlongWall(6260);
+    turnLeftPositon90();
 }
 
 //搜索敌人总函数
 void searchForEnemy(){
-    if(detect_if_detected==DETECT_IF_DETECTED_NO){//122333
+    if(detect_if_detected==DETECT_IF_DETECTED_NO){
         alignWithWalls();
         for(int i=0;i<500;i++){
             detectTheTwoSidesOfTheRightSideForEnemies();
@@ -1887,8 +2124,6 @@ void searchForEnemy(){
     }
     sideFrontToDetectIfThereAreEnemies();
     lostEnemy();
-    //uploadDetect();
-    //goFrontPosition();//down
 }
 
 
@@ -1902,28 +2137,15 @@ void setup(){
     delay(2000);
     //首先更新一下场上的距离常数，再行动
     // letUsGo();//122333
+    roboclaw.ResetEncoders(ADDRESS);
     uploadDetect();
 }
 
 //主函数
 void loop(){
-    bigDetectorTest();
-    // turnRightPosition90();
-    // delay(5000);
-    // turnLeftPositon90();
-    // turnLeftPosition(TURN_LEFT_POSITION_90);
-    // delay(3000);
+    test();
+    // bigDetectorTest();
     // test2();
-    // test();
-    // delay(60000);
-    // test2();
-    // test();
-    // delay(800);
     // searchForEnemy();
-    // roboclaw.ForwardM1(ADDRESS, 64);
-    // // roboclaw.BackwardM1(address,speed);
-    // roboclaw.ForwardM2(ADDRESS, 64);
-    // delay(1000);
-    // stop();
-    // delay(1000000);
+    delay(100000);
 }
