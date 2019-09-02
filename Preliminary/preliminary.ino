@@ -161,6 +161,32 @@
 //     roboclaw.BackwardM2(ADDRESS,speed);
 // }
 
+// /**
+//  * 另一种形式的对齐函数，原理和原对齐函数一致，但是需要经过7次取值，用平均值来计算
+//  */
+// void alignWithWallsUsingAverge(){
+//     int last_detect_alignment[7][2];
+//     for(int i=0;i<7;++i){
+//         last_detect_alignment[i][0] = analogRead(DETECTOR_BACK_LEFT);
+//     }
+//     for(int i=0;i<7;++i){
+//         last_detect_alignment[i][1] = analogRead(DETECTOR_BACK_RIGHT);
+//     }
+//     int last_detect_alignment_averge[2];
+//     last_detect_alignment_averge[0] = (last_detect_alignment[0][0]+last_detect_alignment[1][0]+last_detect_alignment[2][0]+last_detect_alignment[3][0]+last_detect_alignment[4][0]+last_detect_alignment[5][0]+last_detect_alignment[6][0])/7;
+//     last_detect_alignment_averge[1] = (last_detect_alignment[0][1]+last_detect_alignment[1][1]+last_detect_alignment[2][1]+last_detect_alignment[3][1]+last_detect_alignment[4][1]+last_detect_alignment[5][1]+last_detect_alignment[6][1])/7;
+//     if(last_detect_alignment_averge[0]+last_detect_alignment_averge[1]>=1700){
+//         turnLeftPosition(2*TURN_SLOW_POSITION);
+//     }else if(last_detect_alignment_averge[0]-last_detect_alignment_averge[1]>OFFSET_THRESHOLD_ADJUST_SLOW){
+//         turnLeftPosition(TURN_SLOW_POSITION);
+//     }else if(last_detect_alignment_averge[1]-last_detect_alignment_averge[0]>OFFSET_THRESHOLD_ADJUST_SLOW){
+//         turnRightPosition(TURN_SLOW_POSITION);
+//     }else{
+//         uploadDetect();
+//         moveALittleForward();
+//     }
+//     judgeWhetherOnStageOrUnderTheStage();
+// }
 
 // //对齐时判断是否已经对齐过
 // int alignment_only_once = 0;
@@ -1112,10 +1138,10 @@ void backToTouchTheWall(){
     stop();
 }
 
+//检查点：2019年9月1日（已更新）
 /**
  * 台下动作，此时已经判断摔下台了
  */
-//检查点：2019年9月1日（已更新）
 void decidedTheCarHadFallenOff(){
     //pinMode(13,OUTPUT);
     //digitalWrite(13,HIGH);//
@@ -1236,7 +1262,7 @@ void startTheOnStageMotor(){
     // delay(45);
     // roboclaw_stage.BackwardM2(ADDRESS,0);
     roboclaw_stage.ResetEncoders(ADDRESS_STAGE);
-    //122333，空地测试可以转一圈，实地测试的时候可能不是一圈，还需要进一步测试
+    //，空地测试可以转一圈，实地测试的时候可能不是一圈，还需要进一步测试（已测试）
     roboclaw_stage.SpeedAccelDeccelPositionM1M2(ADDRESS_STAGE, ACCEL1, STAGE_SPEED, DECCEL1, -STAGE_MOTOR_ONE_ROUND, ACCEL2, STAGE_SPEED, DECCEL2, STAGE_MOTOR_ONE_ROUND, 1);
     delay(STAGE_DELAY);
     if(analogRead(DETECTOR_LEFT)<600){
@@ -1257,17 +1283,17 @@ void startTheOnStageMotor(){
 /**
  * 判断在台上还是在台下
  */
-//检查点：2019年9月2日11点26分
+//检查点：2019年9月2日11点26分（已更新）
 void judgeWhetherOnStageOrUnderTheStage(){
-    //122333，对于后侧传感器的值，出现过在台子边缘检测异常的情况，还需进一步测试
-    if(temp_analogRead_left_upload+temp_analogRead_right_upload<580 || analogRead(DETECTOR_BACK_LEFT)<330){
+    //，对于后侧传感器的值，出现过在台子边缘检测异常的情况，还需进一步测试（已测试）
+    if(temp_analogRead_left_upload+temp_analogRead_right_upload<570 || analogRead(DETECTOR_BACK_LEFT)<320){
     // if(analogRead(DETECTOR_BACK_LEFT)<330){//
 
     // if(temp_analogRead_left_upload+temp_analogRead_right_upload<580){//
 
         stop();
         delay(1000);//122333
-        if(temp_analogRead_left_upload+temp_analogRead_right_upload<580 || analogRead(DETECTOR_BACK_LEFT)<330){
+        if(temp_analogRead_left_upload+temp_analogRead_right_upload<570 || analogRead(DETECTOR_BACK_LEFT)<320){
         // if(analogRead(DETECTOR_BACK_LEFT)<330){
 
         // if(temp_analogRead_left_upload+temp_analogRead_right_upload<580 ){
@@ -1361,7 +1387,6 @@ void changeThePositionGoingToStage(){
             turnRightPosition90ForUnderStage();
         }else{
             turnLeftPositon90ForUnderStage();
-
         }
     }else if(analogRead(DETECTOR_LEFT)<425){
         turnRightPositionSlowly(TURN_RIGHT_POSITION_90_SLOWLY);
@@ -1376,7 +1401,6 @@ void changeThePositionGoingToStage(){
             turnRightPosition90ForUnderStage();
         }else{
             turnLeftPositon90ForUnderStage();
-
         }
 
     }else if(analogRead(DETECTOR_LEFT)<620){
@@ -1392,7 +1416,6 @@ void changeThePositionGoingToStage(){
             turnRightPosition90ForUnderStage();
         }else{
             turnLeftPositon90ForUnderStage();
-
         }
 
     }else{
@@ -1412,7 +1435,6 @@ void changeThePositionGoingToStage(){
                 turnLeftPositon90ForUnderStage();
             }else{
                 turnRightPosition90ForUnderStage();
-
             }
 
         }else if(analogRead(DETECTOR_RIGHT)<425){
@@ -1429,7 +1451,6 @@ void changeThePositionGoingToStage(){
                 turnLeftPositon90ForUnderStage();
             }else{
                 turnRightPosition90ForUnderStage();
-
             }
 
         }else{
@@ -1448,7 +1469,6 @@ void changeThePositionGoingToStage(){
                 turnLeftPositon90ForUnderStage();
             }else{
                 turnRightPosition90ForUnderStage();
-
             }
 
             // delay(2000);
@@ -1573,10 +1593,15 @@ void alignWithWalls(){
     last_detect_back_right = last_detect_back_right/10;
     if(last_detect_back_left+last_detect_back_right>=1817){
         if(analogRead(DETECTOR_BACK_LEFT)+analogRead(DETECTOR_BACK_RIGHT)>=1817){
-            delay(200);
+            // delay(200);
+            
             if(analogRead(DETECTOR_BACK_LEFT)+analogRead(DETECTOR_BACK_RIGHT)>=1817){
                 if(too_far_turn_if_had_judeged==0){
                     too_far_turn_if_had_judeged = 1;
+                    /**
+                     * 这里是为了防止车到边缘后向错误的方向进行距离过大-
+                     * 转向错误的方向浪费时间，并且只会判断一次转向的方向
+                     */
                     if(analogRead(DETECTOR_LEFT)>analogRead(DETECTOR_RIGHT)){
                         too_far_turn_direction = 0;
                     }else{
@@ -1613,33 +1638,6 @@ void alignWithWalls(){
     // judgeWhetherOnStageOrUnderTheStage();
 }
 
-/**
- * 另一种形式的对齐函数，原理和原对齐函数一致，但是需要经过7次取值，用平均值来计算
- */
-void alignWithWallsUsingAverge(){
-    int last_detect_alignment[7][2];
-    for(int i=0;i<7;++i){
-        last_detect_alignment[i][0] = analogRead(DETECTOR_BACK_LEFT);
-    }
-    for(int i=0;i<7;++i){
-        last_detect_alignment[i][1] = analogRead(DETECTOR_BACK_RIGHT);
-    }
-    int last_detect_alignment_averge[2];
-    last_detect_alignment_averge[0] = (last_detect_alignment[0][0]+last_detect_alignment[1][0]+last_detect_alignment[2][0]+last_detect_alignment[3][0]+last_detect_alignment[4][0]+last_detect_alignment[5][0]+last_detect_alignment[6][0])/7;
-    last_detect_alignment_averge[1] = (last_detect_alignment[0][1]+last_detect_alignment[1][1]+last_detect_alignment[2][1]+last_detect_alignment[3][1]+last_detect_alignment[4][1]+last_detect_alignment[5][1]+last_detect_alignment[6][1])/7;
-    if(last_detect_alignment_averge[0]+last_detect_alignment_averge[1]>=1700){
-        turnLeftPosition(2*TURN_SLOW_POSITION);
-    }else if(last_detect_alignment_averge[0]-last_detect_alignment_averge[1]>OFFSET_THRESHOLD_ADJUST_SLOW){
-        turnLeftPosition(TURN_SLOW_POSITION);
-    }else if(last_detect_alignment_averge[1]-last_detect_alignment_averge[0]>OFFSET_THRESHOLD_ADJUST_SLOW){
-        turnRightPosition(TURN_SLOW_POSITION);
-    }else{
-        uploadDetect();
-        moveALittleForward();
-    }
-    judgeWhetherOnStageOrUnderTheStage();
-}
-
 //距离更新函数，会忽略传感器返回的无信号值
 void uploadDetect(){
     //delay(100); temp_analogRead_right_upload-last_detect_right<ABNORMAL_INCREASE && temp_analogRead_left_upload-last_detect_left<ABNORMAL_INCREASE
@@ -1661,9 +1659,8 @@ void uploadDetect(){
     // last_detect_right = analogRead(DETECTOR_RIGHT_A1);
 }
 
-
-//后退函数，将敌人推下去后返回防守位置
 //void goBack(){//旧
+//后退函数，将敌人推下去后返回防守位置
 void aftertheEnemyDownAndReturnToTheSideOfTheField(){
     // if(analogRead(DETECTOR_LEFT)<){
     //     turnLeftPosition(4*TURN_SLOW_POSITION);
@@ -1717,8 +1714,9 @@ void aftertheEnemyDownAndReturnToTheSideOfTheField(){
     // }
 }
 
+//检查点：2019年9月2日20点52分
 //判断是否在台下，是另一种判断，防止误将边界当成敌人
-//2019年9月2日想法：当前面都检测到的时候，测定两侧和后面的值，应该会有所不同 122333
+//2019年9月2日想法：当前面传感器检测到的时候，测定两侧和后面的值，应该会有所不同//122333
 void determineIfItIsUnderTheStage(){
     int temp_times = 0;
     if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_FRONT)==DETECT_YES){
@@ -2192,13 +2190,18 @@ void bigDetectorTest(){
     last_detect_back_right = last_detect_back_right/10;
     last_temp_left = last_temp_left/10;
     last_temp_right = last_temp_right/10;
-    Serial.print(last_detect_back_left);
-    Serial.print("    ");
-    Serial.print(last_detect_back_right);
-    Serial.print("    ");
-    Serial.println(last_detect_back_right+last_detect_back_left);
+    Serial.print(last_temp_left);
+    Serial.print("     ");
+    Serial.print(last_temp_right);
+    Serial.print("     ");
+    Serial.print(last_temp_left+last_temp_right);
+    // Serial.print(last_detect_back_left);
+    // Serial.print("    ");
+    // Serial.print(last_detect_back_right);
+    // Serial.print("    ");
+    // Serial.print(last_detect_back_right+last_detect_back_left);
     // Serial.print(last_temp_left);
-    // Serial.print("     ");
+    Serial.println("     ");
     // Serial.println(roboclaw.ReadEncM1(ADDRESS));
     // 
     // Serial.println(last_detect_back_right);
@@ -2210,8 +2213,9 @@ void bigDetectorTest(){
 }
 //测试程序
 void test(){
+    stepBackAndGetOnStage();
     // roboclaw_stage.ResetEncoders(ADDRESS_STAGE);
-    // roboclaw_stage.SpeedAccelDeccelPositionM1M2(ADDRESS_STAGE, ACCEL1, STAGE_SPEED, DECCEL1, -STAGE_MOTOR_ONE_ROUND, ACCEL2, STAGE_SPEED, DECCEL2, STAGE_MOTOR_ONE_ROUND, 1);//122333
+    // roboclaw_stage.SpeedAccelDeccelPositionM1M2(ADDRESS_STAGE, ACCEL1, STAGE_SPEED, DECCEL1, -STAGE_MOTOR_ONE_ROUND, ACCEL2, STAGE_SPEED, DECCEL2, STAGE_MOTOR_ONE_ROUND, 1);
     // stepBackAndGetOnStage();
     // roboclaw.BackwardM1(ADDRESS,20);
     // roboclaw.BackwardM2(ADDRESS,20);
@@ -2316,9 +2320,9 @@ void setup(){
 
 //主函数
 void loop(){
-    test();
-    // // bigDetectorTest();
+    // test();
+    bigDetectorTest();
     // test2();
     // // searchForEnemy();
-    delay(100000);
+    // delay(100000);
 }
