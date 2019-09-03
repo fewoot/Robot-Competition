@@ -1714,7 +1714,7 @@ void aftertheEnemyDownAndReturnToTheSideOfTheField(){
     // }
 }
 
-//检查点：2019年9月2日20点52分
+//检查点：2019年9月2日20点52分（已更新）
 //判断是否在台下，是另一种判断，防止误将边界当成敌人
 //2019年9月2日想法：当前面传感器检测到的时候，测定两侧和后面的值，应该会有所不同//122333
 void determineIfItIsUnderTheStage(){
@@ -1749,13 +1749,13 @@ void determineIfItIsUnderTheStage(){
     // delay(1000);
 }
 
+//void detectEnemySide(){//旧
 /**
  * 侧前方检测敌方函数
  * 会向那个方向进行转向
  * 刷新上一次物体方向
  * 进入前方探测器警戒模式
  */
-//void detectEnemySide(){//旧
 void sideFrontToDetectIfThereAreEnemies(){
     determineIfItIsUnderTheStage();//
     if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_FRONT)==DETECT_YES){
@@ -2174,6 +2174,93 @@ void letUsGo(){
 //动作组以上--------------------------------------------------------------------------------------------------
 //动作组以上--------------------------------------------------------------------------------------------------
 
+void smallDetectTest(){
+    int temp_times = 0;
+    if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_FRONT)==DETECT_YES){
+        temp_times++;
+    }
+    if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT)==DETECT_YES){
+        temp_times++;
+    }
+    if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT_MORE)==DETECT_YES){
+        temp_times++;
+    }
+    if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT)==DETECT_YES){
+        temp_times++;
+    }
+    if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT_MORE)==DETECT_YES){
+        temp_times++;
+    }
+    if(temp_times>=3){
+        Serial.print("understage|");
+    }
+    long temp_detect_front_to_judge_if_under_stage = 0;
+    long temp_detect_LFM_to_judge_if_under_stage = 0;
+    long temp_detect_RFM_to_judge_if_under_stage = 0;
+    long temp_detect_LF_to_judge_if_under_stage = 0;
+    long temp_detect_RF_to_judge_if_under_stage = 0;
+        for(int i=0;i<20;++i){
+            temp_detect_front_to_judge_if_under_stage += analogRead(DETECTOR_FRONT);
+            temp_detect_LFM_to_judge_if_under_stage += analogRead(DETECTOR_LEFT_FRONT_MORE);
+            temp_detect_RFM_to_judge_if_under_stage += analogRead(DETECTOR_RIGHT_FRONT_MORE);
+            temp_detect_LF_to_judge_if_under_stage += analogRead(DETECTOR_LEFT_FRONT);
+            temp_detect_RF_to_judge_if_under_stage += analogRead(DETECTOR_RIGHT_FRONT);
+        }
+        temp_detect_front_to_judge_if_under_stage = temp_detect_front_to_judge_if_under_stage/20;
+        temp_detect_LFM_to_judge_if_under_stage = temp_detect_LFM_to_judge_if_under_stage/20;
+        temp_detect_RFM_to_judge_if_under_stage = temp_detect_RFM_to_judge_if_under_stage/20;
+        temp_detect_LF_to_judge_if_under_stage = temp_detect_LF_to_judge_if_under_stage/20;
+        temp_detect_RF_to_judge_if_under_stage = temp_detect_RF_to_judge_if_under_stage/20;
+        Serial.print("|front:");
+        Serial.print(temp_detect_front_to_judge_if_under_stage);
+        Serial.print("|LFM:");
+        Serial.print(temp_detect_LFM_to_judge_if_under_stage);
+        Serial.print("|RFM:");
+        Serial.print(temp_detect_RFM_to_judge_if_under_stage);
+        Serial.print("|LF:");
+        Serial.print(temp_detect_LF_to_judge_if_under_stage);
+        Serial.print("|RF:");
+        Serial.print(temp_detect_RF_to_judge_if_under_stage);
+        Serial.print("|temps:");
+        Serial.print(temp_times);
+        Serial.println(" ");
+        delay(1000);
+        // Serial.print("|right:");
+        
+    
+    // pinMode(13,OUTPUT);
+    // if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_FRONT)==DETECT_YES){
+    //     // digitalWrite(13,HIGH);
+    //     Serial.print("  front:yes  ");
+    // }
+    // // if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT)==DETECT_YES){
+    // //     // digitalWrite(13,LOW);
+    // //     Serial.print("    left:yes    ");
+    // // }
+    // // if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT)==DETECT_YES){
+    // //     /* code */
+    // //     Serial.print("    right:yes     ");
+
+    // // }
+    // if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT)==DETECT_YES){
+    //     Serial.print(" left front:yes   ");
+
+    // }
+    // if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT)==DETECT_YES){
+    //     Serial.print(" right front:yes  ");
+
+    // }
+    // if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT_MORE)==DETECT_YES){
+    //     Serial.print("  LFM:yes ");
+
+    // }
+    // if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT_MORE)==DETECT_YES){
+    //     Serial.print("  RFM:yes  ");
+
+    // }
+    // Serial.println(" ");
+}
+
 void bigDetectorTest(){
     // Serial.print
     long last_detect_back_left = analogRead(DETECTOR_BACK_LEFT);
@@ -2190,15 +2277,32 @@ void bigDetectorTest(){
     last_detect_back_right = last_detect_back_right/10;
     last_temp_left = last_temp_left/10;
     last_temp_right = last_temp_right/10;
+
+    Serial.print("left:");
     Serial.print(last_temp_left);
+
     Serial.print("     ");
+
+    Serial.print("right:");
     Serial.print(last_temp_right);
+
+    // Serial.print("     ");
+
+    // Serial.print("left+right:");
+    // Serial.print(last_temp_left+last_temp_right);
+
     Serial.print("     ");
-    Serial.print(last_temp_left+last_temp_right);
-    // Serial.print(last_detect_back_left);
-    // Serial.print("    ");
-    // Serial.print(last_detect_back_right);
-    // Serial.print("    ");
+
+    Serial.print("back left:");
+    Serial.print(last_detect_back_left);
+
+    Serial.print("    ");
+
+    Serial.print("back right:");
+    Serial.print(last_detect_back_right);
+
+
+    Serial.print("    ");
     // Serial.print(last_detect_back_right+last_detect_back_left);
     // Serial.print(last_temp_left);
     Serial.println("     ");
@@ -2320,8 +2424,9 @@ void setup(){
 
 //主函数
 void loop(){
+    // bigDetectorTest();
     // test();
-    bigDetectorTest();
+    smallDetectTest();
     // test2();
     // // searchForEnemy();
     // delay(100000);
