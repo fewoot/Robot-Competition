@@ -455,7 +455,7 @@
 #define TIMES_FRONT_DETECTOR_FLITER 37
 
 //进攻时的速度
-#define ATTACK_SPEED 1777
+#define ATTACK_SPEED 1877
 
 //边缘传感器的重复检测次数
 #define GRAY_SENSOR_TIMES_OF_REDETECT 14
@@ -539,8 +539,8 @@ RoboClaw roboclaw_stage = RoboClaw(&Serial3,TIME_OUT);
 //攻击函数
 void attack(){
     // roboclaw.ResetEncoders(ADDRESS);
-    roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, ATTACK_SPEED, DECCEL, 1999999, 1);
-    roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, ATTACK_SPEED, DECCEL, 1999999, 1);
+    roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, ATTACK_SPEED, DECCEL, 6999999, 1);
+    roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, ATTACK_SPEED, DECCEL, 6999999, 1);
     // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 1700, DECCEL1, 999999, ACCEL2, 1700, DECCEL2, 999999, 1);
     //gofront(GO_SPEED_ATTACK);
 }
@@ -2128,7 +2128,7 @@ void PrepareforAttack(){
     // roboclaw.ReadPWMs(ADDRESS,pwm1,pwm2);
 
     //结合探测器函数中设置的值
-    if(roboclaw.ReadEncM1(ADDRESS)<37){
+    if(roboclaw.ReadEncM1(ADDRESS)<37 || roboclaw.ReadEncM2(ADDRESS)<37){
     // if(analogRead(DETECTOR_FRONT)>=470){//
         // //do{
         // int storage_front_end_sensors1[7];
@@ -2151,6 +2151,20 @@ void PrepareforAttack(){
         // do{
         roboclaw.ResetEncoders(ADDRESS);
         while(1){
+            if(analogRead(DETECTOR_LEFT_FRONT_MORE)-analogRead(DETECTOR_RIGHT_FRONT_MORE)>150){
+                // goleft(GO_SPEED_ATTACK,7);
+                roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, ATTACK_SPEED, DECCEL, 699999, 1);
+                roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, ATTACK_SPEED+900, DECCEL, 699999, 1);
+                // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 1700, DECCEL1, 999999, ACCEL2, 2500, DECCEL2, 999999, 1);
+            }else if(analogRead(DETECTOR_RIGHT_FRONT_MORE)-analogRead(DETECTOR_LEFT_FRONT_MORE)>150){
+                roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, ATTACK_SPEED+900, DECCEL, 699999, 1);
+                roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, ATTACK_SPEED, DECCEL, 699999, 1);
+                // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2500, DECCEL1, 999999, ACCEL2, 1700, DECCEL2, 999999, 1);
+                // goright(GO_SPEED_ATTACK,7);
+            }else{
+                attack();
+            }
+
             if(grayScaleSensorDetect()==CLOSE_TO_EDGE){
                 stop();
                 delay(1000);
@@ -2164,21 +2178,7 @@ void PrepareforAttack(){
                 }
             }
 
-            if(analogRead(DETECTOR_LEFT_FRONT_MORE)-analogRead(DETECTOR_RIGHT_FRONT_MORE)>150){
-                // goleft(GO_SPEED_ATTACK,7);
-                roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 1777, DECCEL, 199999, 1);
-                roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 2700, DECCEL, 199999, 1);
-                // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 1700, DECCEL1, 999999, ACCEL2, 2500, DECCEL2, 999999, 1);
-            }else if(analogRead(DETECTOR_RIGHT_FRONT_MORE)-analogRead(DETECTOR_LEFT_FRONT_MORE)>150){
-                roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 2700, DECCEL, 199999, 1);
-                roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 1777, DECCEL, 199999, 1);
-                // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2500, DECCEL1, 999999, ACCEL2, 1700, DECCEL2, 999999, 1);
-                // goright(GO_SPEED_ATTACK,7);
-            }else{
-                attack();
-            }
-
-            if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_FRONT)==DETECT_NO){
+            if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_FRONT)==DETECT_NO && determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT_MORE)==DETECT_NO && determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT_MORE)==DETECT_NO){
                 return;
             }
         }
