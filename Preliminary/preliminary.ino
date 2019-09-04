@@ -1716,35 +1716,114 @@ void aftertheEnemyDownAndReturnToTheSideOfTheField(){
 
 //检查点：2019年9月2日20点52分（已更新）
 //判断是否在台下，是另一种判断，防止误将边界当成敌人
-//2019年9月2日想法：当前面传感器检测到的时候，测定两侧和后面的值，应该会有所不同//122333
+//2019年9月2日想法：当前面传感器检测到的时候，测定两侧和后面的值，应该会有所不同（已废弃）
+/**
+ * 更新：想到另一种判断方法，前方传感器1分，两侧前端2分，两侧后端4分，这样可以区分是哪几个-
+ * 传感器检测到，然后根据不同的情况进行区别设计
+ */
 void determineIfItIsUnderTheStage(){
+    // if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT)==DETECT_YES && determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT)==DETECT_YES){
+    //     judge_if_think_enemy_is_edge = 0;
+    //     decidedTheCarHadFallenOff();
+    //     return;
+    // }
     int temp_times = 0;
     if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_FRONT)==DETECT_YES){
         temp_times++;
     }
     if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT)==DETECT_YES){
-        temp_times++;
+        temp_times += 4;
     }
     if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT_MORE)==DETECT_YES){
-        temp_times++;
+        temp_times += 2;
     }
     if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT)==DETECT_YES){
-        temp_times++;
+        temp_times += 4;
     }
     if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT_MORE)==DETECT_YES){
-        temp_times++;
+        temp_times += 2;
     }
-    if(temp_times>=3){
-        if(judge_if_think_enemy_is_edge==0){
-            time_if_think_enemy_is_edge = millis();
-            judge_if_think_enemy_is_edge = 1;
-        }
 
-        if(millis()-time_if_think_enemy_is_edge>1000){
+    ////////////////////////////
+    if(temp_times>=8){
+        judge_if_think_enemy_is_edge = 0;
+        decidedTheCarHadFallenOff();
+        return;
+        // digitalWrite(13,HIGH);
+    }else if(temp_times==7){
+    //     long temp_detect_front_to_judge_if_under_stage = 0;
+    // long temp_detect_LFM_to_judge_if_under_stage = 0;
+    // long temp_detect_RFM_to_judge_if_under_stage = 0;
+    // long temp_detect_LF_to_judge_if_under_stage = 0;
+    // long temp_detect_RF_to_judge_if_under_stage = 0;
+    //     for(int i=0;i<20;++i){
+    //         temp_detect_front_to_judge_if_under_stage += analogRead(DETECTOR_FRONT);
+    //         temp_detect_LFM_to_judge_if_under_stage += analogRead(DETECTOR_LEFT_FRONT_MORE);
+    //         temp_detect_RFM_to_judge_if_under_stage += analogRead(DETECTOR_RIGHT_FRONT_MORE);
+    //         temp_detect_LF_to_judge_if_under_stage += analogRead(DETECTOR_LEFT_FRONT);
+    //         temp_detect_RF_to_judge_if_under_stage += analogRead(DETECTOR_RIGHT_FRONT);
+    //     }
+    //     temp_detect_front_to_judge_if_under_stage = temp_detect_front_to_judge_if_under_stage/20;
+    //     temp_detect_LFM_to_judge_if_under_stage = temp_detect_LFM_to_judge_if_under_stage/20;
+    //     temp_detect_RFM_to_judge_if_under_stage = temp_detect_RFM_to_judge_if_under_stage/20;
+    //     temp_detect_LF_to_judge_if_under_stage = temp_detect_LF_to_judge_if_under_stage/20;
+        //     temp_detect_RF_to_judge_if_under_stage = temp_detect_RF_to_judge_if_under_stage/20;
+        judge_if_think_enemy_is_edge = 0;
+        if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT)==DETECT_YES){
+            turnLeftPosition(TURN_LEFT_FRONT_MORE);
+        }else if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT)==DETECT_YES){
+            turnRightPosition(TURN_RIGHT_FRONT_MORE);
+        }
+        // digitalWrite(13,LOW);
+
+    }else if(temp_times==5){
+        long temp_detect_front_to_judge_if_under_stage = 0;
+    // long temp_detect_LFM_to_judge_if_under_stage = 0;
+    // long temp_detect_RFM_to_judge_if_under_stage = 0;
+    // long temp_detect_LF_to_judge_if_under_stage = 0;
+    // long temp_detect_RF_to_judge_if_under_stage = 0;
+        for(int i=0;i<20;++i){
+            temp_detect_front_to_judge_if_under_stage += analogRead(DETECTOR_FRONT);
+            // temp_detect_LFM_to_judge_if_under_stage += analogRead(DETECTOR_LEFT_FRONT_MORE);
+            // temp_detect_RFM_to_judge_if_under_stage += analogRead(DETECTOR_RIGHT_FRONT_MORE);
+            // temp_detect_LF_to_judge_if_under_stage += analogRead(DETECTOR_LEFT_FRONT);
+            // temp_detect_RF_to_judge_if_under_stage += analogRead(DETECTOR_RIGHT_FRONT);
+        }
+        temp_detect_front_to_judge_if_under_stage = temp_detect_front_to_judge_if_under_stage/20;
+        if(temp_detect_front_to_judge_if_under_stage>=317){
             judge_if_think_enemy_is_edge = 0;
             decidedTheCarHadFallenOff();
+            return;
+        // digitalWrite(13,HIGH);
+
+        }else{
+            // digitalWrite(13,LOW);
+            if(judge_if_think_enemy_is_edge==0){
+                time_if_think_enemy_is_edge = millis();
+                judge_if_think_enemy_is_edge = 1;
+            }
+            if(millis()-time_if_think_enemy_is_edge>2000){
+                judge_if_think_enemy_is_edge = 0;
+                decidedTheCarHadFallenOff();
+                return;
+            }
         }
+        // temp_detect_LFM_to_judge_if_under_stage = temp_detect_LFM_to_judge_if_under_stage/20;
+        // temp_detect_RFM_to_judge_if_under_stage = temp_detect_RFM_to_judge_if_under_stage/20;
+        // temp_detect_LF_to_judge_if_under_stage = temp_detect_LF_to_judge_if_under_stage/20;
+        // temp_detect_RF_to_judge_if_under_stage = temp_detect_RF_to_judge_if_under_stage/20;
+        
+
+        // if(millis()-time_if_think_enemy_is_edge>1000){
+            
+        // }
+    // }
+    }else{
+        // digitalWrite(13,LOW);
+        judge_if_think_enemy_is_edge = 0;
     }
+        
+
     // Serial.println(temp_times);
     // delay(1000);
 }
@@ -1766,7 +1845,10 @@ void sideFrontToDetectIfThereAreEnemies(){
             roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 3000, DECCEL, 7*GO_SLOW_POSITION, 1);
             // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, , ACCEL2, 8000, DECCEL2, , 1);
             // for(;roboclaw.ReadEncM1(ADDRESS)<GO_SLOW_POSITION-ERROR_POSITION;){}
-            delay(150);
+            //因为这个函数是攻击前的动作，不宜用编码器的值，以放敌人在这个途中-
+            //就相撞而无法达到指定位置，延时已经过测试
+            delay(250);
+
             // stopStuck();
             stop();
             // roboclaw.ResetEncoders(ADDRESS);
@@ -2317,7 +2399,19 @@ void bigDetectorTest(){
 }
 //测试程序
 void test(){
-    stepBackAndGetOnStage();
+    // determineIfItIsUnderTheStage();
+    long temp = millis();
+    roboclaw.ResetEncoders(ADDRESS);
+    roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 3000, DECCEL,7*GO_SLOW_POSITION , 1);
+    roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 3000, DECCEL, 7*GO_SLOW_POSITION, 1);
+    while (roboclaw.ReadEncM1(ADDRESS)<(7*GO_SLOW_POSITION)-ERROR_POSITION && roboclaw.ReadEncM2(ADDRESS)<(7*GO_SLOW_POSITION)-ERROR_POSITION){
+        /* code */
+    }
+    Serial.print(millis()-temp);
+    // delay(150);
+    stop();
+    delay(100000);
+    // stepBackAndGetOnStage();
     // roboclaw_stage.ResetEncoders(ADDRESS_STAGE);
     // roboclaw_stage.SpeedAccelDeccelPositionM1M2(ADDRESS_STAGE, ACCEL1, STAGE_SPEED, DECCEL1, -STAGE_MOTOR_ONE_ROUND, ACCEL2, STAGE_SPEED, DECCEL2, STAGE_MOTOR_ONE_ROUND, 1);
     // stepBackAndGetOnStage();
@@ -2414,6 +2508,7 @@ void setup(){
     roboclaw.begin(38400);
     roboclaw_stage.begin(19200);
     Serial.begin(9600);
+    // pinMode(13,OUTPUT);
     //stop();
     delay(2000);
     //首先更新一下场上的距离常数，再行动
@@ -2425,8 +2520,8 @@ void setup(){
 //主函数
 void loop(){
     // bigDetectorTest();
-    // test();
-    smallDetectTest();
+    test();
+    // smallDetectTest();
     // test2();
     // // searchForEnemy();
     // delay(100000);
