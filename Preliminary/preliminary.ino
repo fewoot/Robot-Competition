@@ -1670,7 +1670,7 @@ void uploadDetect(){
 }
 
 //void goBack(){//旧
-//后退函数，将敌人推下去后返回防守位置
+//后退函数，将敌人推下去后返回防守位置//检查点：2019年9月5日17点56分
 void aftertheEnemyDownAndReturnToTheSideOfTheField(){
     // while()
     do{
