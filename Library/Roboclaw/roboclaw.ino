@@ -38,20 +38,20 @@ roboclaw.begin(38400)
 
 
 //控制电机移动，ADDRESS是指令存储的地址，speed值是0-127
-roboclaw.ForwardM1(ADDRESS, speed)
-roboclaw.BackwardM1(ADDRESS,speed)
-roboclaw.ForwardM2(ADDRESS, speed)
-roboclaw.BackwardM2(ADDRESS,speed)
-roboclaw.ForwardBackwardM1(ADDRESS,speed)
-roboclaw.ForwardBackwardM2(ADDRESS,speed)
+roboclaw.ForwardM1(ADDRESS, speed);
+roboclaw.BackwardM1(ADDRESS,speed);
+roboclaw.ForwardM2(ADDRESS, speed);
+roboclaw.BackwardM2(ADDRESS,speed);
+roboclaw.ForwardBackwardM1(ADDRESS,speed);
+roboclaw.ForwardBackwardM2(ADDRESS,speed);
 
 //混合模式下设置电机转动，其中只有这里speed会从中间划分一道分水岭，即向前还是向后
-roboclaw.ForwardMixed(ADDRESS,speed)
-roboclaw.BackwardMixed(ADDRESS,speed)
-roboclaw.TurnRightMixed(ADDRESS,speed)
-roboclaw.TurnLeftMixed(ADDRESS,speed)
-roboclaw.ForwardBackwardMixed(ADDRESS,speed)
-roboclaw.LeftRightMixed(ADDRESS,speed)
+roboclaw.ForwardMixed(ADDRESS,speed);
+roboclaw.BackwardMixed(ADDRESS,speed);
+roboclaw.TurnRightMixed(ADDRESS,speed);
+roboclaw.TurnLeftMixed(ADDRESS,speed);
+roboclaw.ForwardBackwardMixed(ADDRESS,speed);
+roboclaw.LeftRightMixed(ADDRESS,speed);
 
 //读取编码器的值，返回一个32-bit的值，最好用long存储
 //注意：电机驱动的负值不是负值，-1 = 4294967259，依次递减
@@ -59,28 +59,28 @@ roboclaw.ReadEncM1(ADDRESS)
 roboclaw.ReadEncM2(ADDRESS)
 roboclaw.ReadSpeedM1(ADDRESS)
 roboclaw.ReadSpeedM2(ADDRESS)
-roboclaw.ResetEncoders(ADDRESS)
+roboclaw.ResetEncoders(ADDRESS);
 
 //这两个是设定编码器的值，val是一个32-bit的参数
-roboclaw.SetEncM1(ADDRESS,val)
-roboclaw.SetEncM2(ADDRESS,val)
+roboclaw.SetEncM1(ADDRESS,val);
+roboclaw.SetEncM2(ADDRESS,val);
 
 //使电机旋转固定的距离（角度），flag值为0/1，0表示暂存命令，1表示立即执行
-roboclaw.SpeedDistanceM1(ADDRESS, speed, distance, flag)
-roboclaw.SpeedDistanceM2(ADDRESS, speed, distance, flag)
-roboclaw.SpeedDistanceM1M2(ADDRESS, speed1, distance1, speed2, distance2, flag)
+roboclaw.SpeedDistanceM1(ADDRESS, speed, distance, flag);
+roboclaw.SpeedDistanceM2(ADDRESS, speed, distance, flag);
+roboclaw.SpeedDistanceM1M2(ADDRESS, speed1, distance1, speed2, distance2, flag);
 //accel是加速度
-roboclaw.SpeedAccelDistanceM1(ADDRESS, accel, speed, distance, flag)
-roboclaw.SpeedAccelDistanceM2(ADDRESS, accel, speed, distance, flag)
-roboclaw.SpeedAccelDistanceM1M2(ADDRESS, accel, speed1, distance1, speed2, distance2, flag)
+roboclaw.SpeedAccelDistanceM1(ADDRESS, accel, speed, distance, flag);
+roboclaw.SpeedAccelDistanceM2(ADDRESS, accel, speed, distance, flag);
+roboclaw.SpeedAccelDistanceM1M2(ADDRESS, accel, speed1, distance1, speed2, distance2, flag);
 
 //使电机旋转到特定位置，accel是加速度，deccel是减速度，position是位置，是在编码器计数中的位置，
 //在这个给、函数中，speed是编码器函数，0-8000，不同于上面的
 //flag为0暂存命令，1立即执行
-roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, accel, speed, deccel, position, flag)
-roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, accel, speed, deccel, position, flag)
-roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, accel1, speed1, deccel1, position1, accel2, speed2, deccel2, position2, flag)
-roboclaw.ReadPWMs( ADDRESS, &pwm1, &pwm2)
+roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, accel, speed, deccel, position, flag);
+roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, accel, speed, deccel, position, flag);
+roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, accel1, speed1, deccel1, position1, accel2, speed2, deccel2, position2, flag);
+roboclaw.ReadPWMs( ADDRESS, &pwm1, &pwm2);
 
 
 
