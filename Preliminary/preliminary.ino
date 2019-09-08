@@ -40,6 +40,8 @@
  * 
  * 2019年9月1日：明天就要开学了，还有20多天报名就截止了，时间很紧，今天把台下的动作都做得差不多了，-
  * 以后就是修改一些小bug，今天就到这吧，回家！
+ * 
+ * 2019年9月8日：现在大体上都已经完成，但是现在推敌人时会出现突然的突刺，然后掉下去，原因不明，明天再看吧
  */
 
 /**
@@ -547,7 +549,7 @@
 #define ATTACK_SPEED 1977
 
 //边缘传感器的重复检测次数
-#define GRAY_SENSOR_TIMES_OF_REDETECT 14
+#define GRAY_SENSOR_TIMES_OF_REDETECT 10000
 
 //对齐于边界
 #define ALIGN_TO_THE_BORDER 1
@@ -651,7 +653,9 @@ void stopStuck(){
     //for(;roboclaw.ReadEncM1(ADDRESS)>3 || roboclaw.ReadEncM2(ADDRESS)>3;){
         roboclaw.ResetEncoders(ADDRESS);
         //stop();
-        roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, 0, ACCEL2, 8000, DECCEL2, 0, 1);
+        roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, 0, 1);
+        roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 8000, DECCEL, 0, 1);
+        // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 8000, DECCEL1, 0, ACCEL2, 8000, DECCEL2, 0, 1);
     //}
 }
 
@@ -1335,6 +1339,16 @@ void decidedTheCarHadFallenOff(){
 void stepBackAndGetOnStage(){
     //接用此函数
     // backToTouchTheWall();
+    if(analogRead(DETECTOR_BACK_LEFT)<330){
+        roboclaw.BackwardM1(ADDRESS,17);
+        roboclaw.BackwardM2(ADDRESS,17);
+        delay(450);
+        stop();
+        roboclaw.ResetEncoders(ADDRESS);
+        roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 3000, DECCEL, TURN_RIGHT_180-200, 1);
+        roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 3000, DECCEL, -TURN_RIGHT_180+200, 1);
+        delay(800);
+    }
     roboclaw.BackwardM1(ADDRESS,25);
     roboclaw.BackwardM2(ADDRESS,25);
     delay(300);
@@ -1362,8 +1376,13 @@ void startTheOnStageMotor(){
     // roboclaw_stage.BackwardM2(ADDRESS,0);
     roboclaw_stage.ResetEncoders(ADDRESS_STAGE);
     //，空地测试可以转一圈，实地测试的时候可能不是一圈，还需要进一步测试（已测试）
-    roboclaw_stage.SpeedAccelDeccelPositionM1M2(ADDRESS_STAGE, ACCEL1, STAGE_SPEED, DECCEL1, -STAGE_MOTOR_ONE_ROUND, ACCEL2, STAGE_SPEED, DECCEL2, STAGE_MOTOR_ONE_ROUND, 1);
+    // roboclaw_stage.SpeedAccelDeccelPositionM1M2(ADDRESS_STAGE, ACCEL1, STAGE_SPEED, DECCEL1, -STAGE_MOTOR_ONE_ROUND, ACCEL2, STAGE_SPEED, DECCEL2, STAGE_MOTOR_ONE_ROUND, 1);
+    roboclaw_stage.SpeedAccelDeccelPositionM1(ADDRESS_STAGE, ACCEL, STAGE_SPEED, DECCEL, -STAGE_MOTOR_ONE_ROUND, 1);
+    roboclaw_stage.SpeedAccelDeccelPositionM2(ADDRESS_STAGE, ACCEL, STAGE_SPEED, DECCEL, STAGE_MOTOR_ONE_ROUND, 1);
     delay(STAGE_DELAY);
+    roboclaw_stage.ForwardM1(ADDRESS_STAGE, 0);
+    // roboclaw.BackwardM1(ADDRESS,speed);
+    roboclaw_stage.ForwardM2(ADDRESS_STAGE, 0);
     if(analogRead(DETECTOR_LEFT)<600){
         roboclaw.ResetEncoders(ADDRESS);
         roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 3000, DECCEL, TURN_RIGHT_180, 1);
@@ -1665,19 +1684,34 @@ void detectTheTwoSidesOfTheRightSideForEnemies(){
     // Serial.print(".....A1 cha:");
     // Serial.println(last_detect_right-analogRead(DETECTOR_RIGHT_A1));
     judgeWhetherOnStageOrUnderTheStage();//台下判断
-    if(last_detect_left-analogRead(DETECTOR_LEFT)>=MIN_DETECT_TO_90_ENEMY_JUDGE && analogRead(DETECTOR_LEFT)+analogRead(DETECTOR_RIGHT)<1100){
+    int temp_detect_two_side_left = analogRead(DETECTOR_LEFT);
+    int temp_detect_two_side_right = analogRead(DETECTOR_RIGHT);
+    if(last_detect_left-temp_detect_two_side_left>=MIN_DETECT_TO_90_ENEMY_JUDGE && temp_detect_two_side_right+temp_detect_two_side_right<1070){//122333
         // turnLeftPosition(TURN_LEFT_POSITION_90);
         turnLeftPositon90();
         // Serial.println("left");
         uploadDetect();
         //alignment_only_once = 0;
-    }else if(last_detect_right-analogRead(DETECTOR_RIGHT)>=MIN_DETECT_TO_90_ENEMY_JUDGE && analogRead(DETECTOR_LEFT)+analogRead(DETECTOR_RIGHT)<1100){
+    }else if(last_detect_right-temp_detect_two_side_right>=MIN_DETECT_TO_90_ENEMY_JUDGE && temp_detect_two_side_right+temp_detect_two_side_right<1070){//122333
         turnRightPosition90();
         // turnRightPosition(TURN_RIGHT_POSITION_90);
         uploadDetect();
         // Serial.println("right");
         //alignment_only_once = 0;
     }
+    // if(last_detect_left-analogRead(DETECTOR_LEFT)>=MIN_DETECT_TO_90_ENEMY_JUDGE && analogRead(DETECTOR_LEFT)+analogRead(DETECTOR_RIGHT)<1100){
+    //     // turnLeftPosition(TURN_LEFT_POSITION_90);
+    //     turnLeftPositon90();
+    //     // Serial.println("left");
+    //     uploadDetect();
+    //     //alignment_only_once = 0;
+    // }else if(last_detect_right-analogRead(DETECTOR_RIGHT)>=MIN_DETECT_TO_90_ENEMY_JUDGE && analogRead(DETECTOR_LEFT)+analogRead(DETECTOR_RIGHT)<1100){
+    //     turnRightPosition90();
+    //     // turnRightPosition(TURN_RIGHT_POSITION_90);
+    //     uploadDetect();
+    //     // Serial.println("right");
+    //     //alignment_only_once = 0;
+    // }
 }
 
 /**
@@ -1732,7 +1766,7 @@ void alignWithWalls(){
     }else{
         Serial.print("    over");//122333
         too_far_turn_if_had_judeged = 0;
-        uploadDetect();
+        uploadDetectAndDetectEnemy();
         moveALittleForward();
     }
     Serial.println(" ");//122333
@@ -1753,24 +1787,64 @@ void alignWithWalls(){
 //距离更新函数，会忽略传感器返回的无信号值
 void uploadDetect(){
     //delay(100); temp_analogRead_right_upload-last_detect_right<ABNORMAL_INCREASE && temp_analogRead_left_upload-last_detect_left<ABNORMAL_INCREASE
-    temp_analogRead_right_upload = analogRead(DETECTOR_RIGHT);
-    temp_analogRead_left_upload = analogRead(DETECTOR_LEFT);
+    temp_analogRead_right_upload = 0;
+    temp_analogRead_left_upload = 0;
+    for(int i=0;i<5;++i){
+        temp_analogRead_right_upload += analogRead(DETECTOR_RIGHT);
+        temp_analogRead_left_upload += analogRead(DETECTOR_LEFT);
+    }
+    temp_analogRead_right_upload = temp_analogRead_right_upload/5;
+    temp_analogRead_left_upload = temp_analogRead_left_upload/5;
     // if(temp_analogRead_left_upload+temp_analogRead_right_upload>1170){//122333
-        if(temp_analogRead_right_upload<NO_SIGNAL_VALUE){
-        //uploadDetect();
-            last_detect_right = temp_analogRead_right_upload;
-        // Serial.print(last_detect_right);
-        }
-        if(temp_analogRead_left_upload<NO_SIGNAL_VALUE){
-            last_detect_left = temp_analogRead_left_upload;
-            // Serial.println(last_detect_left);
-        }
+    if(temp_analogRead_right_upload<NO_SIGNAL_VALUE){
+    //uploadDetect();
+        last_detect_right = temp_analogRead_right_upload;
+    // Serial.print(last_detect_right);
+    }
+    if(temp_analogRead_left_upload<NO_SIGNAL_VALUE){
+        last_detect_left = temp_analogRead_left_upload;
+        // Serial.println(last_detect_left);
+    }
     // }
     
     // last_detect_left = analogRead(DETECTOR_LEFT_A0);
     // last_detect_right = analogRead(DETECTOR_RIGHT_A1);
 }
 
+void uploadDetectAndDetectEnemy(){
+    for(int i=0;i<500;++i){
+        temp_analogRead_right_upload = analogRead(DETECTOR_RIGHT);
+        temp_analogRead_left_upload = analogRead(DETECTOR_LEFT);
+        // temp_analogRead_right_upload = 0;
+        // temp_analogRead_left_upload = 0;
+        // for(int i=0;i<5;++i){
+        //     temp_analogRead_right_upload += analogRead(DETECTOR_RIGHT);
+        //     temp_analogRead_left_upload += analogRead(DETECTOR_LEFT);
+        // }
+        // temp_analogRead_right_upload = temp_analogRead_right_upload/5;
+        // temp_analogRead_left_upload = temp_analogRead_left_upload/5;
+        if(last_detect_right-temp_analogRead_right_upload>MIN_DETECT_TO_90_ENEMY_JUDGE && temp_analogRead_right_upload+temp_analogRead_left_upload<1100){
+            turnRightPosition90();
+            uploadDetect();
+        }else{
+            if(temp_analogRead_right_upload<NO_SIGNAL_VALUE){
+                //uploadDetect();
+                last_detect_right = temp_analogRead_right_upload;
+                // Serial.print(last_detect_right);
+            }
+        }
+
+        if(last_detect_left-temp_analogRead_left_upload>MIN_DETECT_TO_90_ENEMY_JUDGE && temp_analogRead_right_upload+temp_analogRead_left_upload<1100){
+            turnLeftPositon90();
+            uploadDetect();
+        }else{
+            if(temp_analogRead_left_upload<NO_SIGNAL_VALUE){
+                last_detect_left = temp_analogRead_left_upload;
+                // Serial.println(last_detect_left);
+            }
+        }
+    }
+}
 // long time_//检查点：2019年9月6日11点36分（已更新）
 //void goBack(){//旧
 //后退函数，将敌人推下去后返回防守位置//检查点：2019年9月5日17点56分（已更新）
@@ -2132,7 +2206,12 @@ void detectsWhetherTheEdgeIsReachedWhenPushingEnemy(int mode){
     // }        //delay(1000);
 
     //一次对齐//////////////////////////////////////////////////////////////////
+    long temp_time_gray_sensor = millis();
+    
     do{
+        if(millis()-temp_time_gray_sensor>10000){
+            return;
+        }
         if(digitalRead(GRAYSCALE_SENSOT_RIGHT)==DETECT_NO && digitalRead(GRAYSCALE_SENSOR_LEFT)==DETECT_NO){
             // roboclaw.ResetEncoders(ADDRESS);
             // roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, -(2*TURN_SLOW_POSITION), 1);
@@ -2165,6 +2244,9 @@ void detectsWhetherTheEdgeIsReachedWhenPushingEnemy(int mode){
         }else if(digitalRead(GRAYSCALE_SENSOT_RIGHT)==DETECT_YES && digitalRead(GRAYSCALE_SENSOR_LEFT)==DETECT_YES){
             //二次对齐////////////////////////////////////////////////////////////////////////
             do{
+                if(millis()-temp_time_gray_sensor>10000){
+                    return;
+                }
                 if(digitalRead(GRAYSCALE_SENSOT_RIGHT)==DETECT_YES && digitalRead(GRAYSCALE_SENSOR_LEFT)==DETECT_YES){
                     // roboclaw.ResetEncoders(ADDRESS);
                     // roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, -(2*TURN_SLOW_POSITION), 1);
@@ -2204,6 +2286,9 @@ void detectsWhetherTheEdgeIsReachedWhenPushingEnemy(int mode){
                 }else if(digitalRead(GRAYSCALE_SENSOT_RIGHT)==DETECT_NO && digitalRead(GRAYSCALE_SENSOR_LEFT)==DETECT_NO){
                     //三次对齐////////////////////////////////////////////////////////////////////////
                     do{
+                        if(millis()-temp_time_gray_sensor>10000){
+                            return;
+                        }
                         if(digitalRead(GRAYSCALE_SENSOT_RIGHT)==DETECT_NO && digitalRead(GRAYSCALE_SENSOR_LEFT)==DETECT_NO){
                             // roboclaw.ResetEncoders(ADDRESS);
                             // roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 8000, DECCEL, -(2*TURN_SLOW_POSITION), 1);
@@ -2514,8 +2599,6 @@ void prepareforAttack(){
         // int storage_front_end_sensors1_temp[7] = {1,1,1,1,1,1,1};
         // int storage_front_end_sensors2_temp[7] = {1,1,1,1,1,1,1};
         // if(grayScaleSensorDetect()==STILL_ON_STAGE){
-
-
         // do{
         roboclaw.ResetEncoders(ADDRESS);
         while(1){
@@ -2540,8 +2623,10 @@ void prepareforAttack(){
             }
 
             if(grayScaleSensorDetect()==CLOSE_TO_EDGE){
-                stop();
-                delay(1000);
+
+                // stop();
+                stopStuck();//122333
+                delay(500);//122333
                 if(analogRead(DETECTOR_BACK_LEFT)<PREVENT_REAR_BACK_VALUE || analogRead(DETECTOR_BACK_RIGHT)<PREVENT_REAR_BACK_VALUE){
                     preventRearBackMove();
                     continue;
@@ -2563,9 +2648,13 @@ void prepareforAttack(){
                     roboclaw.ForwardM1(ADDRESS, 15);
                     // roboclaw.BackwardM1(ADDRESS,speed);
                     roboclaw.ForwardM2(ADDRESS, 15);
+                    long temp_time_attack = millis();
                     while(grayScaleSensorDetect()==DETECT_YES){
-
+                        if(millis()-temp_time_attack>20000){
+                            return;
+                        }
                     }
+                    stop();
                     // roboclaw.BackwardM2(ADDRESS,speed);
                     enemy_on_front_go_front_only_once = CAN_GO_FRONT_TO_ENEMY;
                     judge_if_think_enemy_is_edge = 0;
@@ -2577,95 +2666,95 @@ void prepareforAttack(){
             }
             
 
-            if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_FRONT)==DETECT_NO && determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT_MORE)==DETECT_NO && determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT_MORE)==DETECT_NO && determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT)==DETECT_NO && determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT)==DETECT_NO){
-                // for(;;){
-                //     int speed_back_to_field = 0;
-                //     long last_detect_back_left = analogRead(DETECTOR_BACK_LEFT);
-                //     long last_detect_back_right = analogRead(DETECTOR_BACK_RIGHT);
-                //     for(int i=0;i<9;++i){
-                //         last_detect_back_left += analogRead(DETECTOR_BACK_LEFT);
-                //         last_detect_back_right += analogRead(DETECTOR_BACK_RIGHT);
-                //     }
-                //     last_detect_back_left = last_detect_back_left/10;
-                //     last_detect_back_right = last_detect_back_right/10;
-                //     if(last_detect_back_left>700 || last_detect_back_right>700){
-                //         // roboclaw.ForwardM1(ADDRESS, speed);
-                //         roboclaw.BackwardM1(ADDRESS,30);
-                //         // roboclaw.ForwardM2(ADDRESS, speed);
-                //         roboclaw.BackwardM2(ADDRESS,30);
-                //         continue;
-                //     }else if(last_detect_back_left>470 && last_detect_back_right>470){
-                //         speed_back_to_field = 50;
-                //     }else if(last_detect_back_left<417 || last_detect_back_right<417){
-                //         // // roboclaw.ForwardM1(ADDRESS, speed);
-                //         // roboclaw.BackwardM1(ADDRESS,15);
-                //         // // roboclaw.ForwardM2(ADDRESS, speed);
-                //         // roboclaw.BackwardM2(ADDRESS,15);
-                //         stop();
-                //         uploadDetect();
-                //         // delay(30000);
-                //         return;
-                //     }else if(last_detect_back_left<470 || last_detect_back_right<470){
-                //         // roboclaw.ForwardM1(ADDRESS, speed);
-                //         // roboclaw.BackwardM1(ADDRESS,15);
-                //         // roboclaw.ForwardM2(ADDRESS, speed);
-                //         // roboclaw.BackwardM2(ADDRESS,15);
-                //         speed_back_to_field = 15;
-                //     }
+            // if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_FRONT)==DETECT_NO && determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT_MORE)==DETECT_NO && determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT_MORE)==DETECT_NO && determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT)==DETECT_NO && determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT)==DETECT_NO){
+            //     // for(;;){
+            //     //     int speed_back_to_field = 0;
+            //     //     long last_detect_back_left = analogRead(DETECTOR_BACK_LEFT);
+            //     //     long last_detect_back_right = analogRead(DETECTOR_BACK_RIGHT);
+            //     //     for(int i=0;i<9;++i){
+            //     //         last_detect_back_left += analogRead(DETECTOR_BACK_LEFT);
+            //     //         last_detect_back_right += analogRead(DETECTOR_BACK_RIGHT);
+            //     //     }
+            //     //     last_detect_back_left = last_detect_back_left/10;
+            //     //     last_detect_back_right = last_detect_back_right/10;
+            //     //     if(last_detect_back_left>700 || last_detect_back_right>700){
+            //     //         // roboclaw.ForwardM1(ADDRESS, speed);
+            //     //         roboclaw.BackwardM1(ADDRESS,30);
+            //     //         // roboclaw.ForwardM2(ADDRESS, speed);
+            //     //         roboclaw.BackwardM2(ADDRESS,30);
+            //     //         continue;
+            //     //     }else if(last_detect_back_left>470 && last_detect_back_right>470){
+            //     //         speed_back_to_field = 50;
+            //     //     }else if(last_detect_back_left<417 || last_detect_back_right<417){
+            //     //         // // roboclaw.ForwardM1(ADDRESS, speed);
+            //     //         // roboclaw.BackwardM1(ADDRESS,15);
+            //     //         // // roboclaw.ForwardM2(ADDRESS, speed);
+            //     //         // roboclaw.BackwardM2(ADDRESS,15);
+            //     //         stop();
+            //     //         uploadDetect();
+            //     //         // delay(30000);
+            //     //         return;
+            //     //     }else if(last_detect_back_left<470 || last_detect_back_right<470){
+            //     //         // roboclaw.ForwardM1(ADDRESS, speed);
+            //     //         // roboclaw.BackwardM1(ADDRESS,15);
+            //     //         // roboclaw.ForwardM2(ADDRESS, speed);
+            //     //         // roboclaw.BackwardM2(ADDRESS,15);
+            //     //         speed_back_to_field = 15;
+            //     //     }
 
-                //     if(last_detect_back_left-last_detect_back_right>10){
-                //         // roboclaw.ForwardM1(ADDRESS, speed);
-                //         roboclaw.BackwardM1(ADDRESS,speed_back_to_field+10);
-                //         // roboclaw.ForwardM2(ADDRESS, speed);
-                //         roboclaw.BackwardM2(ADDRESS,speed_back_to_field);
-                //     }else if(last_detect_back_right-last_detect_back_left>10){
-                //         // roboclaw.ForwardM1(ADDRESS, speed);
-                //         roboclaw.BackwardM1(ADDRESS,speed_back_to_field);
-                //         // roboclaw.ForwardM2(ADDRESS, speed);
-                //         roboclaw.BackwardM2(ADDRESS,speed_back_to_field+10);
-                //     }else{
-                //         roboclaw.BackwardM1(ADDRESS,speed_back_to_field);
-                //         // roboclaw.ForwardM2(ADDRESS, speed);
-                //         roboclaw.BackwardM2(ADDRESS,speed_back_to_field);
-                //     }
+            //     //     if(last_detect_back_left-last_detect_back_right>10){
+            //     //         // roboclaw.ForwardM1(ADDRESS, speed);
+            //     //         roboclaw.BackwardM1(ADDRESS,speed_back_to_field+10);
+            //     //         // roboclaw.ForwardM2(ADDRESS, speed);
+            //     //         roboclaw.BackwardM2(ADDRESS,speed_back_to_field);
+            //     //     }else if(last_detect_back_right-last_detect_back_left>10){
+            //     //         // roboclaw.ForwardM1(ADDRESS, speed);
+            //     //         roboclaw.BackwardM1(ADDRESS,speed_back_to_field);
+            //     //         // roboclaw.ForwardM2(ADDRESS, speed);
+            //     //         roboclaw.BackwardM2(ADDRESS,speed_back_to_field+10);
+            //     //     }else{
+            //     //         roboclaw.BackwardM1(ADDRESS,speed_back_to_field);
+            //     //         // roboclaw.ForwardM2(ADDRESS, speed);
+            //     //         roboclaw.BackwardM2(ADDRESS,speed_back_to_field);
+            //     //     }
                 
         
-                //     // if(analogRead(DETECTOR_BACK_LEFT)>900 && analogRead(DETECTOR_BACK_A3)>900){
-                //     //     roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2000, DECCEL1, -2795, ACCEL2, 2000, DECCEL2, -2795, 1);
-                //     //     delay(50);
-                //     //     roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 3500, DECCEL1, -2795, ACCEL2, 3500, DECCEL2, -2795, 1);
-                //     // }else if(analogRead(DETECTOR_BACK_A2)>800 && analogRead(DETECTOR_BACK_A3)>800){
-                //     //     //roboclaw.ResetEncoders(ADDRESS);
-                //     //     roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2000, DECCEL1, -2795, ACCEL2, 2000, DECCEL2, -2795, 1);
-                //     //     delay(50);
-                //     //     roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 3500, DECCEL1, -2795, ACCEL2, 3500, DECCEL2, -2795, 1);
-                //     // }else if(analogRead(DETECTOR_BACK_A2)<700 && analogRead(DETECTOR_BACK_A3)<700){
-                //     //     stop();
-                //     //     return;
-                //     // }else if(analogRead(DETECTOR_BACK_A2)<800 && analogRead(DETECTOR_BACK_A3)<800){
-                //     //     //roboclaw.ResetEncoders(ADDRESS);
-                //     //     roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2000, DECCEL1, -2795, ACCEL2, 2000, DECCEL2, -2795, 1);
-                //     // }
-                //     // if(analogRead(DETECTOR_BACK_A2)<400 || analogRead(DETECTOR_BACK_A3)<400){
-                //     //     roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 200, DECCEL1, -8000, ACCEL2, 200, DECCEL2, -8000, 1);
-                //     //     delay(50);
-                //     //     stop();
-                //     //     //delay(1000);
-                //     //     return;
-                //     // }
-                //     // roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 2500, DECCEL, -5570, 1);
-                //     // roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 2500, DECCEL, -5570, 1);
-                //     // // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2500, DECCEL1, -5570, ACCEL2, 2500, DECCEL2, -5570, 1);
-                //     // delay(3000);
-                //     // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 3000, DECCEL1, -5590, ACCEL2, 3000, DECCEL2, -5570, 1);
-                //     // delay(1000);
-                //     // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2000, DECCEL1, -5590, ACCEL2, 2000, DECCEL2, -5570, 1);
-                //     // delay(5000);
+            //     //     // if(analogRead(DETECTOR_BACK_LEFT)>900 && analogRead(DETECTOR_BACK_A3)>900){
+            //     //     //     roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2000, DECCEL1, -2795, ACCEL2, 2000, DECCEL2, -2795, 1);
+            //     //     //     delay(50);
+            //     //     //     roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 3500, DECCEL1, -2795, ACCEL2, 3500, DECCEL2, -2795, 1);
+            //     //     // }else if(analogRead(DETECTOR_BACK_A2)>800 && analogRead(DETECTOR_BACK_A3)>800){
+            //     //     //     //roboclaw.ResetEncoders(ADDRESS);
+            //     //     //     roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2000, DECCEL1, -2795, ACCEL2, 2000, DECCEL2, -2795, 1);
+            //     //     //     delay(50);
+            //     //     //     roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 3500, DECCEL1, -2795, ACCEL2, 3500, DECCEL2, -2795, 1);
+            //     //     // }else if(analogRead(DETECTOR_BACK_A2)<700 && analogRead(DETECTOR_BACK_A3)<700){
+            //     //     //     stop();
+            //     //     //     return;
+            //     //     // }else if(analogRead(DETECTOR_BACK_A2)<800 && analogRead(DETECTOR_BACK_A3)<800){
+            //     //     //     //roboclaw.ResetEncoders(ADDRESS);
+            //     //     //     roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2000, DECCEL1, -2795, ACCEL2, 2000, DECCEL2, -2795, 1);
+            //     //     // }
+            //     //     // if(analogRead(DETECTOR_BACK_A2)<400 || analogRead(DETECTOR_BACK_A3)<400){
+            //     //     //     roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 200, DECCEL1, -8000, ACCEL2, 200, DECCEL2, -8000, 1);
+            //     //     //     delay(50);
+            //     //     //     stop();
+            //     //     //     //delay(1000);
+            //     //     //     return;
+            //     //     // }
+            //     //     // roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 2500, DECCEL, -5570, 1);
+            //     //     // roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 2500, DECCEL, -5570, 1);
+            //     //     // // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2500, DECCEL1, -5570, ACCEL2, 2500, DECCEL2, -5570, 1);
+            //     //     // delay(3000);
+            //     //     // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 3000, DECCEL1, -5590, ACCEL2, 3000, DECCEL2, -5570, 1);
+            //     //     // delay(1000);
+            //     //     // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2000, DECCEL1, -5590, ACCEL2, 2000, DECCEL2, -5570, 1);
+            //     //     // delay(5000);
 
-                // }
-                // dynamicBack();
-                return;
-            }
+            //     // }
+            //     // dynamicBack();
+            //     return;
+            // }
         }
         // while(1){
         //     if(grayScaleSensorDetect()==CLOSE_TO_EDGE){
@@ -2890,28 +2979,28 @@ void bigDetectorTest(){
     last_temp_left = last_temp_left/10;
     last_temp_right = last_temp_right/10;
 
-    // Serial.print("left:");
-    // Serial.print(last_temp_left);
+    Serial.print("left:");
+    Serial.print(last_temp_left);
+
+    Serial.print("     ");
+
+    Serial.print("right:");
+    Serial.print(last_temp_right);
+
+    Serial.print("     ");
+
+    Serial.print("left+right:");
+    Serial.print(last_temp_left+last_temp_right);
 
     // Serial.print("     ");
 
-    // Serial.print("right:");
-    // Serial.print(last_temp_right);
+    // Serial.print("back left:");
+    // Serial.print(last_detect_back_left);
 
-    // Serial.print("     ");
+    // Serial.print("    ");
 
-    // Serial.print("left+right:");
-    // Serial.print(last_temp_left+last_temp_right);
-
-    // Serial.print("     ");
-
-    Serial.print("back left:");
-    Serial.print(last_detect_back_left);
-
-    Serial.print("    ");
-
-    Serial.print("back right:");
-    Serial.print(last_detect_back_right);
+    // Serial.print("back right:");
+    // Serial.print(last_detect_back_right);
 
 
     // Serial.print("    ");
@@ -2929,22 +3018,16 @@ void bigDetectorTest(){
 }
 //测试程序
 void test(){
-    // dynamicBack();
-    // enemy_on_front_go_front_only_once = CAN_GO_FRONT_TO_ENEMY;
-                    // judge_if_think_enemy_is_edge = 0;
-                    // // stopStuck();
-                    // detectsWhetherTheEdgeIsReachedWhenPushingEnemy(); 
-                    // uploadDetect(); 
-
-                    // return;
-                    // break;
-                    roboclaw.ForwardM1(ADDRESS, 15);
+    roboclaw.ForwardM1(ADDRESS, 15);
                     // roboclaw.BackwardM1(ADDRESS,speed);
                     roboclaw.ForwardM2(ADDRESS, 15);
-                    while(grayScaleSensorDetect()==STILL_ON_STAGE){
-
+                    long temp_time_attack = millis();
+                    while(grayScaleSensorDetect()==DETECT_YES){
+                        if(millis()-temp_time_attack>20000){
+                            return;
+                        }
                     }
-                    // delay(1000);
+                    stop();
                     // roboclaw.BackwardM2(ADDRESS,speed);
                     enemy_on_front_go_front_only_once = CAN_GO_FRONT_TO_ENEMY;
                     judge_if_think_enemy_is_edge = 0;
@@ -2952,19 +3035,50 @@ void test(){
                     detectsWhetherTheEdgeIsReachedWhenPushingEnemy(MODE_PUSHING_ENEMY); 
                     uploadDetect(); 
                     // return;
-    // detectsWhetherTheEdgeIsReachedWhenPushingEnemy(MODE_LOST_ENEMY);
-    delay(100000);
-    // aftertheEnemyDownAndReturnToTheSideOfTheField();
-    // roboclaw.ForwardM1(ADDRESS, 10);
-    // // roboclaw.BackwardM1(ADDRESS,10)
-    // // roboclaw.ForwardM2(ADDRESS, speed)
-    // roboclaw.BackwardM2(ADDRESS,20);
-    // delay(5000);
-    // stop();
+                    delay(1000000);
+    // stepBackAndGetOnStage();
+    // turnLeftPositon90();
+    // digitalWrite(13,HIGH);
     // delay(1000000);
-    // attack();
+    // // dynamicBack();
+    // // enemy_on_front_go_front_only_once = CAN_GO_FRONT_TO_ENEMY;
+    //                 // judge_if_think_enemy_is_edge = 0;
+    //                 // // stopStuck();
+    //                 // detectsWhetherTheEdgeIsReachedWhenPushingEnemy(); 
+    //                 // uploadDetect(); 
+
+    //                 // return;
+    //                 // break;
+    //                 roboclaw.ForwardM1(ADDRESS, 15);
+    //                 // roboclaw.BackwardM1(ADDRESS,speed);
+    //                 roboclaw.ForwardM2(ADDRESS, 15);
+    //                 while(grayScaleSensorDetect()==STILL_ON_STAGE){
+
+    //                 }
+    //                 // delay(1000);
+    //                 // roboclaw.BackwardM2(ADDRESS,speed);
+    //                 enemy_on_front_go_front_only_once = CAN_GO_FRONT_TO_ENEMY;
+    //                 judge_if_think_enemy_is_edge = 0;
+    //                 // stopStuck();
+    //                 detectsWhetherTheEdgeIsReachedWhenPushingEnemy(MODE_PUSHING_ENEMY); 
+    //                 uploadDetect(); 
+    //                 // return;
+    // // detectsWhetherTheEdgeIsReachedWhenPushingEnemy(MODE_LOST_ENEMY);
+    // delay(100000);
+    // // aftertheEnemyDownAndReturnToTheSideOfTheField();
+    // // roboclaw.ForwardM1(ADDRESS, 10);
+    // // // roboclaw.BackwardM1(ADDRESS,10)
+    // // // roboclaw.ForwardM2(ADDRESS, speed)
+    // // roboclaw.BackwardM2(ADDRESS,20);
+    // // delay(5000);
+    // // stop();
+    // // delay(1000000);
+    // // attack();
     // determineIfItIsUnderTheStage();
-    // long temp = millis();
+    long temp = millis();
+    grayScaleSensorDetect();
+    Serial.print(millis()-temp);
+    delay(100000);
     // roboclaw.ResetEncoders(ADDRESS);
     // roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, 2500, DECCEL, 1200, 1);
     // roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, 2500, DECCEL, 1200, 1);
@@ -3072,7 +3186,8 @@ void setup(){
     roboclaw.begin(38400);
     roboclaw_stage.begin(19200);
     Serial.begin(9600);
-    // pinMode(13,OUTPUT);
+    // pinMode(13,OUTPUT);//122333
+    // digitalWrite(13,LOW);//122333
     //stop();
     delay(2000);
     //首先更新一下场上的距离常数，再行动
@@ -3084,9 +3199,9 @@ void setup(){
 //主函数
 void loop(){
     // bigDetectorTest();
-    // test();
+    test();
     // smallDetectTest();
     // test2();
-    searchForEnemy();
+    // searchForEnemy();
     // delay(100000);
 }
