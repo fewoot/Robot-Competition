@@ -549,7 +549,7 @@
 #define ATTACK_SPEED 1977
 
 //边缘传感器的重复检测次数
-#define GRAY_SENSOR_TIMES_OF_REDETECT 10000
+#define GRAY_SENSOR_TIMES_OF_REDETECT 17
 
 //对齐于边界
 #define ALIGN_TO_THE_BORDER 1
@@ -1689,11 +1689,14 @@ void detectTheTwoSidesOfTheRightSideForEnemies(){
     if(last_detect_left-temp_detect_two_side_left>=MIN_DETECT_TO_90_ENEMY_JUDGE && temp_detect_two_side_right+temp_detect_two_side_right<1070){//122333
         // turnLeftPosition(TURN_LEFT_POSITION_90);
         turnLeftPositon90();
+        // delay(100);//122333
         // Serial.println("left");
         uploadDetect();
         //alignment_only_once = 0;
     }else if(last_detect_right-temp_detect_two_side_right>=MIN_DETECT_TO_90_ENEMY_JUDGE && temp_detect_two_side_right+temp_detect_two_side_right<1070){//122333
         turnRightPosition90();
+        // delay(100);//122333
+// 
         // turnRightPosition(TURN_RIGHT_POSITION_90);
         uploadDetect();
         // Serial.println("right");
@@ -1727,10 +1730,10 @@ void alignWithWalls(){
     }
     last_detect_back_left = last_detect_back_left/10;
     last_detect_back_right = last_detect_back_right/10;
-    Serial.print("left:");//122333
-    Serial.print(last_detect_back_left);//122333
-    Serial.print("   right:");//122333
-    Serial.print(last_detect_back_right);//122333
+    // Serial.print("left:");//122333
+    // Serial.print(last_detect_back_left);//122333
+    // Serial.print("   right:");//122333
+    // Serial.print(last_detect_back_right);//122333
     // if()
     if(last_detect_back_left+last_detect_back_right>=1817){
         if(analogRead(DETECTOR_BACK_LEFT)+analogRead(DETECTOR_BACK_RIGHT)>=1817){
@@ -1758,18 +1761,18 @@ void alignWithWalls(){
             }
         }
     }else if(last_detect_back_left-last_detect_back_right>OFFSET_THRESHOLD_ADJUST_SLOW){
-        Serial.print("    turn left");//122333
+        // Serial.print("    turn left");//122333
         turnLeftPosition(TURN_SLOW_POSITION);
     }else if(last_detect_back_right-last_detect_back_left>OFFSET_THRESHOLD_ADJUST_SLOW){
-        Serial.print("    turn right");//122333
+        // Serial.print("    turn right");//122333
         turnRightPosition(TURN_SLOW_POSITION);
     }else{
-        Serial.print("    over");//122333
+        // Serial.print("    over");//122333
         too_far_turn_if_had_judeged = 0;
         uploadDetectAndDetectEnemy();
         moveALittleForward();
     }
-    Serial.println(" ");//122333
+    // Serial.println(" ");//122333
     // if(grayScaleSensorDetect()==CLOSE_TO_EDGE){
     //     // turnLeftPositionSlowly
     //     roboclaw.ResetEncoders(ADDRESS);
@@ -1786,6 +1789,7 @@ void alignWithWalls(){
 
 //距离更新函数，会忽略传感器返回的无信号值
 void uploadDetect(){
+    delay(100);//122333
     //delay(100); temp_analogRead_right_upload-last_detect_right<ABNORMAL_INCREASE && temp_analogRead_left_upload-last_detect_left<ABNORMAL_INCREASE
     temp_analogRead_right_upload = 0;
     temp_analogRead_left_upload = 0;
@@ -1825,6 +1829,9 @@ void uploadDetectAndDetectEnemy(){
         // temp_analogRead_left_upload = temp_analogRead_left_upload/5;
         if(last_detect_right-temp_analogRead_right_upload>MIN_DETECT_TO_90_ENEMY_JUDGE && temp_analogRead_right_upload+temp_analogRead_left_upload<1100){
             turnRightPosition90();
+            // delay(100);
+            // delay(100);//122333
+
             uploadDetect();
         }else{
             if(temp_analogRead_right_upload<NO_SIGNAL_VALUE){
@@ -1836,6 +1843,9 @@ void uploadDetectAndDetectEnemy(){
 
         if(last_detect_left-temp_analogRead_left_upload>MIN_DETECT_TO_90_ENEMY_JUDGE && temp_analogRead_right_upload+temp_analogRead_left_upload<1100){
             turnLeftPositon90();
+            // delay(100);
+            // delay(100);//122333
+
             uploadDetect();
         }else{
             if(temp_analogRead_left_upload<NO_SIGNAL_VALUE){
@@ -2327,6 +2337,8 @@ void detectsWhetherTheEdgeIsReachedWhenPushingEnemy(int mode){
                             // stop();
                             // delay(100000);
                             aftertheEnemyDownAndReturnToTheSideOfTheField();
+                            // delay(100);//122333
+
                             uploadDetect();
                             // //stop();
                             return;
@@ -2618,14 +2630,15 @@ void prepareforAttack(){
                 roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, ATTACK_SPEED, DECCEL, 699999, 1);
                 // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 2500, DECCEL1, 999999, ACCEL2, 1700, DECCEL2, 999999, 1);
                 // goright(GO_SPEED_ATTACK,7);
+            // }else
             }else{
                 attack();
             }
 
             if(grayScaleSensorDetect()==CLOSE_TO_EDGE){
 
-                // stop();
-                stopStuck();//122333
+                stop();
+                // stopStuck();//122333
                 delay(500);//122333
                 if(analogRead(DETECTOR_BACK_LEFT)<PREVENT_REAR_BACK_VALUE || analogRead(DETECTOR_BACK_RIGHT)<PREVENT_REAR_BACK_VALUE){
                     preventRearBackMove();
@@ -2799,7 +2812,6 @@ void prepareforAttack(){
         //delay(4000);
         //stop();
         //}while(1);
-        
     }
 }
 
@@ -3018,24 +3030,35 @@ void bigDetectorTest(){
 }
 //测试程序
 void test(){
-    roboclaw.ForwardM1(ADDRESS, 15);
-                    // roboclaw.BackwardM1(ADDRESS,speed);
-                    roboclaw.ForwardM2(ADDRESS, 15);
-                    long temp_time_attack = millis();
-                    while(grayScaleSensorDetect()==DETECT_YES){
-                        if(millis()-temp_time_attack>20000){
-                            return;
-                        }
-                    }
-                    stop();
-                    // roboclaw.BackwardM2(ADDRESS,speed);
-                    enemy_on_front_go_front_only_once = CAN_GO_FRONT_TO_ENEMY;
-                    judge_if_think_enemy_is_edge = 0;
-                    // stopStuck();
-                    detectsWhetherTheEdgeIsReachedWhenPushingEnemy(MODE_PUSHING_ENEMY); 
-                    uploadDetect(); 
-                    // return;
-                    delay(1000000);
+    attack();
+    while(1){
+      
+    // delay(1000);
+    if(grayScaleSensorDetect()==CLOSE_TO_EDGE){
+        break;
+    }  
+    }
+    // stop();
+    stopStuck();
+    delay(1000000);
+    // roboclaw.ForwardM1(ADDRESS, 15);
+    //                 // roboclaw.BackwardM1(ADDRESS,speed);
+    //                 roboclaw.ForwardM2(ADDRESS, 15);
+    //                 long temp_time_attack = millis();
+    //                 while(grayScaleSensorDetect()==DETECT_YES){
+    //                     if(millis()-temp_time_attack>20000){
+    //                         return;
+    //                     }
+    //                 }
+    //                 stop();
+    //                 // roboclaw.BackwardM2(ADDRESS,speed);
+    //                 enemy_on_front_go_front_only_once = CAN_GO_FRONT_TO_ENEMY;
+    //                 judge_if_think_enemy_is_edge = 0;
+    //                 // stopStuck();
+    //                 detectsWhetherTheEdgeIsReachedWhenPushingEnemy(MODE_PUSHING_ENEMY); 
+    //                 uploadDetect(); 
+    //                 // return;
+    //                 delay(1000000);
     // stepBackAndGetOnStage();
     // turnLeftPositon90();
     // digitalWrite(13,HIGH);
@@ -3199,9 +3222,9 @@ void setup(){
 //主函数
 void loop(){
     // bigDetectorTest();
-    test();
+    // test();
     // smallDetectTest();
     // test2();
-    // searchForEnemy();
+    searchForEnemy();
     // delay(100000);
 }
