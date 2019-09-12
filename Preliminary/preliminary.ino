@@ -1436,19 +1436,19 @@ void startTheOnStageMotor(){
 //检查点：2019年9月2日11点26分（已更新）
 void judgeWhetherOnStageOrUnderTheStage(){
     //，对于后侧传感器的值，出现过在台子边缘检测异常的情况，还需进一步测试（已测试）
-    if(temp_analogRead_left_upload+temp_analogRead_right_upload<570 || analogRead(DETECTOR_BACK_LEFT)<320){
+    if(analogRead(DETECTOR_LEFT)+analogRead(DETECTOR_RIGHT)<570 || analogRead(DETECTOR_BACK_LEFT)<320){
     // if(analogRead(DETECTOR_BACK_LEFT)<330){//
 
     // if(temp_analogRead_left_upload+temp_analogRead_right_upload<580){//
 
         stop();
         delay(100);
-        if(temp_analogRead_left_upload+temp_analogRead_right_upload<570 || analogRead(DETECTOR_BACK_LEFT)<320){
+        if(analogRead(DETECTOR_LEFT)+analogRead(DETECTOR_RIGHT)<570 || analogRead(DETECTOR_BACK_LEFT)<320){
         // if(analogRead(DETECTOR_BACK_LEFT)<330){
             stop();
             delay(100);
         // if(temp_analogRead_left_upload+temp_analogRead_right_upload<580 ){
-            if(temp_analogRead_left_upload+temp_analogRead_right_upload<570 || analogRead(DETECTOR_BACK_LEFT)<320){
+            if(analogRead(DETECTOR_LEFT)+analogRead(DETECTOR_RIGHT)<570 || analogRead(DETECTOR_BACK_LEFT)<320){
                 decidedTheCarHadFallenOff();
             }
             
@@ -1716,8 +1716,8 @@ void detectTheTwoSidesOfTheRightSideForEnemies(){
     // Serial.print(".....A1 cha:");
     // Serial.println(last_detect_right-analogRead(DETECTOR_RIGHT_A1));
     judgeWhetherOnStageOrUnderTheStage();//台下判断
-    int temp_detect_two_side_left = 0;
-    int temp_detect_two_side_right = 0;
+    // int temp_detect_two_side_left = 0;
+    // int temp_detect_two_side_right = 0;
     // for(int i=0;i<3;++i){
     //     temp_detect_two_side_left += analogRead(DETECTOR_LEFT);
     //     temp_detect_two_side_right += analogRead(DETECTOR_RIGHT);
@@ -1730,41 +1730,42 @@ void detectTheTwoSidesOfTheRightSideForEnemies(){
     // int 
     // ignment_only_once = 0;
 //     }else 
-    if((temp_detect_two_side_left+temp_detect_two_side_right)<1100){
+    if((temp_detect_two_side_left+temp_detect_two_side_right)<1050){
         // i = 500;
-        //新的转向系统，在没敌人时，两侧之和是1200+，有敌人时在1100-，通过这个来判断是否有敌人
+        //新的转向系统，在没敌人时，两侧之和是1200+，有敌人时在1010-，通过这个来判断是否有敌人
         times_detect_real_side = TIMES_DETECT_REAL_SIDE_MAX;
 
         if((stationary_distance_left-temp_detect_two_side_left)>(stationary_distance_right-temp_detect_two_side_right)){
             turnLeftPositon90();
             detect_enemy_two_side_can_or_not_remember_the_distance = CAN_REMEMBER_DISTANCE;
-            uploadDetect();
+            // uploadDetect();
 
         }else if((stationary_distance_left-temp_detect_two_side_left)<(stationary_distance_right-temp_detect_two_side_right)){
             turnRightPosition90();
             detect_enemy_two_side_can_or_not_remember_the_distance = CAN_REMEMBER_DISTANCE;
-            uploadDetect();
+            // uploadDetect();
 
         }
         
-    }else if(last_detect_left-temp_detect_two_side_left>=MIN_DETECT_TO_90_ENEMY_JUDGE && temp_detect_two_side_right+temp_detect_two_side_right<1070){//122333
-        // turnLeftPosition(TURN_LEFT_POSITION_90);
-        turnLeftPositon90();
-        // delay(100);//122333
-        // Serial.println("left");
-        detect_enemy_two_side_can_or_not_remember_the_distance = CAN_REMEMBER_DISTANCE;
-        uploadDetect();
-        //alignment_only_once = 0;
-    }else if(last_detect_right-temp_detect_two_side_right>=MIN_DETECT_TO_90_ENEMY_JUDGE && temp_detect_two_side_right+temp_detect_two_side_right<1070){//122333
-        turnRightPosition90();
-        // delay(100);//122333
-        detect_enemy_two_side_can_or_not_remember_the_distance = CAN_REMEMBER_DISTANCE;
-//      
-        // turnRightPosition(TURN_RIGHT_POSITION_90);
-        uploadDetect();
-        // Serial.println("right");
-        //al
     }
+//     else if(last_detect_left-temp_detect_two_side_left>=MIN_DETECT_TO_90_ENEMY_JUDGE && temp_detect_two_side_right+temp_detect_two_side_right<1070){//122333
+//         // turnLeftPosition(TURN_LEFT_POSITION_90);
+//         turnLeftPositon90();
+//         // delay(100);//122333
+//         // Serial.println("left");
+//         detect_enemy_two_side_can_or_not_remember_the_distance = CAN_REMEMBER_DISTANCE;
+//         // uploadDetect();
+//         //alignment_only_once = 0;
+//     }else if(last_detect_right-temp_detect_two_side_right>=MIN_DETECT_TO_90_ENEMY_JUDGE && temp_detect_two_side_right+temp_detect_two_side_right<1070){//122333
+//         turnRightPosition90();
+//         // delay(100);//122333
+//         detect_enemy_two_side_can_or_not_remember_the_distance = CAN_REMEMBER_DISTANCE;
+// //      
+//         // turnRightPosition(TURN_RIGHT_POSITION_90);
+//         // uploadDetect();
+//         // Serial.println("right");
+//         //al
+//     }
     // if(last_detect_left-analogRead(DETECTOR_LEFT)>=MIN_DETECT_TO_90_ENEMY_JUDGE && analogRead(DETECTOR_LEFT)+analogRead(DETECTOR_RIGHT)<1100){
     //     // turnLeftPosition(TURN_LEFT_POSITION_90);
     //     turnLeftPositon90();
@@ -1917,13 +1918,13 @@ void uploadDetectAndDetectEnemy(){
 
         //     uploadDetect();
         // }else{
-            if(temp_analogRead_right_upload<NO_SIGNAL_VALUE){
-                //uploadDetect();
-                last_detect_right = temp_analogRead_right_upload;
-                // Serial.print(last_detect_right);
-            }else{
-                last_detect_right = 0;
-            }
+            // if(temp_analogRead_right_upload<NO_SIGNAL_VALUE){
+            //     //uploadDetect();
+            //     last_detect_right = temp_analogRead_right_upload;
+            //     // Serial.print(last_detect_right);
+            // }else{
+            //     last_detect_right = 0;
+            // }
         // }
 
         // if(last_detect_left-temp_analogRead_left_upload>MIN_DETECT_TO_90_ENEMY_JUDGE && temp_analogRead_right_upload+temp_analogRead_left_upload<1100){
@@ -1933,12 +1934,12 @@ void uploadDetectAndDetectEnemy(){
 
         //     uploadDetect();
         // }else{
-            if(temp_analogRead_left_upload<NO_SIGNAL_VALUE){
-                last_detect_left = temp_analogRead_left_upload;
-                // Serial.println(last_detect_left);
-            }else{
-                last_detect_left = 0;
-            }
+            // if(temp_analogRead_left_upload<NO_SIGNAL_VALUE){
+            //     last_detect_left = temp_analogRead_left_upload;
+            //     // Serial.println(last_detect_left);
+            // }else{
+            //     last_detect_left = 0;
+            // }
         // }
     // }
 }
@@ -2433,7 +2434,7 @@ void detectsWhetherTheEdgeIsReachedWhenPushingEnemy(int mode){
                             aftertheEnemyDownAndReturnToTheSideOfTheField();
                             // delay(100);//122333
 
-                            uploadDetect();
+                            // uploadDetect();
                             // //stop();
                             return;
                             
@@ -2630,7 +2631,7 @@ void lostEnemy(){
                     // turnLeftPosition(abs(value_of_turns%TURN_LEFT_POSITION_90));
                     
                     last_detect_side = DETECT_LAST_FRONT;
-                    uploadDetect();
+                    // uploadDetect();
                     // value_of_turns = 0;
                     return;
                     //break;
@@ -2662,7 +2663,7 @@ void lostEnemy(){
                     stop();
                     // turnRightPosition(TURN_RIGHT_POSITION_90-abs(value_of_turns%TURN_RIGHT_POSITION_90));
                     last_detect_side = DETECT_LAST_FRONT;
-                    uploadDetect();
+                    // uploadDetect();
                     // value_of_turns = 0;
                     return;
                     //break;
@@ -2779,7 +2780,7 @@ void prepareforAttack(){
                     judge_if_think_enemy_is_edge = 0;
                     // stopStuck();
                     detectsWhetherTheEdgeIsReachedWhenPushingEnemy(MODE_PUSHING_ENEMY); 
-                    uploadDetect(); 
+                    // uploadDetect(); 
                     return;
                 }
             }
@@ -2914,7 +2915,7 @@ void prepareforAttack(){
         judge_if_think_enemy_is_edge = 0;
         // stopStuck();
         detectsWhetherTheEdgeIsReachedWhenPushingEnemy(MODE_PUSHING_ENEMY); 
-        uploadDetect(); 
+        // uploadDetect(); 
         //delay(4000);
         //stop();
         //}while(1);
@@ -3352,7 +3353,7 @@ void setup(){
     //首先更新一下场上的距离常数，再行动
     // letUsGo();//122333
     // roboclaw.ResetEncoders(ADDRESS);
-    uploadDetect();
+    // uploadDetect();
 }
 
 //主函数
