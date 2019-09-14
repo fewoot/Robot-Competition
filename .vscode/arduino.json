@@ -1,7 +1,7 @@
 {
     "board": "arduino:avr:mega",
-    "sketch": "Preliminary\\preliminary.ino",
-    "port": "COM19",
+    "sketch": "Test\\main.ino",
+    "port": "COM13",
     "programmer": "AVRISP mkII",
     "configuration": "cpu=atmega2560"
 }
