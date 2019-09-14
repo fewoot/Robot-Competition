@@ -396,10 +396,10 @@
 #define DETECTOR_RIGHT_FRONT_MORE A4
 
 //边缘传感器1
-#define GRAYSCALE_SENSOR_LEFT 37
+#define GRAYSCALE_SENSOR_LEFT 53
 
 //边缘传感器
-#define GRAYSCALE_SENSOT_RIGHT 36
+#define GRAYSCALE_SENSOT_RIGHT 52
 
 //电机和主板模拟引脚1
 #define MOTOR_DRIVER_S1 11
@@ -546,7 +546,7 @@
 #define TIMES_FRONT_DETECTOR_FLITER 37
 
 //进攻时的速度
-#define ATTACK_SPEED 1977
+#define ATTACK_SPEED 2170//1977
 
 //边缘传感器的重复检测次数
 #define GRAY_SENSOR_TIMES_OF_REDETECT 17
@@ -2210,13 +2210,13 @@ void determineIfItIsUnderTheStage(){
             // temp_detect_RF_to_judge_if_under_stage += analogRead(DETECTOR_RIGHT_FRONT);
         }
         temp_detect_front_to_judge_if_under_stage = temp_detect_front_to_judge_if_under_stage/20;
-        if(temp_detect_front_to_judge_if_under_stage>=317){
-            judge_if_think_enemy_is_edge = 0;
-            decidedTheCarHadFallenOff();
-            return;
-        // digitalWrite(13,HIGH);
+        // if(temp_detect_front_to_judge_if_under_stage>=317){
+        //     judge_if_think_enemy_is_edge = 0;
+        //     decidedTheCarHadFallenOff();
+        //     return;
+        // // digitalWrite(13,HIGH);
 
-        }else{
+        // }else{
             // digitalWrite(13,LOW);
             if(judge_if_think_enemy_is_edge==0){
                 time_if_think_enemy_is_edge = millis();
@@ -2227,7 +2227,7 @@ void determineIfItIsUnderTheStage(){
                 decidedTheCarHadFallenOff();
                 return;
             }
-        }
+        // }
         // temp_detect_LFM_to_judge_if_under_stage = temp_detect_LFM_to_judge_if_under_stage/20;
         // temp_detect_RFM_to_judge_if_under_stage = temp_detect_RFM_to_judge_if_under_stage/20;
         // temp_detect_LF_to_judge_if_under_stage = temp_detect_LF_to_judge_if_under_stage/20;
@@ -2777,13 +2777,13 @@ void prepareforAttack(){
                 roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, ATTACK_SPEED+1300, DECCEL, 699999, 1);
                 roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, ATTACK_SPEED, DECCEL, 699999, 1);
 
-            }else if(analogRead(DETECTOR_LEFT_FRONT_MORE)-analogRead(DETECTOR_RIGHT_FRONT_MORE)>150){
+            }else if(analogRead(DETECTOR_LEFT_FRONT_MORE)-analogRead(DETECTOR_RIGHT_FRONT_MORE)>150 && determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_FRONT)==DETECT_NO){
                 // goleft(GO_SPEED_ATTACK,7);
                 roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, ATTACK_SPEED, DECCEL, 699999, 1);
                 roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, ATTACK_SPEED+900, DECCEL, 699999, 1);
 
                 // roboclaw.SpeedAccelDeccelPositionM1M2(ADDRESS, ACCEL1, 1700, DECCEL1, 999999, ACCEL2, 2500, DECCEL2, 999999, 1);
-            }else if(analogRead(DETECTOR_RIGHT_FRONT_MORE)-analogRead(DETECTOR_LEFT_FRONT_MORE)>150){
+            }else if(analogRead(DETECTOR_RIGHT_FRONT_MORE)-analogRead(DETECTOR_LEFT_FRONT_MORE)>150 && determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_FRONT)==DETECT_NO){
                 roboclaw.SpeedAccelDeccelPositionM1(ADDRESS, ACCEL, ATTACK_SPEED+900, DECCEL, 699999, 1);
                 roboclaw.SpeedAccelDeccelPositionM2(ADDRESS, ACCEL, ATTACK_SPEED, DECCEL, 699999, 1);
 
@@ -2808,35 +2808,35 @@ void prepareforAttack(){
                 if(grayScaleSensorDetect()==CLOSE_TO_EDGE){
                     break;
                 }
+            }
 
-                if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_FRONT)==DETECT_NO && determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT_MORE)==DETECT_NO && determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT_MORE)==DETECT_NO && determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT)==DETECT_NO && determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT)==DETECT_NO){
+            if(determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_FRONT)==DETECT_NO && determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT_MORE)==DETECT_NO && determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT_MORE)==DETECT_NO && determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_LEFT_FRONT)==DETECT_NO && determineIfThereIsAnObjectInFrontOfTheSide(DETECTOR_RIGHT_FRONT)==DETECT_NO){
                     
-                    // enemy_on_front_go_front_only_once = CAN_GO_FRONT_TO_ENEMY;
-                    // judge_if_think_enemy_is_edge = 0;
-                    // // stopStuck();
-                    // detectsWhetherTheEdgeIsReachedWhenPushingEnemy(); 
-                    // uploadDetect(); 
+                // enemy_on_front_go_front_only_once = CAN_GO_FRONT_TO_ENEMY;
+                // judge_if_think_enemy_is_edge = 0;
+                // // stopStuck();
+                // detectsWhetherTheEdgeIsReachedWhenPushingEnemy(); 
+                // uploadDetect(); 
 
-                    // return;
-                    // break;
-                    roboclaw.ForwardM1(ADDRESS, 15);
-                    // roboclaw.BackwardM1(ADDRESS,speed);
-                    roboclaw.ForwardM2(ADDRESS, 15);
-                    long temp_time_attack = millis();
-                    while(grayScaleSensorDetect()==DETECT_YES){
-                        if(millis()-temp_time_attack>4000){
-                            return;
-                        }
+                // return;
+                // break;
+                roboclaw.ForwardM1(ADDRESS, 15);
+                // roboclaw.BackwardM1(ADDRESS,speed);
+                roboclaw.ForwardM2(ADDRESS, 15);
+                long temp_time_attack = millis();
+                while(grayScaleSensorDetect()==DETECT_YES){
+                    if(millis()-temp_time_attack>2000){
+                        return;
                     }
-                    stop();
-                    // roboclaw.BackwardM2(ADDRESS,speed);
-                    enemy_on_front_go_front_only_once = CAN_GO_FRONT_TO_ENEMY;
-                    judge_if_think_enemy_is_edge = 0;
-                    // stopStuck();
-                    detectsWhetherTheEdgeIsReachedWhenPushingEnemy(MODE_PUSHING_ENEMY); 
-                    // uploadDetect(); 
-                    return;
                 }
+                stopStuck();
+                // roboclaw.BackwardM2(ADDRESS,speed);
+                enemy_on_front_go_front_only_once = CAN_GO_FRONT_TO_ENEMY;
+                judge_if_think_enemy_is_edge = 0;
+                // stopStuck();
+                detectsWhetherTheEdgeIsReachedWhenPushingEnemy(MODE_PUSHING_ENEMY); 
+                // uploadDetect(); 
+                return;
             }
             
 
